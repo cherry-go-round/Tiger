@@ -63,10 +63,7 @@ class CaptureSessionCoordinator(
             bundlePath = bundlePath,
             task = task,
             objectName = objectName,
-        ).also {
-            session =
-                it
-        }
+        ).also { session = it }
     }
 
     /**
@@ -142,10 +139,7 @@ class CaptureSessionCoordinator(
             task = task,
             objectName = objectName,
             outcome = EpisodeState.ACTIVE,
-        ).also {
-            activeEpisode =
-                it
-        }
+        ).also { activeEpisode = it }
     }
 
     fun endEpisode(): EpisodeMarker {
@@ -175,10 +169,7 @@ class CaptureSessionCoordinator(
         writers.forEach(SessionWriter::finalizeWriter)
         return requireNotNull(
             session,
-        ).copy(recordingState = RecordingState.FINALIZING, recordingEndMonotonicTimestampNs = clock.nowNs()).also {
-            session =
-                it
-        }
+        ).copy(recordingState = RecordingState.FINALIZING, recordingEndMonotonicTimestampNs = clock.nowNs()).also { session = it }
     }
 
     /**
