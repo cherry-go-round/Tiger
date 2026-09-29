@@ -19,7 +19,7 @@ import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import java.util.concurrent.Executor
 
-class CameraPreviewController(
+class PreviewCameraSession(
     context: Context,
     private val onFailure: (String) -> Unit,
 ) {

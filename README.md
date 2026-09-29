@@ -89,7 +89,7 @@ FPS 30 고정
 | White balance | `CONTROL_AWB_MODE_OFF` + `COLOR_CORRECTION_GAINS` / `TRANSFORM` |
 | 흔들림 보정 | `CONTROL_VIDEO_STABILIZATION_MODE_OFF`, `LENS_OPTICAL_STABILIZATION_MODE_OFF` |
 
-하나의 설정 객체를 프리뷰(`CameraPreviewController`)와 녹화(`ArSharedCameraSession`)가 함께 씁니다. Session이 시작되면 화면과 상태 전이 양쪽에서 잠깁니다. 값의 범위는 **ARCore가 실제로 녹화에 쓰는 `cameraId`**에서 읽고, 마지막에 쓴 값 한 벌을 기억합니다.
+하나의 설정 객체를 프리뷰(`PreviewCameraSession`)와 녹화(`ArSharedCameraSession`)가 함께 씁니다. Session이 시작되면 화면과 상태 전이 양쪽에서 잠깁니다. 값의 범위는 **ARCore가 실제로 녹화에 쓰는 `cameraId`**에서 읽고, 마지막에 쓴 값 한 벌을 기억합니다.
 
 `metadata.json`에 `capture_settings`가 더해집니다. 요청값과 실제값을 나눠 담는 것은 `CaptureRequest`에 넣었다고 센서가 그 값을 썼다고 볼 수 없기 때문입니다. 형식은 [Session `metadata.json` 계약](specs/003-session-episode-tracking-gate/contracts/session-metadata.md)에 있습니다.
 
