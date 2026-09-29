@@ -122,7 +122,7 @@ data class CameraMetadata(
      * `(W - x, H - y)`로 옮겨진다. `W`, `H`는 회전 전 가로·세로다.
      */
     fun rotatedClockwise(degrees: Int): CameraMetadata =
-        when (((degrees % 360) + 360) % 360) {
+        when (degrees.mod(360)) {
             90 ->
                 copy(
                     imageWidth = imageHeight,

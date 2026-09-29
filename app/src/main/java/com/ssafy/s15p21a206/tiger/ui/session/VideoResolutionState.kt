@@ -73,7 +73,7 @@ internal fun displayResolution(
     rotationDegrees: Int?,
 ): VideoResolutionState {
     if (width == null || height == null || width <= 0 || height <= 0) return VideoResolutionState.Unavailable
-    val normalized = (((rotationDegrees ?: 0) % 360) + 360) % 360
+    val normalized = (rotationDegrees ?: 0).mod(360)
     return if (normalized == 90 || normalized == 270) {
         VideoResolutionState.Available(width = height, height = width)
     } else {
