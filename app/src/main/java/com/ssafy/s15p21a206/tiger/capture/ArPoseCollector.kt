@@ -9,6 +9,7 @@ import com.google.ar.core.Frame
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.ssafy.s15p21a206.tiger.episode.CameraMetadata
+import com.ssafy.s15p21a206.tiger.episode.SessionBundle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,7 +50,7 @@ class ArPoseCollector(
 
     /** CSV 헤더를 적고 기록 대상을 잡는다. 수집을 시작하기 전에 부른다. */
     fun open(poses: File) {
-        poses.writeText("android_camera_timestamp_ns,tx,ty,tz,qx,qy,qz,qw,tracking_state,tracking_failure_reason\n")
+        poses.writeText("${SessionBundle.ARCORE_POSES_HEADER}\n")
         this.poses = poses
     }
 

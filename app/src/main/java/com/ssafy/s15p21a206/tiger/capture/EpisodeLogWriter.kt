@@ -1,6 +1,7 @@
 package com.ssafy.s15p21a206.tiger.capture
 
 import com.ssafy.s15p21a206.tiger.episode.EpisodeMarker
+import com.ssafy.s15p21a206.tiger.episode.SessionBundle
 import java.io.File
 
 /**
@@ -14,7 +15,7 @@ class EpisodeLogWriter(
 ) {
     /** 헤더를 적어 파일을 연다. */
     fun start() {
-        file.writeText("episode_id,start_timestamp_ns,end_timestamp_ns,task,object,outcome\n")
+        file.writeText("${SessionBundle.EPISODES_HEADER}\n")
     }
 
     fun append(marker: EpisodeMarker) {

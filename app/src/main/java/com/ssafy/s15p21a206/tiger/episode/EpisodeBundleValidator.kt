@@ -14,12 +14,12 @@ import java.security.MessageDigest
 object SessionBundleValidator {
     private val requiredCsvHeaders =
         mapOf(
-            SessionBundle.MAIN_FRAME_TIMESTAMPS_FILE to "frame_number,timestamp_ns,timestamp_source",
-            SessionBundle.ACCELEROMETER_FILE to "timestamp_ns,x,y,z,accuracy",
-            SessionBundle.GYROSCOPE_FILE to "timestamp_ns,x,y,z,accuracy",
-            SessionBundle.ROTATION_VECTOR_FILE to "timestamp_ns,x,y,z,scalar_component,heading_accuracy_rad,accuracy",
-            SessionBundle.ARCORE_POSES_FILE to "android_camera_timestamp_ns,tx,ty,tz,qx,qy,qz,qw,tracking_state,tracking_failure_reason",
-            SessionBundle.EPISODES_FILE to "episode_id,start_timestamp_ns,end_timestamp_ns,task,object,outcome",
+            SessionBundle.MAIN_FRAME_TIMESTAMPS_FILE to SessionBundle.FRAME_TIMESTAMPS_HEADER,
+            SessionBundle.ACCELEROMETER_FILE to SessionBundle.ACCELEROMETER_HEADER,
+            SessionBundle.GYROSCOPE_FILE to SessionBundle.GYROSCOPE_HEADER,
+            SessionBundle.ROTATION_VECTOR_FILE to SessionBundle.ROTATION_VECTOR_HEADER,
+            SessionBundle.ARCORE_POSES_FILE to SessionBundle.ARCORE_POSES_HEADER,
+            SessionBundle.EPISODES_FILE to SessionBundle.EPISODES_HEADER,
         )
 
     fun validate(
@@ -77,7 +77,7 @@ object SessionBundleValidator {
 
     private fun hasValidUltraWideFiles(directory: File): Boolean =
         File(directory, SessionBundle.ULTRAWIDE_VIDEO_FILE).hasContent() &&
-            File(directory, SessionBundle.ULTRAWIDE_FRAME_TIMESTAMPS_FILE).hasHeader("frame_number,timestamp_ns,timestamp_source")
+            File(directory, SessionBundle.ULTRAWIDE_FRAME_TIMESTAMPS_FILE).hasHeader(SessionBundle.FRAME_TIMESTAMPS_HEADER)
 
     private fun hasUltraWideDocuments(directory: File): Boolean =
         File(directory, SessionBundle.ULTRAWIDE_VIDEO_FILE).exists() ||

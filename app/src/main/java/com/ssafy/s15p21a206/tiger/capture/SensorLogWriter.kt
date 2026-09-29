@@ -23,9 +23,9 @@ class SensorLogWriter(
 
     /** 세 센서의 CSV 헤더를 적고 기록 대상을 잡는다. */
     fun open(bundle: SessionBundle) {
-        bundle.accelerometer.writeText("timestamp_ns,x,y,z,accuracy\n")
-        bundle.gyroscope.writeText("timestamp_ns,x,y,z,accuracy\n")
-        bundle.rotationVector.writeText("timestamp_ns,x,y,z,scalar_component,heading_accuracy_rad,accuracy\n")
+        bundle.accelerometer.writeText("${SessionBundle.ACCELEROMETER_HEADER}\n")
+        bundle.gyroscope.writeText("${SessionBundle.GYROSCOPE_HEADER}\n")
+        bundle.rotationVector.writeText("${SessionBundle.ROTATION_VECTOR_HEADER}\n")
         files[Sensor.TYPE_ACCELEROMETER] = bundle.accelerometer
         files[Sensor.TYPE_GYROSCOPE] = bundle.gyroscope
         files[Sensor.TYPE_ROTATION_VECTOR] = bundle.rotationVector

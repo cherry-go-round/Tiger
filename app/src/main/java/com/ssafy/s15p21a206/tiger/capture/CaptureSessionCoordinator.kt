@@ -4,6 +4,7 @@ import com.ssafy.s15p21a206.tiger.episode.CaptureSession
 import com.ssafy.s15p21a206.tiger.episode.EpisodeMarker
 import com.ssafy.s15p21a206.tiger.episode.EpisodeState
 import com.ssafy.s15p21a206.tiger.episode.RecordingState
+import com.ssafy.s15p21a206.tiger.episode.SessionBundle
 import com.ssafy.s15p21a206.tiger.episode.TrackingState
 import com.ssafy.s15p21a206.tiger.episode.UploadState
 import java.io.File
@@ -225,7 +226,7 @@ open class CsvWriter(
 
 class FrameTimestampWriter(
     file: File,
-) : CsvWriter(file, "frame_number,timestamp_ns,timestamp_source") {
+) : CsvWriter(file, SessionBundle.FRAME_TIMESTAMPS_HEADER) {
     // 영상 녹화가 실제로 진행 중인 구간만 기록한다. 카메라 스레드가 읽고 수집 수명주기가 쓴다.
     @Volatile var recording: Boolean = false
 
