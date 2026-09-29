@@ -104,7 +104,6 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 - `previewSurface`·`previewTexture`는 `AndroidView` 안 `TextureView`의 리스너에서 만들어져 수명이 View에 묶인다. ViewModel이 들고 있으면 backing View가 사라진 뒤의 null·release를 직접 처리해야 한다.
 - 카메라 권한·프리뷰 권한의 `rememberLauncherForActivityResult`는 composition에서만 만들 수 있다.
 - ARCore `requestInstall`과 수집 화면의 방향 고정은 Activity를 필요로 한다.
-- `CapturePreviewController`의 preflight가 `previewSurface`를 클로저로 잡는다.
 
 ### 데이터·업로드 계층은 올렸다 (해결)
 

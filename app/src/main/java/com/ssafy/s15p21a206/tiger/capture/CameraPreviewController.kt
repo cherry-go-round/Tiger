@@ -15,6 +15,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.view.Surface
+import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import java.util.concurrent.Executor
 
@@ -90,16 +91,20 @@ class CameraPreviewController(
         }
 
     fun prepare(surface: Surface) {
-        if (cameraDevice != null || session != null) return
+        // 열기는 비동기라 onOpened 전에는 device가 비어 있다. 스레드로 판단해야 여는 중에 다시 열지 않는다.
+        if (thread != null) return
         if (ContextCompat.checkSelfPermission(appContext, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             onFailure("Camera permission is required for preview")
             return
         }
+        // 카메라 서비스가 응답하지 않으면 목록 조회도 던진다. 후면 카메라를 찾지 못한 것으로 다룬다.
         val cameraId =
-            cameraManager.cameraIdList.firstOrNull { id ->
-                cameraManager.getCameraCharacteristics(id).get(CameraCharacteristics.LENS_FACING) ==
-                    CameraCharacteristics.LENS_FACING_BACK
-            } ?: run {
+            runCatching {
+                cameraManager.cameraIdList.firstOrNull { id ->
+                    cameraManager.getCameraCharacteristics(id).get(CameraCharacteristics.LENS_FACING) ==
+                        CameraCharacteristics.LENS_FACING_BACK
+                }
+            }.getOrNull() ?: run {
                 onFailure("Rear camera is unavailable")
                 return
             }
@@ -110,6 +115,21 @@ class CameraPreviewController(
         this.handler = handler
         activeSurface = surface
         val token = ++generation
+        // openCamera는 콜백을 기다리지 않고 곧바로 던지기도 한다. 그 실패도 콜백과 같은 길로 알린다.
+        runCatching { openCamera(cameraId, surface, handler, token) }
+            .onFailure {
+                onFailure("Camera preview could not be opened")
+                release()
+            }
+    }
+
+    @RequiresPermission(Manifest.permission.CAMERA)
+    private fun openCamera(
+        cameraId: String,
+        surface: Surface,
+        handler: Handler,
+        token: Int,
+    ) {
         cameraManager.openCamera(
             cameraId,
             object : CameraDevice.StateCallback() {

@@ -3,7 +3,6 @@ package com.ssafy.s15p21a206.tiger.ui.capture
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraManager
 import android.net.Uri
@@ -21,7 +20,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -30,15 +28,11 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.capture.AndroidCaptureRuntime
 import com.ssafy.s15p21a206.tiger.capture.CameraPreviewController
-import com.ssafy.s15p21a206.tiger.capture.CapturePreviewController
-import com.ssafy.s15p21a206.tiger.capture.CapturePreviewPreflight
-import com.ssafy.s15p21a206.tiger.capture.CapturePreviewState
 import com.ssafy.s15p21a206.tiger.capture.CaptureSessionCoordinator
 import com.ssafy.s15p21a206.tiger.capture.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.capture.ManualCameraConfigStore
 import com.ssafy.s15p21a206.tiger.capture.ManualCameraProfile
 import com.ssafy.s15p21a206.tiger.capture.MonotonicClock
-import com.ssafy.s15p21a206.tiger.capture.PreviewRuntime
 import com.ssafy.s15p21a206.tiger.capture.RecordingResolutionStore
 import com.ssafy.s15p21a206.tiger.episode.CaptureSession
 import com.ssafy.s15p21a206.tiger.episode.EpisodeState
@@ -122,28 +116,6 @@ internal fun rememberCaptureDriver(
                 onIntent(CaptureIntent.PreviewFailed(previewFailureMessage))
             }
         }
-    val capturePreviewController =
-        remember {
-            CapturePreviewController(
-                preflight =
-                    CapturePreviewPreflight {
-                        when {
-                            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) !=
-                                PackageManager.PERMISSION_GRANTED -> "Camera permission is required for preview"
-                            previewSurface == null -> "Camera preview surface is unavailable"
-                            else -> null
-                        }
-                    },
-                preview =
-                    object : PreviewRuntime {
-                        override fun startPreview() {
-                            previewController.prepare(requireNotNull(previewSurface))
-                        }
-
-                        override fun releasePreview() = previewController.release()
-                    },
-            )
-        }
     val manualCameraStore = remember { ManualCameraConfigStore(context.applicationContext) }
     val manualCameraProfile =
         remember {
@@ -188,13 +160,11 @@ internal fun rememberCaptureDriver(
     val arCoreSessionStartFailed = stringResource(R.string.arcore_session_start_failed)
 
     // ARCore가 카메라를 놓은 뒤 유휴 Camera2 프리뷰를 되살린다.
-    // prepare()는 Ready 상태에서 즉시 반환하므로 먼저 Idle로 되돌려야 실제로 다시 연다.
+    // prepare()는 이미 열려 있으면 즉시 반환하므로 먼저 닫아야 실제로 다시 연다.
     fun restoreIdlePreview() {
-        if (previewSurface == null) return
-        capturePreviewController.release()
-        if (capturePreviewController.prepare() is CapturePreviewState.Failed) {
-            onIntent(CaptureIntent.PreviewFailed(previewFailureMessage))
-        }
+        val surface = previewSurface ?: return
+        previewController.release()
+        previewController.prepare(surface)
     }
     val cameraPermission =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -284,11 +254,10 @@ internal fun rememberCaptureDriver(
         }
     val previewPermission =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted && previewSurface != null) {
-                capturePreviewController.release()
-                if (capturePreviewController.prepare() is CapturePreviewState.Failed) {
-                    onIntent(CaptureIntent.PreviewFailed(previewFailureMessage))
-                }
+            val surface = previewSurface
+            if (granted && surface != null) {
+                previewController.release()
+                previewController.prepare(surface)
             } else if (!granted) {
                 onIntent(CaptureIntent.PreviewFailed(previewFailureMessage))
             }
@@ -419,12 +388,10 @@ internal fun rememberCaptureDriver(
         onSurfaceAvailable = { surface, texture ->
             previewSurface = surface
             previewTexture = texture
-            if (capturePreviewController.prepare() is CapturePreviewState.Failed) {
-                onIntent(CaptureIntent.PreviewFailed(previewFailureMessage))
-            }
+            previewController.prepare(surface)
         },
         onSurfaceDestroyed = {
-            capturePreviewController.release()
+            previewController.release()
             previewSurface?.release()
             previewSurface = null
             previewTexture = null
@@ -434,7 +401,7 @@ internal fun rememberCaptureDriver(
             if (!state.policy.canPlay) return@play
             if (state.phase == CaptureWorkspaceControlState.Idle) {
                 onIntent(CaptureIntent.SessionRequested)
-                capturePreviewController.release()
+                previewController.release()
                 cameraPermission.launch(Manifest.permission.CAMERA)
             } else {
                 // Episode 시작은 Coordinator가 Tracking 안정화 여부를 확인한 뒤에만 허용한다.
@@ -476,7 +443,7 @@ internal fun rememberCaptureDriver(
                 restoreIdlePreview()
             }
         },
-        releaseIdlePreview = capturePreviewController::release,
+        releaseIdlePreview = previewController::release,
         // 값이 바뀌면 곧바로 프리뷰에 건다. 초점을 화면으로 보고 고르는 것이 이 기능의 목적이다.
         // 기억까지 여기서 하는 것은, 다음에 앱을 켰을 때도 같은 조건으로 찍어야 하기 때문이다.
         editManualCamera = { requested ->
