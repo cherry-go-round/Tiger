@@ -35,8 +35,7 @@ class CaptureSessionCoordinator(
     var trackingState: TrackingState = TrackingState.INITIALIZING
         private set
     private var readySinceNs: Long? = null
-    private var lossDetectedAtNs: Long? = null
-    private var lossObservedAtNs: Long? = null
+    private var trackingLoss: TrackingLoss? = null
 
     /**
      * Session을 연다. [task]와 [objectName]은 이 Session 전체에 적용되는 두 이름이다.
@@ -76,36 +75,35 @@ class CaptureSessionCoordinator(
     fun onTracking(
         isTracking: Boolean,
         observedAtNs: Long? = null,
-        failureReason: String? = null,
     ) {
         val now = clock.nowNs()
-        if (isTracking) {
-            lossDetectedAtNs = null
-            lossObservedAtNs = null
-            if (readySinceNs == null) readySinceNs = now
-            if (now - readySinceNs!! >= READY_GATE_NS) trackingState = TrackingState.READY
-            session?.takeIf { it.recordingState == RecordingState.INITIALIZING && trackingState == TrackingState.READY }?.let {
-                session =
-                    it.copy(recordingState = RecordingState.READY)
-            }
-        } else {
-            readySinceNs = null
-            trackingState = TrackingState.PAUSED
-            if (lossDetectedAtNs == null) {
-                lossDetectedAtNs = now
-                lossObservedAtNs = trustedObservation(observedAtNs, now)
-            }
-            activeEpisode?.let { episode ->
-                if (now - lossDetectedAtNs!! >= TRACKING_LOSS_NS) {
-                    val lossStartedNs = lossObservedAtNs ?: lossDetectedAtNs!!
-                    val invalidated =
-                        episode.copy(endTimestampNs = lossStartedNs + TRACKING_LOSS_NS, outcome = EpisodeState.INVALID_TRACKING)
-                    activeEpisode = null
-                    latestClosedEpisode = invalidated
-                    onEpisodeClosed(invalidated)
-                }
-            }
-        }
+        if (isTracking) holdTracking(now) else loseTracking(now, observedAtNs)
+    }
+
+    /** Tracking이 [READY_GATE_NS] 동안 이어지면 READY로 올리고, 시작을 기다리는 Session도 함께 올린다. */
+    private fun holdTracking(now: Long) {
+        trackingLoss = null
+        val readySince = readySinceNs ?: now.also { readySinceNs = it }
+        if (now - readySince < READY_GATE_NS) return
+        trackingState = TrackingState.READY
+        val current = session ?: return
+        if (current.recordingState == RecordingState.INITIALIZING) session = current.copy(recordingState = RecordingState.READY)
+    }
+
+    /** Tracking을 잃은 지 [TRACKING_LOSS_NS]가 지나면 진행 중 Episode를 유실이 시작된 시각 기준으로 무효 마감한다. */
+    private fun loseTracking(
+        now: Long,
+        observedAtNs: Long?,
+    ) {
+        readySinceNs = null
+        trackingState = TrackingState.PAUSED
+        val loss =
+            trackingLoss
+                ?: TrackingLoss(detectedAtNs = now, startedAtNs = trustedObservation(observedAtNs, now) ?: now)
+                    .also { trackingLoss = it }
+        val episode = activeEpisode ?: return
+        if (now - loss.detectedAtNs < TRACKING_LOSS_NS) return
+        closeEpisode(episode.copy(endTimestampNs = loss.startedAtNs + TRACKING_LOSS_NS, outcome = EpisodeState.INVALID_TRACKING))
     }
 
     /**
@@ -147,10 +145,15 @@ class CaptureSessionCoordinator(
             requireNotNull(activeEpisode) {
                 "No active episode"
             }.copy(endTimestampNs = clock.nowNs(), outcome = EpisodeState.COMPLETED)
-        activeEpisode = null
-        latestClosedEpisode = completed
-        onEpisodeClosed(completed)
+        closeEpisode(completed)
         return completed
+    }
+
+    /** 사용자 종료와 Tracking 유실 자동 마감이 함께 지나는 출구. */
+    private fun closeEpisode(closed: EpisodeMarker) {
+        activeEpisode = null
+        latestClosedEpisode = closed
+        onEpisodeClosed(closed)
     }
 
     fun interrupt(reason: String): CaptureSession {
@@ -184,9 +187,14 @@ class CaptureSessionCoordinator(
         latestClosedEpisode = null
         trackingState = TrackingState.INITIALIZING
         readySinceNs = null
-        lossDetectedAtNs = null
-        lossObservedAtNs = null
+        trackingLoss = null
     }
+
+    /** 판정은 [detectedAtNs](단조 시계)로, 기록은 [startedAtNs](가능하면 카메라 시각)로 한다. */
+    private data class TrackingLoss(
+        val detectedAtNs: Long,
+        val startedAtNs: Long,
+    )
 
     companion object {
         const val READY_GATE_NS = 1_000_000_000L
