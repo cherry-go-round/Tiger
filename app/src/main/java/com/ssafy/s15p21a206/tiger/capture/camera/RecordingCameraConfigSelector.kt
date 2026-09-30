@@ -1,6 +1,6 @@
 package com.ssafy.s15p21a206.tiger.capture.camera
 
-import com.ssafy.s15p21a206.tiger.session.RecordingResolution
+import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 
 /**
  * 녹화 해상도에 맞는 ARCore Camera config를 고른다.

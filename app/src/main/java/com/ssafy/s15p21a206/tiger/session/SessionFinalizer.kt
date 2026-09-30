@@ -1,5 +1,7 @@
 package com.ssafy.s15p21a206.tiger.session
 
+import com.ssafy.s15p21a206.tiger.core.model.capture.CameraMetadata
+import com.ssafy.s15p21a206.tiger.core.model.capture.CaptureSettingsMetadata
 import com.ssafy.s15p21a206.tiger.core.model.session.BundleValidationResult
 import com.ssafy.s15p21a206.tiger.core.model.session.FinalizeResult
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle

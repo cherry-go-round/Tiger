@@ -1,9 +1,9 @@
 package com.ssafy.s15p21a206.tiger.capture
 
+import com.ssafy.s15p21a206.tiger.core.model.capture.TrackingState
 import com.ssafy.s15p21a206.tiger.core.model.session.EpisodeMarker
 import com.ssafy.s15p21a206.tiger.core.model.session.EpisodeState
 import com.ssafy.s15p21a206.tiger.core.model.session.RecordingState
-import com.ssafy.s15p21a206.tiger.session.TrackingState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull

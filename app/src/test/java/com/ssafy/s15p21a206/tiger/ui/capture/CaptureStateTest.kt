@@ -1,9 +1,9 @@
 package com.ssafy.s15p21a206.tiger.ui.capture
 
-import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraCapabilities
-import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
-import com.ssafy.s15p21a206.tiger.session.RecordingResolution
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull

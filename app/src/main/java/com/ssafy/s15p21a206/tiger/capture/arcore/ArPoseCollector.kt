@@ -10,8 +10,9 @@ import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.ssafy.s15p21a206.tiger.capture.CAPTURE_LOG_TAG
 import com.ssafy.s15p21a206.tiger.capture.camera.CameraMetadataReader
+import com.ssafy.s15p21a206.tiger.core.model.capture.CameraMetadata
+import com.ssafy.s15p21a206.tiger.core.model.capture.TrackingSample
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
-import com.ssafy.s15p21a206.tiger.session.CameraMetadata
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -290,14 +291,3 @@ private class ArCameraTexture(
         const val SENSOR_DISPLAY_ROTATION = Surface.ROTATION_90
     }
 }
-
-/**
- * ARCore Tracking 관측 한 건.
- *
- * [observedAtNs]는 이 관측을 만든 프레임의 카메라 시각이며 `arcore_poses.csv`의
- * `android_camera_timestamp_ns`와 같은 값이다.
- */
-data class TrackingSample(
-    val isTracking: Boolean,
-    val observedAtNs: Long,
-)

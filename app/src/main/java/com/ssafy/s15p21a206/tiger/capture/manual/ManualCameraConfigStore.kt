@@ -3,6 +3,9 @@ package com.ssafy.s15p21a206.tiger.capture.manual
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.ssafy.s15p21a206.tiger.core.model.capture.FixedWhiteBalance
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
 
 /**
  * 직전에 맞춘 촬영 조건을 기억한다.

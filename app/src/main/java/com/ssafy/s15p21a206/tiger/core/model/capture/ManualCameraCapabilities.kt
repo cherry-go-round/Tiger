@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.capture.manual
+package com.ssafy.s15p21a206.tiger.core.model.capture
 
 /**
  * 실제 녹화에 쓰일 카메라가 무엇을 지원하는지.

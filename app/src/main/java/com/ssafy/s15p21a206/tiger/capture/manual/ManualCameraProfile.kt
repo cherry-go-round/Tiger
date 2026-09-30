@@ -6,6 +6,7 @@ import android.util.Log
 import com.google.ar.core.Session
 import com.ssafy.s15p21a206.tiger.capture.CAPTURE_LOG_TAG
 import com.ssafy.s15p21a206.tiger.capture.camera.firstRearCameraId
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
 import java.util.EnumSet
 
 /**

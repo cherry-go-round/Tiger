@@ -1,9 +1,7 @@
-package com.ssafy.s15p21a206.tiger.session
+package com.ssafy.s15p21a206.tiger.core.model.capture
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-@Serializable enum class TrackingState { INITIALIZING, READY, PAUSED }
 
 /**
  * 실제 촬영에 사용된 Camera의 식별자·해상도·Intrinsic.
@@ -29,7 +27,9 @@ data class CameraMetadata(
     @SerialName("video_rotation_degrees") val videoRotationDegrees: Int = 0,
 )
 
-@Serializable data class RecordingResolution(
-    val width: Int,
-    val height: Int,
+data class CameraOptics(
+    val focalLengthMm: Float? = null,
+    val sensorWidthMm: Float? = null,
+    val sensorHeightMm: Float? = null,
+    val distortionCoefficients: List<Float>? = null,
 )

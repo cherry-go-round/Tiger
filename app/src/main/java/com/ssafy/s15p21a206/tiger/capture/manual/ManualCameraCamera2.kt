@@ -8,7 +8,10 @@ import android.hardware.camera2.params.ColorSpaceTransform
 import android.hardware.camera2.params.RggbChannelVector
 import android.util.Log
 import com.ssafy.s15p21a206.tiger.capture.CAPTURE_LOG_TAG
-import com.ssafy.s15p21a206.tiger.session.ActualCaptureSettings
+import com.ssafy.s15p21a206.tiger.core.model.capture.ActualCaptureSettings
+import com.ssafy.s15p21a206.tiger.core.model.capture.FixedWhiteBalance
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
 import kotlin.math.abs
 import android.hardware.camera2.CameraMetadata as Camera2Metadata
 

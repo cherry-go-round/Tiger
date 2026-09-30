@@ -1,5 +1,6 @@
 package com.ssafy.s15p21a206.tiger.session
 
+import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.session.ValidationError
 import com.ssafy.s15p21a206.tiger.core.model.session.ValidationResult
 

@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.session
+package com.ssafy.s15p21a206.tiger.core.model.capture
 
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi

@@ -11,7 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.session.RecordingResolution
+import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.string
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureCameraPanel
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureCameraSettingsButton

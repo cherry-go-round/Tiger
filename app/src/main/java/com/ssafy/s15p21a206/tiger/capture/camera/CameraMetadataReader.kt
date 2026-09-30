@@ -2,6 +2,7 @@ package com.ssafy.s15p21a206.tiger.capture.camera
 
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import com.ssafy.s15p21a206.tiger.core.model.capture.CameraOptics
 
 /**
  * Camera2가 제공하는 부가 광학 값을 읽는다.
@@ -27,10 +28,3 @@ class CameraMetadataReader(
             )
         }.getOrElse { CameraOptics() }
 }
-
-data class CameraOptics(
-    val focalLengthMm: Float? = null,
-    val sensorWidthMm: Float? = null,
-    val sensorHeightMm: Float? = null,
-    val distortionCoefficients: List<Float>? = null,
-)

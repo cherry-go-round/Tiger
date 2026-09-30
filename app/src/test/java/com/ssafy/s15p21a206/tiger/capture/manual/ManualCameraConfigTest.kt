@@ -1,5 +1,9 @@
 package com.ssafy.s15p21a206.tiger.capture.manual
 
+import com.ssafy.s15p21a206.tiger.core.model.capture.FixedWhiteBalance
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.core.model.capture.ShutterPreset
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
