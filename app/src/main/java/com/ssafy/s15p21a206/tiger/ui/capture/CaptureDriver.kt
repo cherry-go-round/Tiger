@@ -39,6 +39,7 @@ import com.ssafy.s15p21a206.tiger.episode.EpisodeState
 import com.ssafy.s15p21a206.tiger.episode.FinalizeResult
 import com.ssafy.s15p21a206.tiger.episode.RecordingResolution
 import com.ssafy.s15p21a206.tiger.episode.RecordingState
+import com.ssafy.s15p21a206.tiger.episode.SessionBundle
 import com.ssafy.s15p21a206.tiger.episode.SessionBundleStore
 import com.ssafy.s15p21a206.tiger.episode.SessionRepository
 import com.ssafy.s15p21a206.tiger.episode.TrackingState
@@ -218,17 +219,7 @@ internal fun rememberCaptureDriver(
                             )
                             onIntent(CaptureIntent.SessionStarted(bundle, startedAtNs, state.resolution))
                             repository.save(
-                                CaptureSession(
-                                    bundle.sessionId,
-                                    bundle.displayNumber,
-                                    RecordingState.INITIALIZING,
-                                    UploadState.LOCAL_ONLY,
-                                    startedAtNs,
-                                    bundlePath = bundle.directory.absolutePath,
-                                    recordingStartEpochMs = System.currentTimeMillis(),
-                                    task = state.task,
-                                    objectName = state.objectName,
-                                ),
+                                sessionRow(bundle, state.task, state.objectName, RecordingState.INITIALIZING, startNs = startedAtNs),
                             )
                         }.onFailure { error ->
                             // ARCore가 카메라를 잡지 못했으므로 유휴 프리뷰를 되살린다.
@@ -297,17 +288,13 @@ internal fun rememberCaptureDriver(
         captureRuntime.interrupt()
         scope.launch {
             repository.save(
-                CaptureSession(
-                    interruptedBundle.sessionId,
-                    interruptedBundle.displayNumber,
-                    RecordingState.INTERRUPTED,
-                    UploadState.LOCAL_ONLY,
-                    startedAtNs,
-                    SystemClock.elapsedRealtimeNanos(),
-                    interruptedBundle.directory.absolutePath,
-                    System.currentTimeMillis(),
+                sessionRow(
+                    interruptedBundle,
                     state.task,
                     state.objectName,
+                    RecordingState.INTERRUPTED,
+                    startNs = startedAtNs,
+                    endNs = SystemClock.elapsedRealtimeNanos(),
                 ),
             )
         }
@@ -340,20 +327,18 @@ internal fun rememberCaptureDriver(
                         bundle?.let {
                             // 백그라운드에서 마감됐으면 전송을 걸지 않고 실패로 남긴다.
                             val startUpload = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
-                            val completedSession =
-                                CaptureSession(
-                                    bundle.sessionId,
-                                    bundle.displayNumber,
-                                    RecordingState.COMPLETED,
-                                    if (startUpload) UploadState.LOCAL_ONLY else UploadState.FAILED,
-                                    startedAtNs,
-                                    SystemClock.elapsedRealtimeNanos(),
-                                    result.directory.absolutePath,
-                                    System.currentTimeMillis(),
+                            repository.save(
+                                sessionRow(
+                                    bundle,
                                     state.task,
                                     state.objectName,
-                                )
-                            repository.save(completedSession)
+                                    RecordingState.COMPLETED,
+                                    startNs = startedAtNs,
+                                    endNs = SystemClock.elapsedRealtimeNanos(),
+                                    bundlePath = result.directory.absolutePath,
+                                    uploadState = if (startUpload) UploadState.LOCAL_ONLY else UploadState.FAILED,
+                                ),
+                            )
                             // 어디로 갈지는 부모가 정한다. 수집은 목적지를 모른다.
                             onCompleted(bundle.sessionId, startUpload)
                         }
@@ -479,6 +464,37 @@ private fun Context.openArCoreStore() {
     val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.ar.core"))
     startActivity(if (marketIntent.resolveActivity(packageManager) != null) marketIntent else webIntent)
 }
+
+/**
+ * 이 수집의 Session 행. 저장할 때마다 이 함수로 만들어 행 전체를 덮어쓴다.
+ *
+ * 시작 때 먼저 저장해 두는 것은 수집 도중 프로세스가 죽어도 다음 실행이 이 행으로 staging 번들을 찾아
+ * 복구하게 하기 위해서다. Task·Object와 표시 번호는 번들에 없고 이 행에만 있다.
+ *
+ * 벽시계 시각은 저장할 때마다 새로 잰다. 끝날 때 저장한 값이 곧 영상이 만들어진 시각이며, 목록의
+ * 수집 시각과 정렬 기준이 된다. 수집 길이는 [startNs]와 [endNs](부팅 이후 경과 시간)로 따로 잰다.
+ */
+private fun sessionRow(
+    bundle: SessionBundle,
+    task: String,
+    objectName: String,
+    recordingState: RecordingState,
+    startNs: Long,
+    endNs: Long? = null,
+    bundlePath: String = bundle.directory.absolutePath,
+    uploadState: UploadState = UploadState.LOCAL_ONLY,
+) = CaptureSession(
+    sessionId = bundle.sessionId,
+    displayNumber = bundle.displayNumber,
+    recordingState = recordingState,
+    uploadState = uploadState,
+    recordingStartMonotonicTimestampNs = startNs,
+    recordingEndMonotonicTimestampNs = endNs,
+    bundlePath = bundlePath,
+    recordingStartEpochMs = System.currentTimeMillis(),
+    task = task,
+    objectName = objectName,
+)
 
 // Tracking 판정 주기. 안정화(1초)와 유실(0.5초) 임계값보다 충분히 촘촘해야 마감 시점이 제때 발화한다.
 private const val TRACKING_TICK_MS = 100L
