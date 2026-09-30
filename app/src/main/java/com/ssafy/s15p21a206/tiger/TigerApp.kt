@@ -37,7 +37,6 @@ import com.ssafy.s15p21a206.tiger.ui.session.SessionDetailScreen
 import com.ssafy.s15p21a206.tiger.ui.session.SessionListScreen
 import com.ssafy.s15p21a206.tiger.ui.session.SessionOperations
 import com.ssafy.s15p21a206.tiger.ui.session.TaskSessionListScreen
-import com.ssafy.s15p21a206.tiger.ui.upload.cancelUploadOnStop
 import com.ssafy.s15p21a206.tiger.ui.video.FullScreenVideoScreen
 import com.ssafy.s15p21a206.tiger.ui.video.rememberSharedVideoPlayer
 import kotlinx.serialization.Serializable
@@ -126,7 +125,7 @@ fun TigerApp() {
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
         // 백그라운드 업로드는 하지 않는다. 판정 기준이 "업로드 화면에 있는가"였으나 그 화면을 없애
         // 전송이 진행 중인지로 바꾼다. 어느 화면에 있든 전송 중이면 끊고 FAILED로 남긴다.
-        if (cancelUploadOnStop(uploadInFlight = operations.uploadInFlight)) {
+        if (operations.uploadInFlight) {
             operations.cancelUpload()
         }
     }
