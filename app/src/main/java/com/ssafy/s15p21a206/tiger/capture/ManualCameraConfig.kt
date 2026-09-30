@@ -121,6 +121,9 @@ data class ManualCameraCapabilities(
                 else -> null
             }
 
+    /** 이 기기에서 고를 수 있는 preset만. 하나도 없으면 빈 목록이다. */
+    fun availableShutterPresets(): List<ShutterPreset> = ShutterPreset.entries.filter(::allows)
+
     /** 이 preset을 고를 수 있는지. 기기 범위 밖이거나 30 fps 프레임 간격을 넘으면 고를 수 없다. */
     fun allows(preset: ShutterPreset): Boolean {
         val range = exposureRangeNs ?: return false
@@ -137,9 +140,6 @@ data class ManualCameraCapabilities(
         val max = maxFrameDurationNs ?: return ManualCameraConfig.TARGET_FRAME_DURATION_NS
         return minOf(ManualCameraConfig.TARGET_FRAME_DURATION_NS, max)
     }
-
-    /** 이 기기에서 고를 수 있는 preset만. 하나도 없으면 빈 목록이다. */
-    fun availableShutterPresets(): List<ShutterPreset> = ShutterPreset.entries.filter(::allows)
 
     /** 처음 열었을 때 보여 줄 값. 저장된 설정이 없을 때 쓴다. */
     fun defaultConfig(): ManualCameraConfig =
