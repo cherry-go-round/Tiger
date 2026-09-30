@@ -48,34 +48,6 @@ class PreviewCameraSession(
     // 그 콜백이 이미 닫힌 device를 건드리지 않도록 세대 번호로 구분한다.
     @Volatile private var generation = 0
 
-    /**
-     * 프리뷰가 쓸 촬영 조건을 바꾼다.
-     *
-     * 사용자가 슬라이더를 움직이는 동안 계속 불린다. 프리뷰가 아직 열리지 않았으면 값만 들어 두고,
-     * 다음 [prepare]가 그 값으로 연다. 초점을 화면으로 보고 고르는 것이 이 기능의 전부이므로,
-     * 값이 바뀌면 곧바로 반복 요청을 다시 건다.
-     */
-    fun apply(config: ManualCameraConfig?) {
-        manual = config
-        val device = cameraDevice ?: return
-        val active = session ?: return
-        val surface = activeSurface ?: return
-        val target = handler ?: return
-        runCatching { active.setRepeatingRequest(buildRequest(device, surface, config), previewCallback, target) }
-            .onFailure { Log.w(CAPTURE_LOG_TAG, "Could not apply the manual camera settings to the preview", it) }
-    }
-
-    private fun buildRequest(
-        device: CameraDevice,
-        surface: Surface,
-        config: ManualCameraConfig?,
-    ) = device
-        .createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-        .apply {
-            addTarget(surface)
-            applyManualCamera(config)
-        }.build()
-
     /** 수렴한 화이트 밸런스를 주워 둔다. 이미 고정했으면 읽을 것이 없다. */
     private val previewCallback =
         object : CameraCaptureSession.CaptureCallback() {
@@ -203,6 +175,34 @@ class PreviewCameraSession(
         override fun onConfigureFailed(configured: CameraCaptureSession) {
             if (isCurrent(token)) fail("Camera preview configuration failed")
         }
+    }
+
+    private fun buildRequest(
+        device: CameraDevice,
+        surface: Surface,
+        config: ManualCameraConfig?,
+    ) = device
+        .createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+        .apply {
+            addTarget(surface)
+            applyManualCamera(config)
+        }.build()
+
+    /**
+     * 프리뷰가 쓸 촬영 조건을 바꾼다.
+     *
+     * 사용자가 슬라이더를 움직이는 동안 계속 불린다. 프리뷰가 아직 열리지 않았으면 값만 들어 두고,
+     * 다음 [prepare]가 그 값으로 연다. 초점을 화면으로 보고 고르는 것이 이 기능의 전부이므로,
+     * 값이 바뀌면 곧바로 반복 요청을 다시 건다.
+     */
+    fun apply(config: ManualCameraConfig?) {
+        manual = config
+        val device = cameraDevice ?: return
+        val active = session ?: return
+        val surface = activeSurface ?: return
+        val target = handler ?: return
+        runCatching { active.setRepeatingRequest(buildRequest(device, surface, config), previewCallback, target) }
+            .onFailure { Log.w(CAPTURE_LOG_TAG, "Could not apply the manual camera settings to the preview", it) }
     }
 
     /** [token]을 받은 열기가 그 뒤의 release나 prepare로 무효가 되지 않았는지. */
