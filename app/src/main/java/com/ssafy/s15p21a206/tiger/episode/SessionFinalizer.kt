@@ -31,8 +31,8 @@ class SessionFinalizer(
         val validation = SessionBundleValidator.validate(bundle.directory, includesUltraWide, requireMetadata = false)
         if (validation is BundleValidationResult.Invalid) return FinalizeResult.Failed(validation.reason)
         val manifest = manifestOf(bundle)
-        val metadata = metadataJson(bundle, includesUltraWide, camera, captureSettings, manifest)
-        bundle.metadata.writeText(Json.encodeToString(metadata))
+        val document = metadataJson(bundle, includesUltraWide, camera, captureSettings, manifest)
+        bundle.metadata.writeText(Json.encodeToString(document))
         val published = bundleStore.publish(bundle, includesUltraWide)
         return FinalizeResult.Completed(published, checksums = manifest.mapValues { it.value.sha256 })
     }
