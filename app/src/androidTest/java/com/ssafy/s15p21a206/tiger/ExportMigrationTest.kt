@@ -3,8 +3,8 @@ package com.ssafy.s15p21a206.tiger
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
-import com.ssafy.s15p21a206.tiger.data.local.MIGRATION_2_3
-import com.ssafy.s15p21a206.tiger.data.local.MIGRATION_5_6
+import com.ssafy.s15p21a206.tiger.database.MIGRATION_2_3
+import com.ssafy.s15p21a206.tiger.database.MIGRATION_5_6
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

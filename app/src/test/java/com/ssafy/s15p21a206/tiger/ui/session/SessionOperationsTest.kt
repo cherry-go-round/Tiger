@@ -1,10 +1,10 @@
 package com.ssafy.s15p21a206.tiger.ui.session
 
-import com.ssafy.s15p21a206.tiger.data.local.CaptureSessionDao
-import com.ssafy.s15p21a206.tiger.data.local.CaptureSessionEntity
-import com.ssafy.s15p21a206.tiger.data.local.EpisodeMarkerDao
-import com.ssafy.s15p21a206.tiger.data.local.EpisodeMarkerEntity
-import com.ssafy.s15p21a206.tiger.data.local.SessionSummaryEntity
+import com.ssafy.s15p21a206.tiger.database.CaptureSessionDao
+import com.ssafy.s15p21a206.tiger.database.CaptureSessionEntity
+import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerDao
+import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerEntity
+import com.ssafy.s15p21a206.tiger.database.SessionSummaryEntity
 import com.ssafy.s15p21a206.tiger.episode.RecordingState
 import com.ssafy.s15p21a206.tiger.episode.SessionBundleStore
 import com.ssafy.s15p21a206.tiger.episode.SessionRepository

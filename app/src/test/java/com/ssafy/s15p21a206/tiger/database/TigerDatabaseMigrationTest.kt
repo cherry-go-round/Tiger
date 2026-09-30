@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.data.local
+package com.ssafy.s15p21a206.tiger.database
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

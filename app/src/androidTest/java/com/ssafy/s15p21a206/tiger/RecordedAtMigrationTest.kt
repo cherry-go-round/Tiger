@@ -6,8 +6,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
-import com.ssafy.s15p21a206.tiger.data.local.MIGRATION_7_8
-import com.ssafy.s15p21a206.tiger.data.local.TigerDatabase
+import com.ssafy.s15p21a206.tiger.database.MIGRATION_7_8
+import com.ssafy.s15p21a206.tiger.database.TigerDatabase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After

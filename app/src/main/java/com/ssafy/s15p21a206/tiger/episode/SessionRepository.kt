@@ -1,10 +1,10 @@
 package com.ssafy.s15p21a206.tiger.episode
 
-import com.ssafy.s15p21a206.tiger.data.local.CaptureSessionDao
-import com.ssafy.s15p21a206.tiger.data.local.CaptureSessionEntity
-import com.ssafy.s15p21a206.tiger.data.local.EpisodeMarkerDao
-import com.ssafy.s15p21a206.tiger.data.local.EpisodeMarkerEntity
-import com.ssafy.s15p21a206.tiger.data.local.SessionSummaryEntity
+import com.ssafy.s15p21a206.tiger.database.CaptureSessionDao
+import com.ssafy.s15p21a206.tiger.database.CaptureSessionEntity
+import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerDao
+import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerEntity
+import com.ssafy.s15p21a206.tiger.database.SessionSummaryEntity
 import com.ssafy.s15p21a206.tiger.upload.UploadSessionStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
