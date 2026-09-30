@@ -20,25 +20,29 @@ import android.hardware.camera2.CameraMetadata as Camera2Metadata
 /** 실제 녹화에 쓰일 카메라의 수동 제어 능력을 읽는다. 읽지 못한 항목은 null·false로 둔다. */
 fun CameraManager.readManualCameraCapabilities(cameraId: String): ManualCameraCapabilities {
     val characteristics = getCameraCharacteristics(cameraId)
-    val capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES) ?: IntArray(0)
-    val aeModes = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES) ?: IntArray(0)
-    val afModes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES) ?: IntArray(0)
-    val awbModes = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES) ?: IntArray(0)
-    val isoRange = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)
-    val exposureRange = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE)
     return ManualCameraCapabilities(
         cameraId = cameraId,
-        manualSensor = capabilities.contains(Camera2Metadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR),
-        aeOffSupported = aeModes.contains(Camera2Metadata.CONTROL_AE_MODE_OFF),
-        afOffSupported = afModes.contains(Camera2Metadata.CONTROL_AF_MODE_OFF),
-        awbOffSupported = awbModes.contains(Camera2Metadata.CONTROL_AWB_MODE_OFF),
+        manualSensor =
+            characteristics.has(
+                CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES,
+                Camera2Metadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR,
+            ),
+        aeOffSupported = characteristics.has(CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES, Camera2Metadata.CONTROL_AE_MODE_OFF),
+        afOffSupported = characteristics.has(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES, Camera2Metadata.CONTROL_AF_MODE_OFF),
+        awbOffSupported = characteristics.has(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES, Camera2Metadata.CONTROL_AWB_MODE_OFF),
         awbLockSupported = characteristics.get(CameraCharacteristics.CONTROL_AWB_LOCK_AVAILABLE) == true,
         maxFocusDiopter = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE) ?: 0f,
-        isoRange = isoRange?.let { it.lower..it.upper },
-        exposureRangeNs = exposureRange?.let { it.lower..it.upper },
+        isoRange = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)?.let { it.lower..it.upper },
+        exposureRangeNs = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE)?.let { it.lower..it.upper },
         maxFrameDurationNs = characteristics.get(CameraCharacteristics.SENSOR_INFO_MAX_FRAME_DURATION),
     )
 }
+
+/** [key]가 가리키는 목록에 [value]가 있는지. 기기가 목록을 주지 않으면 없는 것으로 본다. */
+private fun CameraCharacteristics.has(
+    key: CameraCharacteristics.Key<IntArray>,
+    value: Int,
+): Boolean = get(key)?.contains(value) == true
 
 /**
  * 수동 설정을 요청에 건다. [config]가 null이면 아무것도 걸지 않아 template의 auto가 그대로 남는다.
