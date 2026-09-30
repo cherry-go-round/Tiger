@@ -2,7 +2,7 @@ package com.ssafy.s15p21a206.tiger.ui.upload
 
 import androidx.annotation.StringRes
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.session.UploadState
+import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 
 /**
  * 전송 상태를 사람이 읽는 문구로 옮긴다.

@@ -34,6 +34,7 @@ import com.ssafy.s15p21a206.tiger.capture.camera.RecordingResolutionStore
 import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfigStore
 import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraProfile
+import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.session.CaptureSession
 import com.ssafy.s15p21a206.tiger.session.EpisodeState
 import com.ssafy.s15p21a206.tiger.session.FinalizeResult
@@ -43,7 +44,6 @@ import com.ssafy.s15p21a206.tiger.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.session.SessionBundleStore
 import com.ssafy.s15p21a206.tiger.session.SessionRepository
 import com.ssafy.s15p21a206.tiger.session.TrackingState
-import com.ssafy.s15p21a206.tiger.session.UploadState
 import com.ssafy.s15p21a206.tiger.ui.common.findActivity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers

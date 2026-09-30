@@ -1,5 +1,6 @@
 package com.ssafy.s15p21a206.tiger.session
 
+import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -20,8 +21,6 @@ enum class EpisodeState {
 }
 
 @Serializable enum class TrackingState { INITIALIZING, READY, PAUSED }
-
-@Serializable enum class UploadState { LOCAL_ONLY, UPLOADING, UPLOADED, FAILED }
 
 @Serializable
 data class CaptureSession(
@@ -96,9 +95,4 @@ data class CameraMetadata(
 @Serializable data class RecordingResolution(
     val width: Int,
     val height: Int,
-)
-
-@Serializable data class RemoteReceipt(
-    @SerialName("session_id") val sessionId: String,
-    val result: String,
 )

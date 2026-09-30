@@ -1,6 +1,7 @@
 package com.ssafy.s15p21a206.tiger.upload
 
-import com.ssafy.s15p21a206.tiger.session.RemoteReceipt
+import com.ssafy.s15p21a206.tiger.core.model.upload.RemoteReceipt
+import com.ssafy.s15p21a206.tiger.core.model.upload.UploadResult
 import com.ssafy.s15p21a206.tiger.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.session.SessionBundleValidator
 import kotlinx.coroutines.CancellableContinuation
@@ -76,14 +77,6 @@ class SessionUploadRequestFactory(
     }
 
     private fun String.isUuid(): Boolean = runCatching { UUID.fromString(this) }.isSuccess
-}
-
-sealed interface UploadResult {
-    data object Uploaded : UploadResult
-
-    data class Failed(
-        val reason: String,
-    ) : UploadResult
 }
 
 interface SessionUploadGateway {

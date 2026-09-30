@@ -1,5 +1,6 @@
 package com.ssafy.s15p21a206.tiger.session
 
+import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.database.CaptureSessionDao
 import com.ssafy.s15p21a206.tiger.database.CaptureSessionEntity
 import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerDao

@@ -1,7 +1,7 @@
 package com.ssafy.s15p21a206.tiger.ui.session
 
+import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.session.SessionSummary
-import com.ssafy.s15p21a206.tiger.session.UploadState
 
 internal data class SessionDetailPresentation(
     val durationSeconds: Long,

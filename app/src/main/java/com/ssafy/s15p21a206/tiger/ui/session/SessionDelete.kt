@@ -3,7 +3,7 @@ package com.ssafy.s15p21a206.tiger.ui.session
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.session.UploadState
+import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.ui.common.DestructiveConfirmationDialog
 
 /**

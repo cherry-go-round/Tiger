@@ -14,8 +14,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.session.SessionSummary
-import com.ssafy.s15p21a206.tiger.session.UploadState
 import com.ssafy.s15p21a206.tiger.string
 import org.junit.Assert.assertEquals
 import org.junit.Rule
