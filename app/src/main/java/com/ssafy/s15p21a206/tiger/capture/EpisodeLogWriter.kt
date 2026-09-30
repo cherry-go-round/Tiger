@@ -27,8 +27,7 @@ class EpisodeLogWriter(
                 marker.task.csvField(),
                 marker.objectName.csvField(),
                 marker.outcome.name,
-            ).joinToString(",") +
-                "\n",
+            ).joinToString(",", postfix = "\n"),
         )
     }
 
