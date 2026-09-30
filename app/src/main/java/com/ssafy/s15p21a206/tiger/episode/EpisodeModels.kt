@@ -11,16 +11,6 @@ enum class RecordingState {
     FINALIZING,
     COMPLETED,
     INTERRUPTED,
-    ;
-
-    fun canTransitionTo(next: RecordingState): Boolean =
-        when (this) {
-            IDLE -> next == INITIALIZING
-            INITIALIZING -> next == READY || next == INTERRUPTED
-            READY -> next == FINALIZING || next == INTERRUPTED
-            FINALIZING -> next == COMPLETED || next == INTERRUPTED
-            COMPLETED, INTERRUPTED -> false
-        }
 }
 
 @Serializable
@@ -29,14 +19,6 @@ enum class EpisodeState {
     ACTIVE,
     COMPLETED,
     INVALID_TRACKING,
-    ;
-
-    fun canTransitionTo(next: EpisodeState): Boolean =
-        when (this) {
-            NONE -> next == ACTIVE
-            ACTIVE -> next == COMPLETED || next == INVALID_TRACKING
-            COMPLETED, INVALID_TRACKING -> false
-        }
 }
 
 @Serializable enum class TrackingState { INITIALIZING, READY, PAUSED, STOPPED }
@@ -111,65 +93,14 @@ data class CameraMetadata(
     @SerialName("distortion_coefficients") val distortionCoefficients: List<Float>? = null,
     /** `main_rgb.mp4`에 적용된 시계 방향 회전. 이 값을 반영한 뒤의 기하가 위 필드에 담긴다. */
     @SerialName("video_rotation_degrees") val videoRotationDegrees: Int = 0,
-) {
-    /**
-     * 영상에 적용한 시계 방향 회전을 Intrinsic에도 반영한다.
-     *
-     * 회전을 반영하는 도구로 영상을 열면 프레임이 이미 돌아간 상태로 나오므로, Intrinsic도 같은
-     * 기하를 가리켜야 투영이 맞는다. 90도와 270도에서는 가로세로와 초점거리 축이 바뀐다.
-     *
-     * 픽셀 좌표 `(x, y)`는 90도에서 `(H - y, x)`로, 270도에서 `(y, W - x)`로, 180도에서
-     * `(W - x, H - y)`로 옮겨진다. `W`, `H`는 회전 전 가로·세로다.
-     */
-    fun rotatedClockwise(degrees: Int): CameraMetadata =
-        when (degrees.mod(360)) {
-            90 ->
-                copy(
-                    imageWidth = imageHeight,
-                    imageHeight = imageWidth,
-                    fx = fy,
-                    fy = fx,
-                    cx = imageHeight - cy,
-                    cy = cx,
-                    videoRotationDegrees = 90,
-                )
-            180 ->
-                copy(
-                    cx = imageWidth - cx,
-                    cy = imageHeight - cy,
-                    videoRotationDegrees = 180,
-                )
-            270 ->
-                copy(
-                    imageWidth = imageHeight,
-                    imageHeight = imageWidth,
-                    fx = fy,
-                    fy = fx,
-                    cx = cy,
-                    cy = imageWidth - cx,
-                    videoRotationDegrees = 270,
-                )
-            else -> copy(videoRotationDegrees = 0)
-        }
-}
+)
 
 @Serializable data class RecordingResolution(
     val width: Int,
     val height: Int,
 )
 
-@Serializable data class FileManifest(
-    val path: String,
-    @SerialName("size_bytes") val sizeBytes: Long,
-    val sha256: String,
-)
-
 @Serializable data class RemoteReceipt(
     @SerialName("session_id") val sessionId: String,
     val result: String,
-)
-
-@Serializable data class UploadError(
-    val code: String? = null,
-    val message: String? = null,
 )
