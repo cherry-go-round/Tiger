@@ -112,7 +112,7 @@ internal fun CaptureCameraPanel(
         IsoRow(capabilities, config, enabled, onChange)
         ShutterRow(capabilities, config, enabled, onChange)
         Text(
-            text = stringResource(R.string.capture_camera_fps_fixed, ManualCameraConfig.TARGET_FPS),
+            text = stringResource(R.string.capture_camera_fps_fixed, RecordingInputValidator.TARGET_FPS),
             style = TigerText.overlaySupporting,
             color = CaptureOverlaySupporting,
         )

@@ -150,7 +150,7 @@ class AndroidCaptureRuntime(
             setVideoSource(MediaRecorder.VideoSource.SURFACE)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-            setVideoFrameRate(30)
+            setVideoFrameRate(RecordingInputValidator.TARGET_FPS)
             setVideoSize(session.cameraConfig.textureSize.width, session.cameraConfig.textureSize.height)
             setOutputFile(bundle.mainVideo.absolutePath)
             // 회전 정보를 남기지 않는다. 폰을 가로로 눕혀 촬영하므로 센서가 내보내는
@@ -237,7 +237,7 @@ class AndroidCaptureRuntime(
                     iso = requested.iso,
                     exposureTimeNs = requested.exposureTimeNs,
                     frameDurationNs = requested.frameDurationNs,
-                    fpsTarget = ManualCameraConfig.TARGET_FPS,
+                    fpsTarget = RecordingInputValidator.TARGET_FPS,
                 ),
             actual = cameraSession.appliedSettings,
             awbFixed = requested.awbFixed,
