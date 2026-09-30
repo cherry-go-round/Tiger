@@ -45,6 +45,9 @@ class SessionRepository(
      * 홈 버튼이나 화면 꺼짐으로 수집 화면이 중단되면 번들이 마감되지 못한 채 staging에 남는다.
      * 그때까지 수집된 영상·IMU·pose·Episode는 그 자체로 유효한 데이터이므로 버리지 않고
      * 정상 Session으로 마감한다. 마감할 수 없을 만큼 손상된 번들만 `INTERRUPTED`로 남긴다.
+     *
+     * 마감한 Session의 수집 시각은 `main_rgb.mp4`의 수정 시각으로 채운다. 프로세스가 끝나 끝에서
+     * 저장하지 못한 행은 시각이 비어 있고, 화면 중단으로 저장한 행도 그 값과 거의 같다.
      */
     suspend fun recoverInterruptedStaging() {
         val stagingDirectories = bundleStore.interruptedStagingBundles().associateBy(File::getAbsolutePath)
@@ -61,6 +64,9 @@ class SessionRepository(
                         session.copy(
                             recordingState = RecordingState.COMPLETED.name,
                             bundlePath = result.directory.absolutePath,
+                            // 끝에서 저장하지 못한 Session은 영상이 만들어진 시각이 비어 있다. 영상 파일이
+                            // 마지막으로 쓰인 순간이 곧 녹화가 멈춘 순간이다.
+                            recordedAtEpochMs = File(result.directory, SessionBundle.MAIN_VIDEO_FILE).lastModified(),
                         ),
                     )
                 is FinalizeResult.Failed ->

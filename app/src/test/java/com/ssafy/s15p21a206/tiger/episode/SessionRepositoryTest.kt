@@ -86,6 +86,31 @@ class SessionRepositoryTest {
         }
     }
 
+    /**
+     * 프로세스가 끝나 끝에서 저장하지 못한 Session은 시작 행 그대로(`INITIALIZING`, 시각 0) 남는다.
+     * 복구가 영상 파일이 마지막으로 쓰인 시각, 곧 녹화가 멈춘 순간으로 수집 시각을 채운다.
+     */
+    @Test
+    fun `a recovered session takes its recorded time from the video file`() {
+        runBlocking {
+            val root = Files.createTempDirectory("session-store").toFile()
+            val store = SessionBundleStore(root)
+            val bundle = store.createStagingBundle(1).also(::fillBundle)
+            val videoWrittenAt = 1_790_000_000_000L
+            assertTrue(bundle.mainVideo.setLastModified(videoWrittenAt))
+            val startRow = session(bundle.sessionId, bundle.directory.path).copy(recordingState = "INITIALIZING", recordedAtEpochMs = 0L)
+            val dao = FakeSessionDao(listOf(startRow))
+            val repository = SessionRepository(dao, FakeMarkerDao(), store)
+
+            repository.recoverInterruptedStaging()
+
+            val recovered = dao.session(bundle.sessionId)!!
+            assertEquals("COMPLETED", recovered.recordingState)
+            assertEquals(videoWrittenAt, recovered.recordedAtEpochMs)
+            root.deleteRecursively()
+        }
+    }
+
     @Test
     fun `a staging bundle that cannot be finalized stays interrupted`() {
         runBlocking {

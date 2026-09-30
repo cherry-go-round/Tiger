@@ -295,6 +295,7 @@ internal fun rememberCaptureDriver(
                     RecordingState.INTERRUPTED,
                     startNs = startedAtNs,
                     endNs = SystemClock.elapsedRealtimeNanos(),
+                    recordedAtEpochMs = System.currentTimeMillis(),
                 ),
             )
         }
@@ -335,6 +336,7 @@ internal fun rememberCaptureDriver(
                                     RecordingState.COMPLETED,
                                     startNs = startedAtNs,
                                     endNs = SystemClock.elapsedRealtimeNanos(),
+                                    recordedAtEpochMs = System.currentTimeMillis(),
                                     bundlePath = result.directory.absolutePath,
                                     uploadState = if (startUpload) UploadState.LOCAL_ONLY else UploadState.FAILED,
                                 ),
@@ -471,8 +473,9 @@ private fun Context.openArCoreStore() {
  * 시작 때 먼저 저장해 두는 것은 수집 도중 프로세스가 죽어도 다음 실행이 이 행으로 staging 번들을 찾아
  * 복구하게 하기 위해서다. Task·Object와 표시 번호는 번들에 없고 이 행에만 있다.
  *
- * 벽시계 시각은 저장할 때마다 새로 잰다. 끝날 때 저장한 값이 곧 영상이 만들어진 시각이며, 목록의
- * 수집 시각과 정렬 기준이 된다. 수집 길이는 [startNs]와 [endNs](부팅 이후 경과 시간)로 따로 잰다.
+ * [recordedAtEpochMs]는 영상이 만들어진 벽시계 시각이라 녹화가 멈춘 저장(마감·중단)에서만 넘긴다.
+ * 시작 행은 아직 영상이 없어 0으로 두며, 끝에서 저장하지 못하고 복구된 Session은 복구가 영상 파일의
+ * 수정 시각으로 채운다. 수집 길이는 [startNs]와 [endNs](부팅 이후 경과 시간)로 따로 잰다.
  */
 private fun sessionRow(
     bundle: SessionBundle,
@@ -481,6 +484,7 @@ private fun sessionRow(
     recordingState: RecordingState,
     startNs: Long,
     endNs: Long? = null,
+    recordedAtEpochMs: Long = 0L,
     bundlePath: String = bundle.directory.absolutePath,
     uploadState: UploadState = UploadState.LOCAL_ONLY,
 ) = CaptureSession(
@@ -491,7 +495,7 @@ private fun sessionRow(
     recordingStartMonotonicTimestampNs = startNs,
     recordingEndMonotonicTimestampNs = endNs,
     bundlePath = bundlePath,
-    recordedAtEpochMs = System.currentTimeMillis(),
+    recordedAtEpochMs = recordedAtEpochMs,
     task = task,
     objectName = objectName,
 )
