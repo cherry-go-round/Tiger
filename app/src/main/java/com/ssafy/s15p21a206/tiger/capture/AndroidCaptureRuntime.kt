@@ -72,55 +72,6 @@ class AndroidCaptureRuntime(
         return next
     }
 
-    fun appendEpisode(marker: EpisodeMarker) {
-        if (bundle == null) return
-        episodeLog?.append(marker)
-    }
-
-    fun stop(): FinalizeResult {
-        val active = requireNotNull(bundle) { "No active capture" }
-        sensorLog.stopListening()
-        closeFrameWindow()
-        val stopError = runCatching { mediaRecorder?.stop() }.exceptionOrNull()
-        val camera = poseCollector.cameraMetadata
-        // 정리하면서 비워지므로 먼저 걷는다.
-        val settings = captureSettings()
-        releaseResources()
-        bundle = null
-        if (stopError != null) return FinalizeResult.Failed(stopError.message ?: "Video recording could not be finalized")
-        return SessionFinalizer(store).finalize(active, camera = camera, captureSettings = settings)
-    }
-
-    /**
-     * 이번 Session의 촬영 조건. 수동 설정을 쓰지 않았으면 null이다.
-     *
-     * 요청값과 실제값을 함께 담는다. 둘이 다를 수 있다는 것이 이 항목을 남기는 이유다.
-     */
-    private fun captureSettings(): CaptureSettingsMetadata? {
-        val requested = manualConfig ?: return null
-        return CaptureSettingsMetadata(
-            mode = "manual",
-            requested =
-                RequestedCaptureSettings(
-                    focusDistanceDiopter = requested.focusDistanceDiopter,
-                    iso = requested.iso,
-                    exposureTimeNs = requested.exposureTimeNs,
-                    frameDurationNs = requested.frameDurationNs,
-                    fpsTarget = ManualCameraConfig.TARGET_FPS,
-                ),
-            actual = cameraSession.appliedSettings,
-            awbFixed = requested.awbFixed,
-        )
-    }
-
-    fun interrupt() {
-        sensorLog.stopListening()
-        closeFrameWindow()
-        runCatching { mediaRecorder?.stop() }
-        releaseResources()
-        bundle = null
-    }
-
     private fun writeHeaders(bundle: SessionBundle) {
         frameTimestamps = FrameTimestampWriter(bundle.mainFrameTimestamps).also(FrameTimestampWriter::start)
         sensorLog.open(bundle)
@@ -154,22 +105,6 @@ class AndroidCaptureRuntime(
             poseCollector.start(session, previewSurface)
         }
         sensorLog.listen()
-    }
-
-    /**
-     * 시작하지 못한 수집을 버리고 실패를 올려 보낸다.
-     *
-     * 마감되지 않은 bundle을 남기면 다음 start가 막힌다. 헤더만 적힌 디렉터리도 함께 지운다.
-     */
-    private fun abandon(
-        next: SessionBundle,
-        error: Exception,
-    ): Nothing {
-        Log.e(CAPTURE_LOG_TAG, "Could not start ARCore shared capture", error)
-        releaseResources()
-        bundle = null
-        next.directory.deleteRecursively()
-        throw error
     }
 
     /**
@@ -250,6 +185,71 @@ class AndroidCaptureRuntime(
         return runCatching { previewSurfaces.surfaceFor(textureSize.width, textureSize.height) }
             .onFailure { Log.w(CAPTURE_LOG_TAG, "Could not obtain a preview surface", it) }
             .getOrNull()
+    }
+
+    /**
+     * 시작하지 못한 수집을 버리고 실패를 올려 보낸다.
+     *
+     * 마감되지 않은 bundle을 남기면 다음 start가 막힌다. 헤더만 적힌 디렉터리도 함께 지운다.
+     */
+    private fun abandon(
+        next: SessionBundle,
+        error: Exception,
+    ): Nothing {
+        Log.e(CAPTURE_LOG_TAG, "Could not start ARCore shared capture", error)
+        releaseResources()
+        bundle = null
+        next.directory.deleteRecursively()
+        throw error
+    }
+
+    fun appendEpisode(marker: EpisodeMarker) {
+        if (bundle == null) return
+        episodeLog?.append(marker)
+    }
+
+    fun stop(): FinalizeResult {
+        val active = requireNotNull(bundle) { "No active capture" }
+        sensorLog.stopListening()
+        closeFrameWindow()
+        val stopError = runCatching { mediaRecorder?.stop() }.exceptionOrNull()
+        val camera = poseCollector.cameraMetadata
+        // 정리하면서 비워지므로 먼저 걷는다.
+        val settings = captureSettings()
+        releaseResources()
+        bundle = null
+        if (stopError != null) return FinalizeResult.Failed(stopError.message ?: "Video recording could not be finalized")
+        return SessionFinalizer(store).finalize(active, camera = camera, captureSettings = settings)
+    }
+
+    /**
+     * 이번 Session의 촬영 조건. 수동 설정을 쓰지 않았으면 null이다.
+     *
+     * 요청값과 실제값을 함께 담는다. 둘이 다를 수 있다는 것이 이 항목을 남기는 이유다.
+     */
+    private fun captureSettings(): CaptureSettingsMetadata? {
+        val requested = manualConfig ?: return null
+        return CaptureSettingsMetadata(
+            mode = "manual",
+            requested =
+                RequestedCaptureSettings(
+                    focusDistanceDiopter = requested.focusDistanceDiopter,
+                    iso = requested.iso,
+                    exposureTimeNs = requested.exposureTimeNs,
+                    frameDurationNs = requested.frameDurationNs,
+                    fpsTarget = ManualCameraConfig.TARGET_FPS,
+                ),
+            actual = cameraSession.appliedSettings,
+            awbFixed = requested.awbFixed,
+        )
+    }
+
+    fun interrupt() {
+        sensorLog.stopListening()
+        closeFrameWindow()
+        runCatching { mediaRecorder?.stop() }
+        releaseResources()
+        bundle = null
     }
 
     /**
