@@ -13,12 +13,14 @@ import java.nio.FloatBuffer
  *
  * Camera2 출력 surface를 하나 더 여는 대신 이 경로를 쓴다. 대상 기기가 ARCore 2개 + MediaRecorder에
  * preview까지 더한 4개 stream 조합을 거부하기 때문이다. 이 방식은 stream을 늘리지 않는다.
+ *
+ * GL context가 current인 스레드에서 만든다. 만들 때 그릴 프로그램을 준비한다.
  */
 internal class CameraTextureRenderer {
-    private var program = 0
-    private var positionHandle = 0
-    private var texCoordHandle = 0
-    private var textureHandle = 0
+    private val program = buildProgram()
+    private val positionHandle = GLES20.glGetAttribLocation(program, "a_Position")
+    private val texCoordHandle = GLES20.glGetAttribLocation(program, "a_TexCoord")
+    private val textureHandle = GLES20.glGetUniformLocation(program, "u_Texture")
     private var coordinatesReady = false
 
     private val ndcCoords: FloatBuffer = floatBufferOf(-1f, -1f, +1f, -1f, -1f, +1f, +1f, +1f)
@@ -34,10 +36,6 @@ internal class CameraTextureRenderer {
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
-        program = buildProgram()
-        positionHandle = GLES20.glGetAttribLocation(program, "a_Position")
-        texCoordHandle = GLES20.glGetAttribLocation(program, "a_TexCoord")
-        textureHandle = GLES20.glGetUniformLocation(program, "u_Texture")
         return textureId
     }
 
