@@ -379,5 +379,3 @@ private val DETAIL_GROUP_GAP = 20.dp
  * 알면 되는 단추로 남긴다. 터치 영역은 `IconButton`의 48dp를 그대로 둔다.
  */
 private val HEADER_MENU_ICON_SIZE = 20.dp
-
-/** 헤더 메뉴 항목의 글자 굵기. `labelLarge`의 Medium에서 한 단계 내린 값이다. */
