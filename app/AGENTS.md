@@ -123,15 +123,15 @@ Room 데이터베이스와 `SessionRepository`, `SessionUploadService`는 `Tiger
 
 ## 수집 파이프라인의 구성
 
-`capture/`는 책임별 하위 패키지로 갈라져 있다. 루트에는 한 번의 수집을 조율하는 것만 두고, 실제 일은 하위 패키지가 맡는다.
+`core/capture/`는 책임별 하위 패키지로 갈라져 있다. 루트에는 한 번의 수집을 조율하는 것만 두고, 실제 일은 하위 패키지가 맡는다.
 
 | 패키지 | 두는 것 |
 |---|---|
-| `capture` | `AndroidCaptureRuntime`(여닫는 순서), `CaptureSessionCoordinator`(Tracking 게이트·Episode 경계), 공용 로그 태그 |
-| `capture.camera` | Camera2를 여닫는 것. 녹화용 `ArSharedCameraSession`, 녹화 전 프리뷰용 `PreviewCameraSession`, 녹화 해상도 선택·기억 |
-| `capture.manual` | MASK 수동 촬영 설정. 설정 값, 기기 능력, Camera2 key 변환, 저장 |
-| `capture.arcore` | ARCore 프레임 처리. `ArPoseCollector`와 그것만 쓰는 GL 그리기 |
-| `capture.writer` | 번들 CSV 기록기. IMU, Episode 경계, 프레임 시각 |
+| `core.capture` | `AndroidCaptureRuntime`(여닫는 순서), `CaptureSessionCoordinator`(Tracking 게이트·Episode 경계), 공용 로그 태그 |
+| `core.capture.camera` | Camera2를 여닫는 것. 녹화용 `ArSharedCameraSession`, 녹화 전 프리뷰용 `PreviewCameraSession`, 녹화 해상도 선택·기억 |
+| `core.capture.manual` | MASK 수동 촬영 설정. 기기 능력 읽기, Camera2 key 변환, 저장. 설정 값과 기기 능력 모델은 `core.model.capture`에 있다 |
+| `core.capture.arcore` | ARCore 프레임 처리. `ArPoseCollector`와 그것만 쓰는 GL 그리기 |
+| `core.capture.writer` | 번들 CSV 기록기. IMU, Episode 경계, 프레임 시각 |
 
 `AndroidCaptureRuntime`이 한 번의 수집을 시작하고 마감하되, 실제 일은 아래에 맡긴다.
 

@@ -16,8 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.ssafy.s15p21a206.tiger.capture.camera.RecordingResolutionStore
-import com.ssafy.s15p21a206.tiger.session.SessionRepository
+import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
+import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
 import com.ssafy.s15p21a206.tiger.ui.common.LockLandscapeWhileVisible
 
 /**

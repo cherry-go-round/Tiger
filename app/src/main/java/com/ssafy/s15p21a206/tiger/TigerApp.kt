@@ -26,7 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.ssafy.s15p21a206.tiger.capture.camera.RecordingResolutionStore
+import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureIntent
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureUiState
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureWorkspace

@@ -1,14 +1,14 @@
 package com.ssafy.s15p21a206.tiger.ui.session
 
+import com.ssafy.s15p21a206.tiger.core.database.CaptureSessionDao
+import com.ssafy.s15p21a206.tiger.core.database.CaptureSessionEntity
+import com.ssafy.s15p21a206.tiger.core.database.EpisodeMarkerDao
+import com.ssafy.s15p21a206.tiger.core.database.EpisodeMarkerEntity
+import com.ssafy.s15p21a206.tiger.core.database.SessionSummaryEntity
 import com.ssafy.s15p21a206.tiger.core.model.session.RecordingState
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
-import com.ssafy.s15p21a206.tiger.database.CaptureSessionDao
-import com.ssafy.s15p21a206.tiger.database.CaptureSessionEntity
-import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerDao
-import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerEntity
-import com.ssafy.s15p21a206.tiger.database.SessionSummaryEntity
-import com.ssafy.s15p21a206.tiger.session.SessionBundleStore
-import com.ssafy.s15p21a206.tiger.session.SessionRepository
+import com.ssafy.s15p21a206.tiger.core.session.SessionBundleStore
+import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -32,7 +32,7 @@ class SessionOperationsTest {
 
     private fun operations(
         dao: CaptureSessionDao,
-        uploadService: com.ssafy.s15p21a206.tiger.upload.SessionUploadService? = null,
+        uploadService: com.ssafy.s15p21a206.tiger.core.upload.SessionUploadService? = null,
     ): Pair<SessionOperations, SessionRepository> {
         val root = Files.createTempDirectory("session-operations").toFile()
         val store = SessionBundleStore(root)

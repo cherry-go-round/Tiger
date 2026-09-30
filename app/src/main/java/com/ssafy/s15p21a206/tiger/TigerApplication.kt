@@ -3,18 +3,18 @@ package com.ssafy.s15p21a206.tiger
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
-import com.ssafy.s15p21a206.tiger.database.MIGRATION_2_3
-import com.ssafy.s15p21a206.tiger.database.MIGRATION_3_4
-import com.ssafy.s15p21a206.tiger.database.MIGRATION_4_5
-import com.ssafy.s15p21a206.tiger.database.MIGRATION_5_6
-import com.ssafy.s15p21a206.tiger.database.MIGRATION_6_7
-import com.ssafy.s15p21a206.tiger.database.MIGRATION_7_8
-import com.ssafy.s15p21a206.tiger.database.TigerDatabase
-import com.ssafy.s15p21a206.tiger.session.SessionBundleStore
-import com.ssafy.s15p21a206.tiger.session.SessionRepository
-import com.ssafy.s15p21a206.tiger.upload.SessionUploadRequestFactory
-import com.ssafy.s15p21a206.tiger.upload.SessionUploadService
-import com.ssafy.s15p21a206.tiger.upload.SessionUploader
+import com.ssafy.s15p21a206.tiger.core.database.MIGRATION_2_3
+import com.ssafy.s15p21a206.tiger.core.database.MIGRATION_3_4
+import com.ssafy.s15p21a206.tiger.core.database.MIGRATION_4_5
+import com.ssafy.s15p21a206.tiger.core.database.MIGRATION_5_6
+import com.ssafy.s15p21a206.tiger.core.database.MIGRATION_6_7
+import com.ssafy.s15p21a206.tiger.core.database.MIGRATION_7_8
+import com.ssafy.s15p21a206.tiger.core.database.TigerDatabase
+import com.ssafy.s15p21a206.tiger.core.session.SessionBundleStore
+import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
+import com.ssafy.s15p21a206.tiger.core.upload.SessionUploadRequestFactory
+import com.ssafy.s15p21a206.tiger.core.upload.SessionUploadService
+import com.ssafy.s15p21a206.tiger.core.upload.SessionUploader
 import okhttp3.OkHttpClient
 
 /**

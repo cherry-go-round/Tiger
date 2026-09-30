@@ -4,7 +4,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
-import com.ssafy.s15p21a206.tiger.database.MIGRATION_6_7
+import com.ssafy.s15p21a206.tiger.core.database.MIGRATION_6_7
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
