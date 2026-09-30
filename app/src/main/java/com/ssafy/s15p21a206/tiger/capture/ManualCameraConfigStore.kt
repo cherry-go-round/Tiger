@@ -30,16 +30,6 @@ class ManualCameraConfigStore(
         )
     }
 
-    fun save(config: ManualCameraConfig) {
-        preferences.edit {
-            putFloat(KEY_FOCUS, config.focusDistanceDiopter)
-            putInt(KEY_ISO, config.iso)
-            putLong(KEY_EXPOSURE, config.exposureTimeNs)
-            putLong(KEY_FRAME_DURATION, config.frameDurationNs)
-            putWhiteBalance(config.whiteBalance)
-        }
-    }
-
     private fun loadWhiteBalance(): FixedWhiteBalance? {
         val transform = preferences.getString(KEY_WB_TRANSFORM, null)?.split(',')?.mapNotNull(String::toIntOrNull)
         if (transform == null || transform.size != FixedWhiteBalance.TRANSFORM_SIZE) return null
@@ -50,6 +40,16 @@ class ManualCameraConfigStore(
             blueGain = preferences.getFloat(KEY_WB_BLUE, 1f),
             transform = transform,
         )
+    }
+
+    fun save(config: ManualCameraConfig) {
+        preferences.edit {
+            putFloat(KEY_FOCUS, config.focusDistanceDiopter)
+            putInt(KEY_ISO, config.iso)
+            putLong(KEY_EXPOSURE, config.exposureTimeNs)
+            putLong(KEY_FRAME_DURATION, config.frameDurationNs)
+            putWhiteBalance(config.whiteBalance)
+        }
     }
 
     /** 고정하지 않았으면 transform만 지운다. [loadWhiteBalance]는 transform이 없으면 null로 읽는다. */
