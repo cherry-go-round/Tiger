@@ -62,6 +62,25 @@ class ArSharedCameraSession(
         private set
 
     /**
+     * 프레임 타임스탬프를 받는 콜백. 상태가 없어 한 인스턴스가 모든 열기를 감당한다.
+     *
+     * 반복 요청과 ARCore 양쪽에 같은 인스턴스를 건다. 그래서 같은 프레임이 두 번 도착할 수 있고,
+     * 거르는 것은 받는 쪽(`FrameTimestampWriter`)의 몫이다.
+     */
+    private val frameCallback =
+        object : CameraCaptureSession.CaptureCallback() {
+            override fun onCaptureCompleted(
+                cameraSession: CameraCaptureSession,
+                request: CaptureRequest,
+                result: TotalCaptureResult,
+            ) {
+                val timestampNs = result.get(CaptureResult.SENSOR_TIMESTAMP) ?: return
+                onFrameTimestamp(timestampNs)
+                manualGuard?.observe(cameraSession, request, result)
+            }
+        }
+
+    /**
      * 카메라를 열어 recorder에 프레임을 흘려보낸다. 스트림이 돌기 시작하면 돌아온다.
      *
      * [manual]이 있으면 녹화 요청에 수동 값을 걸고, ARCore가 그것을 덮으면 되받는다. null이면
@@ -248,25 +267,6 @@ class ArSharedCameraSession(
             closedLatch?.countDown()
         }
     }
-
-    /**
-     * 프레임 타임스탬프를 받는 콜백. 상태가 없어 한 인스턴스가 모든 열기를 감당한다.
-     *
-     * 반복 요청과 ARCore 양쪽에 같은 인스턴스를 건다. 그래서 같은 프레임이 두 번 도착할 수 있고,
-     * 거르는 것은 받는 쪽(`FrameTimestampWriter`)의 몫이다.
-     */
-    private val frameCallback =
-        object : CameraCaptureSession.CaptureCallback() {
-            override fun onCaptureCompleted(
-                cameraSession: CameraCaptureSession,
-                request: CaptureRequest,
-                result: TotalCaptureResult,
-            ) {
-                val timestampNs = result.get(CaptureResult.SENSOR_TIMESTAMP) ?: return
-                onFrameTimestamp(timestampNs)
-                manualGuard?.observe(cameraSession, request, result)
-            }
-        }
 
     /**
      * ARCore가 가져간 repeating request를 되받고, 실제로 쓰인 값을 읽어 둔다.
