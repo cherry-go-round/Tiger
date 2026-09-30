@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
 import java.io.File
 import java.security.MessageDigest
@@ -59,8 +60,8 @@ class SessionFinalizer(
                     put("ultrawide", includesUltraWide)
                 },
             )
-            camera?.let { put("camera", Json.encodeToJsonElement(CameraMetadata.serializer(), it)) }
-            captureSettings?.let { put("capture_settings", Json.encodeToJsonElement(CaptureSettingsMetadata.serializer(), it)) }
+            if (camera != null) put("camera", Json.encodeToJsonElement(camera))
+            if (captureSettings != null) put("capture_settings", Json.encodeToJsonElement(captureSettings))
             put("files", filesJson(manifest))
         }
 
