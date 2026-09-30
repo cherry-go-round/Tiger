@@ -31,8 +31,10 @@ class SessionFinalizer(
         val validation = SessionBundleValidator.validate(bundle.directory, includesUltraWide, requireMetadata = false)
         if (validation is BundleValidationResult.Invalid) return FinalizeResult.Failed(validation.reason)
         val manifest = manifestOf(bundle)
-        bundle.metadata.writeText(Json.encodeToString(metadataJson(bundle, includesUltraWide, camera, captureSettings, manifest)))
-        return FinalizeResult.Completed(bundleStore.publish(bundle, includesUltraWide), manifest.mapValues { it.value.sha256 })
+        val metadata = metadataJson(bundle, includesUltraWide, camera, captureSettings, manifest)
+        bundle.metadata.writeText(Json.encodeToString(metadata))
+        val published = bundleStore.publish(bundle, includesUltraWide)
+        return FinalizeResult.Completed(published, checksums = manifest.mapValues { it.value.sha256 })
     }
 
     /** `metadata.json`을 뺀 번들 파일마다의 크기와 SHA-256. */
