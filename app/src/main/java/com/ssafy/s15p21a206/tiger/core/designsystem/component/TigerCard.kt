@@ -1,12 +1,18 @@
 package com.ssafy.s15p21a206.tiger.core.designsystem.component
 
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSurface
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
  * 값 묶음 하나를 담는 카드다. 목록의 한 항목과 상세의 한 묶음이 같은 것을 쓴다.
@@ -34,4 +40,15 @@ fun TigerCard(
             ),
         content = content,
     )
+}
+
+@Preview
+@Composable
+@Suppress("FunctionName")
+private fun TigerCardPreview() {
+    ComponentPreview {
+        TigerCard(modifier = Modifier.fillMaxWidth()) {
+            Text(text = "카드 안의 글자", style = TigerText.itemName, modifier = Modifier.padding(16.dp))
+        }
+    }
 }

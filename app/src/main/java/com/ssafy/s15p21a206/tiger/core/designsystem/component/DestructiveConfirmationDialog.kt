@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.ssafy.s15p21a206.tiger.R
 
 /**
@@ -44,4 +45,19 @@ fun DestructiveConfirmationDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
+}
+
+@Preview
+@Composable
+@Suppress("FunctionName")
+private fun DestructiveConfirmationDialogPreview() {
+    ComponentPreview {
+        DestructiveConfirmationDialog(
+            title = stringResource(R.string.session_delete_title),
+            message = stringResource(R.string.session_delete_message_only_copy),
+            confirmLabel = stringResource(R.string.session_delete),
+            onConfirm = {},
+            onDismiss = {},
+        )
+    }
 }

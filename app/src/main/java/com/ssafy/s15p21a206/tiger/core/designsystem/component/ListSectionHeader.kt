@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
@@ -28,5 +31,15 @@ fun ListSectionHeader(
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(text = title, style = TigerText.sectionName)
         if (supporting != null) Text(text = supporting, style = TigerText.sectionCount)
+    }
+}
+
+@Preview
+@Composable
+@Suppress("FunctionName")
+private fun ListSectionHeaderPreview() {
+    ComponentPreview {
+        ListSectionHeader(title = stringResource(R.string.session_list_title), supporting = stringResource(R.string.task_list_count, 3))
+        ListSectionHeader(title = stringResource(R.string.session_list_title), supporting = null)
     }
 }

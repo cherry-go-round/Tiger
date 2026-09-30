@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
@@ -87,6 +90,19 @@ fun LabelledValue(
             modifier = Modifier.width(LABEL_COLUMN_WIDTH),
         )
         Text(text = value, style = TigerText.value)
+    }
+}
+
+@Preview
+@Composable
+@Suppress("FunctionName")
+private fun LabelledGroupPreview() {
+    ComponentPreview {
+        LabelledGroup(label = stringResource(R.string.session_group_info)) {
+            LabelledValue(label = stringResource(R.string.session_label_task), value = "컵 집기")
+            LabelledValue(label = stringResource(R.string.session_label_object), value = "머그컵")
+            LabelledValue(label = stringResource(R.string.session_label_id), value = "9c0a11e8")
+        }
     }
 }
 

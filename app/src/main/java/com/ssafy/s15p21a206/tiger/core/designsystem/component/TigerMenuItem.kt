@@ -11,7 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
@@ -63,6 +66,29 @@ fun TigerMenuItem(
             },
         onClick = onClick,
     )
+}
+
+@Preview
+@Composable
+@Suppress("FunctionName")
+private fun TigerMenuItemPreview() {
+    ComponentPreview {
+        TigerCard {
+            TigerMenuItem(label = stringResource(R.string.session_info_title), icon = R.drawable.ic_session_info, onClick = {})
+            TigerMenuItem(
+                label = stringResource(R.string.session_info_title),
+                icon = R.drawable.ic_session_info,
+                onClick = {},
+                enabled = false,
+            )
+            TigerMenuItem(
+                label = stringResource(R.string.session_delete),
+                icon = R.drawable.ic_session_delete,
+                onClick = {},
+                destructive = true,
+            )
+        }
+    }
 }
 
 /** 글리프와 글자 사이. 항목의 가장자리 여백(12dp)보다 좁아야 둘이 한 덩어리로 읽힌다. */
