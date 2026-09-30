@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.ui.common
+package com.ssafy.s15p21a206.tiger.core.android
 
 import android.content.pm.ActivityInfo
 import androidx.compose.runtime.Composable

@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.android.findActivity
 import com.ssafy.s15p21a206.tiger.core.capture.AndroidCaptureRuntime
 import com.ssafy.s15p21a206.tiger.core.capture.CaptureSessionCoordinator
 import com.ssafy.s15p21a206.tiger.core.capture.MonotonicClock
@@ -44,7 +45,6 @@ import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.core.session.SessionBundleStore
 import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
-import com.ssafy.s15p21a206.tiger.ui.common.findActivity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
