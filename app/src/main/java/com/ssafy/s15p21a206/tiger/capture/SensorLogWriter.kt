@@ -50,16 +50,8 @@ class SensorLogWriter(
 
     override fun onSensorChanged(event: SensorEvent) {
         val target = files[event.sensor.type] ?: return
-        val values = event.values
-
-        fun axis(index: Int) = values.getOrElse(index) { 0f }
-        val row =
-            when (event.sensor.type) {
-                Sensor.TYPE_ROTATION_VECTOR ->
-                    "${event.timestamp},${axis(0)},${axis(1)},${axis(2)},${axis(3)},${axis(4)},${event.accuracy}"
-                else -> "${event.timestamp},${axis(0)},${axis(1)},${axis(2)},${event.accuracy}"
-            }
-        target.appendText("$row\n")
+        val valueCount = if (event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) ROTATION_VECTOR_VALUES else MOTION_VALUES
+        target.appendText("${sensorRow(event.timestamp, event.values, valueCount, event.accuracy)}\n")
     }
 
     override fun onAccuracyChanged(
@@ -71,3 +63,26 @@ class SensorLogWriter(
         sensorManager.getDefaultSensor(type)?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
     }
 }
+
+/**
+ * `timestamp_ns`, 값 [valueCount]개, `accuracy` 순의 CSV 행.
+ *
+ * 기기가 값을 덜 주면 0으로 채워 열 수를 헤더에 맞춘다. 회전 벡터의 heading accuracy는 기기에 따라 오지 않는다.
+ */
+internal fun sensorRow(
+    timestampNs: Long,
+    values: FloatArray,
+    valueCount: Int,
+    accuracy: Int,
+): String =
+    buildList {
+        add(timestampNs)
+        repeat(valueCount) { add(values.getOrElse(it) { 0f }) }
+        add(accuracy)
+    }.joinToString(",")
+
+/** [SessionBundle.ROTATION_VECTOR_HEADER]의 x, y, z, scalar_component, heading_accuracy_rad. */
+private const val ROTATION_VECTOR_VALUES = 5
+
+/** [SessionBundle.ACCELEROMETER_HEADER]·[SessionBundle.GYROSCOPE_HEADER]의 x, y, z. */
+private const val MOTION_VALUES = 3
