@@ -47,29 +47,47 @@ private fun CameraCharacteristics.has(
 /**
  * 수동 설정을 요청에 건다. [config]가 null이면 아무것도 걸지 않아 template의 auto가 그대로 남는다.
  *
- * 촬영 도중 값이 흔들리면 안 되므로 auto를 하나도 남기지 않는다. OIS와 EIS까지 끄는 것은 둘 다
- * 프레임마다 intrinsic을 움직여, 같은 조건으로 찍었다는 전제를 깨기 때문이다.
+ * 촬영 도중 값이 흔들리면 안 되므로 auto를 하나도 남기지 않는다.
  */
 fun CaptureRequest.Builder.applyManualCamera(config: ManualCameraConfig?) {
     if (config == null) return
+    fixFocus(config)
+    fixExposure(config)
+    disableStabilization()
+    applyWhiteBalance(config.whiteBalance)
+}
+
+/** AF를 끄고 렌즈를 고른 거리에 둔다. */
+private fun CaptureRequest.Builder.fixFocus(config: ManualCameraConfig) {
     set(CaptureRequest.CONTROL_AF_MODE, Camera2Metadata.CONTROL_AF_MODE_OFF)
     set(CaptureRequest.LENS_FOCUS_DISTANCE, config.focusDistanceDiopter)
+}
+
+/** AE를 끄고 감도·노출·프레임 간격을 직접 건다. */
+private fun CaptureRequest.Builder.fixExposure(config: ManualCameraConfig) {
     set(CaptureRequest.CONTROL_AE_MODE, Camera2Metadata.CONTROL_AE_MODE_OFF)
     set(CaptureRequest.SENSOR_SENSITIVITY, config.iso)
     set(CaptureRequest.SENSOR_EXPOSURE_TIME, config.exposureTimeNs)
     set(CaptureRequest.SENSOR_FRAME_DURATION, config.frameDurationNs)
+}
+
+/** OIS와 EIS를 끈다. 둘 다 프레임마다 intrinsic을 움직여, 같은 조건으로 찍었다는 전제를 깬다. */
+private fun CaptureRequest.Builder.disableStabilization() {
     set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, Camera2Metadata.CONTROL_VIDEO_STABILIZATION_MODE_OFF)
     set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, Camera2Metadata.LENS_OPTICAL_STABILIZATION_MODE_OFF)
-    val whiteBalance = config.whiteBalance
+}
+
+/** 고정한 값이 있으면 그 gain·transform으로 고정하고, 없으면 AUTO로 둔다. */
+private fun CaptureRequest.Builder.applyWhiteBalance(whiteBalance: FixedWhiteBalance?) {
     if (whiteBalance == null) {
         // 아직 고정하지 않았다. 프리뷰가 수렴해야 고정할 값이 생기므로 AUTO로 둔다.
         set(CaptureRequest.CONTROL_AWB_MODE, Camera2Metadata.CONTROL_AWB_MODE_AUTO)
-        return
+    } else {
+        set(CaptureRequest.CONTROL_AWB_MODE, Camera2Metadata.CONTROL_AWB_MODE_OFF)
+        set(CaptureRequest.COLOR_CORRECTION_MODE, Camera2Metadata.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX)
+        set(CaptureRequest.COLOR_CORRECTION_GAINS, whiteBalance.toGains())
+        set(CaptureRequest.COLOR_CORRECTION_TRANSFORM, ColorSpaceTransform(whiteBalance.transform.toIntArray()))
     }
-    set(CaptureRequest.CONTROL_AWB_MODE, Camera2Metadata.CONTROL_AWB_MODE_OFF)
-    set(CaptureRequest.COLOR_CORRECTION_MODE, Camera2Metadata.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX)
-    set(CaptureRequest.COLOR_CORRECTION_GAINS, whiteBalance.toGains())
-    set(CaptureRequest.COLOR_CORRECTION_TRANSFORM, ColorSpaceTransform(whiteBalance.transform.toIntArray()))
 }
 
 /** 이 요청이 우리가 건 수동 요청인지. ARCore가 제 요청으로 갈아 끼웠는지 가리는 데 쓴다. */
