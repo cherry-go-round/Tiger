@@ -4,6 +4,7 @@ import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.util.Log
 import com.google.ar.core.Session
+import com.ssafy.s15p21a206.tiger.capture.camera.firstRearCameraId
 import java.util.EnumSet
 
 /**

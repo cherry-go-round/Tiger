@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.capture
+package com.ssafy.s15p21a206.tiger.capture.camera
 
 import android.content.Context
 import androidx.core.content.edit

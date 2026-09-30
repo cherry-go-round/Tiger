@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.capture
+package com.ssafy.s15p21a206.tiger.capture.camera
 
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager

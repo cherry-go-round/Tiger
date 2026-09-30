@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.capture
+package com.ssafy.s15p21a206.tiger.capture.camera
 
 import android.Manifest
 import android.content.Context
@@ -20,6 +20,12 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.ar.core.Session
 import com.google.ar.core.SharedCamera
+import com.ssafy.s15p21a206.tiger.capture.CAPTURE_LOG_TAG
+import com.ssafy.s15p21a206.tiger.capture.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.capture.applyManualCamera
+import com.ssafy.s15p21a206.tiger.capture.carriesManualCamera
+import com.ssafy.s15p21a206.tiger.capture.logCameraSettingMismatch
+import com.ssafy.s15p21a206.tiger.capture.readAppliedCameraSettings
 import com.ssafy.s15p21a206.tiger.episode.ActualCaptureSettings
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeoutOrNull
