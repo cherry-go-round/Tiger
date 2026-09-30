@@ -27,7 +27,7 @@ class SessionRepositoryTest {
             val dao = FakeSessionDao(listOf(session("managed", managed.path), session("legacy", root.resolve("legacy").path)))
             val repository = SessionRepository(dao, FakeMarkerDao(), store)
 
-            assertEquals(listOf("managed"), repository.observeCompleted().first().map(CaptureSession::sessionId))
+            assertNotNull(repository.completedSource("managed"))
             assertNull(repository.completedSource("legacy"))
             root.deleteRecursively()
         }
@@ -81,7 +81,7 @@ class SessionRepositoryTest {
             val recovered = dao.session(bundle.sessionId)!!
             assertEquals("COMPLETED", recovered.recordingState)
             assertEquals(store.completedDirectory(bundle.sessionId).path, recovered.bundlePath)
-            assertEquals(listOf(bundle.sessionId), repository.observeCompleted().first().map(CaptureSession::sessionId))
+            assertNotNull(repository.completedSource(bundle.sessionId))
             root.deleteRecursively()
         }
     }
@@ -178,7 +178,7 @@ class SessionRepositoryTest {
             assertNull(dao.session("target"))
             assertEquals(emptyList<EpisodeMarkerEntity>(), markerDao.markers)
             assertFalse(directory.exists())
-            assertEquals(emptyList<CaptureSession>(), repository.observeCompleted().first())
+            assertNull(repository.completedSource("target"))
             root.deleteRecursively()
         }
     }
@@ -253,7 +253,7 @@ class SessionRepositoryTest {
             repository.recoverInterruptedStaging()
 
             assertNull(dao.session(bundle.sessionId))
-            assertEquals(emptyList<CaptureSession>(), repository.observeCompleted().first())
+            assertNull(repository.completedSource(bundle.sessionId))
             root.deleteRecursively()
         }
     }
@@ -273,9 +273,6 @@ class SessionRepositoryTest {
         private val summaries: List<SessionSummaryEntity> = emptyList(),
     ) : CaptureSessionDao {
         private val values = sessions.associateBy(CaptureSessionEntity::sessionId).toMutableMap()
-
-        override fun observeCompleted(): Flow<List<CaptureSessionEntity>> =
-            flowOf(values.values.filter { it.recordingState == "COMPLETED" })
 
         override fun observeCompletedSummaries(): Flow<List<SessionSummaryEntity>> = flowOf(summaries)
 
@@ -330,9 +327,6 @@ class SessionRepositoryTest {
     private class FakeMarkerDao(
         val markers: MutableList<EpisodeMarkerEntity> = mutableListOf(),
     ) : EpisodeMarkerDao {
-        override fun observeForSession(sessionId: String): Flow<List<EpisodeMarkerEntity>> =
-            flowOf(markers.filter { it.sessionId == sessionId })
-
         override suspend fun upsert(marker: EpisodeMarkerEntity) {
             markers += marker
         }

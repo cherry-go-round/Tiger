@@ -79,8 +79,6 @@ class SessionSummaryRepositoryTest {
     private class SummarySessionDao(
         private val summaries: List<SessionSummaryEntity>,
     ) : CaptureSessionDao {
-        override fun observeCompleted(): Flow<List<CaptureSessionEntity>> = flowOf(emptyList())
-
         override fun observeCompletedSummaries(): Flow<List<SessionSummaryEntity>> = flowOf(summaries)
 
         override suspend fun upsert(session: CaptureSessionEntity) = Unit
@@ -115,8 +113,6 @@ class SessionSummaryRepositoryTest {
     }
 
     private class EmptyMarkerDao : EpisodeMarkerDao {
-        override fun observeForSession(sessionId: String): Flow<List<EpisodeMarkerEntity>> = flowOf(emptyList())
-
         override suspend fun upsert(marker: EpisodeMarkerEntity) = Unit
 
         override suspend fun deleteForSession(sessionId: String) = Unit

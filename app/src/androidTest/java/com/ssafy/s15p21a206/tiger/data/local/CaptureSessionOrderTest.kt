@@ -39,10 +39,8 @@ class CaptureSessionOrderTest {
             dao.upsert(completedSession(sessionId = "before-reboot", startEpochMs = 1_000L, startNs = 9_000_000_000L))
             dao.upsert(completedSession(sessionId = "after-reboot", startEpochMs = 2_000L, startNs = 1_000_000_000L))
 
-            val sessions = dao.observeCompleted().first()
             val summaries = dao.observeCompletedSummaries().first()
 
-            assertEquals(listOf("after-reboot", "before-reboot"), sessions.map { it.sessionId })
             assertEquals(listOf("after-reboot", "before-reboot"), summaries.map { it.sessionId })
         }
     }

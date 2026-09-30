@@ -63,12 +63,6 @@ interface CaptureSessionDao {
      * 목록 정렬은 절대 시각인 [CaptureSessionEntity.recordingStartEpochMs]를 기준으로 한다.
      * `recordingStartNs`는 부팅 이후 경과 시간이라 재부팅하면 0으로 돌아가므로,
      * 재부팅 경계를 걸친 Session끼리 순서가 뒤섞인다. 화면에 표시하는 수집 시각과 같은 값이어야 한다.
-     */
-    @Query("SELECT * FROM sessions WHERE recordingState = 'COMPLETED' ORDER BY recordingStartEpochMs DESC")
-    fun observeCompleted(): Flow<List<CaptureSessionEntity>>
-
-    /**
-     * 정렬 기준은 [observeCompleted]와 같다.
      *
      * Task와 Object는 `sessions` 행에서 그대로 읽는다. 전에는 `episode_markers`의 최솟값으로
      * 역산했는데, 그러면 Episode가 하나도 없는 Session에서 두 이름이 빈 문자열로 사라졌다.
@@ -145,9 +139,6 @@ interface CaptureSessionDao {
 
 @Dao
 interface EpisodeMarkerDao {
-    @Query("SELECT * FROM episode_markers WHERE sessionId = :sessionId ORDER BY startTimestampNs")
-    fun observeForSession(sessionId: String): Flow<List<EpisodeMarkerEntity>>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(marker: EpisodeMarkerEntity)
 

@@ -15,20 +15,12 @@ class SessionRepository(
     private val markerDao: EpisodeMarkerDao,
     private val bundleStore: SessionBundleStore,
 ) : UploadSessionStore {
-    fun observeCompleted(): Flow<List<CaptureSession>> =
-        sessionDao.observeCompleted().map { sessions ->
-            sessions.filter { bundleStore.isManagedCompletedDirectory(it.bundlePath) }.map(CaptureSessionEntity::toCaptureSession)
-        }
-
     fun observeCompletedSummaries(): Flow<List<SessionSummary>> =
         sessionDao.observeCompletedSummaries().map { summaries ->
             summaries
                 .filter { bundleStore.isManagedCompletedDirectory(it.bundlePath) }
                 .map(SessionSummaryEntity::toSessionSummary)
         }
-
-    fun observeMarkers(sessionId: String): Flow<List<EpisodeMarker>> =
-        markerDao.observeForSession(sessionId).map { markers -> markers.map(EpisodeMarkerEntity::toEpisodeMarker) }
 
     suspend fun save(session: CaptureSession) = sessionDao.upsert(session.toEntity())
 
@@ -176,9 +168,6 @@ private fun CaptureSession.toEntity() =
         task = task,
         objectName = objectName,
     )
-
-private fun EpisodeMarkerEntity.toEpisodeMarker() =
-    EpisodeMarker(episodeId, sessionId, startTimestampNs, endTimestampNs, task, objectName, EpisodeState.valueOf(outcome))
 
 private fun EpisodeMarker.toEntity() =
     EpisodeMarkerEntity(episodeId, sessionId, startTimestampNs, endTimestampNs, task, objectName, outcome.name)

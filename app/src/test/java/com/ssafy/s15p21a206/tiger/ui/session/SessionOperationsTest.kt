@@ -116,8 +116,6 @@ class SessionOperationsTest {
     private open class FakeSessionDao(
         private val stored: CaptureSessionEntity?,
     ) : CaptureSessionDao {
-        override fun observeCompleted(): Flow<List<CaptureSessionEntity>> = flowOf(listOfNotNull(stored))
-
         override fun observeCompletedSummaries(): Flow<List<SessionSummaryEntity>> = flowOf(emptyList())
 
         override suspend fun upsert(session: CaptureSessionEntity) = Unit
@@ -156,8 +154,6 @@ class SessionOperationsTest {
     }
 
     private class FakeMarkerDao : EpisodeMarkerDao {
-        override fun observeForSession(sessionId: String): Flow<List<EpisodeMarkerEntity>> = flowOf(emptyList())
-
         override suspend fun upsert(marker: EpisodeMarkerEntity) = Unit
 
         override suspend fun deleteForSession(sessionId: String) = Unit
