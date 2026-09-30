@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCaptureSession
-import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest
@@ -75,7 +74,7 @@ class PreviewCameraSession(
             return
         }
         val cameraId =
-            findRearCameraId() ?: run {
+            cameraManager.firstRearCameraId() ?: run {
                 onFailure("Rear camera is unavailable")
                 return
             }
@@ -86,15 +85,6 @@ class PreviewCameraSession(
         runCatching { cameraManager.openCamera(cameraId, deviceCallback(surface, handler, token), handler) }
             .onFailure { fail("Camera preview could not be opened") }
     }
-
-    /** 카메라 서비스가 응답하지 않으면 목록 조회도 던진다. 그때도 후면 카메라를 찾지 못한 것으로 다룬다. */
-    private fun findRearCameraId(): String? =
-        runCatching {
-            cameraManager.cameraIdList.firstOrNull { id ->
-                cameraManager.getCameraCharacteristics(id).get(CameraCharacteristics.LENS_FACING) ==
-                    CameraCharacteristics.LENS_FACING_BACK
-            }
-        }.getOrNull()
 
     /** 카메라 콜백을 나를 스레드를 띄우고 그 핸들러를 돌려준다. */
     private fun startThread(): Handler {

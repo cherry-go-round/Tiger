@@ -1,7 +1,6 @@
 package com.ssafy.s15p21a206.tiger.capture
 
 import android.content.Context
-import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.util.Log
 import com.google.ar.core.Session
@@ -57,16 +56,8 @@ class ManualCameraProfile(
             }.onFailure { Log.w(CAPTURE_LOG_TAG, "Could not ask ARCore which camera it records with", it) }
                 .getOrNull()
         if (fromArCore != null) return fromArCore
-        val fallback = firstBackCameraId()
+        val fallback = cameraManager.firstRearCameraId()
         Log.w(CAPTURE_LOG_TAG, "Falling back to the first rear camera ($fallback) for manual camera ranges")
         return fallback
     }
-
-    private fun firstBackCameraId(): String? =
-        runCatching {
-            cameraManager.cameraIdList.firstOrNull { id ->
-                cameraManager.getCameraCharacteristics(id).get(CameraCharacteristics.LENS_FACING) ==
-                    CameraCharacteristics.LENS_FACING_BACK
-            }
-        }.getOrNull()
 }
