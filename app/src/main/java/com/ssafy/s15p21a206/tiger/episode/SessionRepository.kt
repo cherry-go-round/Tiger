@@ -5,6 +5,7 @@ import com.ssafy.s15p21a206.tiger.data.local.CaptureSessionEntity
 import com.ssafy.s15p21a206.tiger.data.local.EpisodeMarkerDao
 import com.ssafy.s15p21a206.tiger.data.local.EpisodeMarkerEntity
 import com.ssafy.s15p21a206.tiger.data.local.SessionSummaryEntity
+import com.ssafy.s15p21a206.tiger.upload.UploadSessionStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.File
@@ -13,7 +14,7 @@ class SessionRepository(
     private val sessionDao: CaptureSessionDao,
     private val markerDao: EpisodeMarkerDao,
     private val bundleStore: SessionBundleStore,
-) : com.ssafy.s15p21a206.tiger.upload.UploadSessionStore {
+) : UploadSessionStore {
     fun observeCompleted(): Flow<List<CaptureSession>> =
         sessionDao.observeCompleted().map { sessions ->
             sessions.filter { bundleStore.isManagedCompletedDirectory(it.bundlePath) }.map(CaptureSessionEntity::toCaptureSession)
