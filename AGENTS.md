@@ -31,7 +31,7 @@ adb shell am instrument -w com.ssafy.s15p21a206.tigermask.test/androidx.test.run
 ```
 
 2026-09-21에 같은 기기에서 당시 전체 20개가 15초에 끝났다. 모두 통과하면 마지막 줄이
-`OK (N tests)`이고, N은 `app/src/androidTest`의 `@Test` 수와 같다(2026-09-29 기준 41개).
+`OK (N tests)`이고, N은 `app/src/androidTest`의 `@Test` 수와 같다(2026-09-30 기준 42개).
 클래스나 메서드만 고르려면 `-e class`를 준다.
 
 패키지 이름이 둘이다. `-w` 뒤의 instrumentation은 `applicationId`(`com.ssafy.s15p21a206.tigermask`)를
