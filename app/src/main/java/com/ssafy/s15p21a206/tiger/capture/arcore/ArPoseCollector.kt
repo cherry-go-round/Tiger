@@ -10,8 +10,8 @@ import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.ssafy.s15p21a206.tiger.capture.CAPTURE_LOG_TAG
 import com.ssafy.s15p21a206.tiger.capture.camera.CameraMetadataReader
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.session.CameraMetadata
-import com.ssafy.s15p21a206.tiger.session.SessionBundle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

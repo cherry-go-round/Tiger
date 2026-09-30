@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.session.SessionSummary
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.ui.common.ListSectionHeader
 import com.ssafy.s15p21a206.tiger.ui.common.NavigationHeader
 import com.ssafy.s15p21a206.tiger.ui.common.NavigationHeaderHeight

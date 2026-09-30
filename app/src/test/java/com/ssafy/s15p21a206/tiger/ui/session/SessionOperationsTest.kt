@@ -1,12 +1,12 @@
 package com.ssafy.s15p21a206.tiger.ui.session
 
+import com.ssafy.s15p21a206.tiger.core.model.session.RecordingState
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.database.CaptureSessionDao
 import com.ssafy.s15p21a206.tiger.database.CaptureSessionEntity
 import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerDao
 import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerEntity
 import com.ssafy.s15p21a206.tiger.database.SessionSummaryEntity
-import com.ssafy.s15p21a206.tiger.session.RecordingState
 import com.ssafy.s15p21a206.tiger.session.SessionBundleStore
 import com.ssafy.s15p21a206.tiger.session.SessionRepository
 import kotlinx.coroutines.CoroutineScope

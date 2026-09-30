@@ -4,7 +4,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import com.ssafy.s15p21a206.tiger.session.SessionBundle
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import java.io.File
 
 /**

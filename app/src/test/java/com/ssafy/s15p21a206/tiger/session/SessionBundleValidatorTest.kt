@@ -1,5 +1,6 @@
 package com.ssafy.s15p21a206.tiger.session
 
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test

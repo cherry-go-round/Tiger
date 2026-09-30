@@ -3,8 +3,8 @@ package com.ssafy.s15p21a206.tiger.ui.session
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionDeleteResult
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadResult
-import com.ssafy.s15p21a206.tiger.session.SessionDeleteResult
 import com.ssafy.s15p21a206.tiger.session.SessionRepository
 import com.ssafy.s15p21a206.tiger.upload.SessionUploadService
 import kotlinx.coroutines.CoroutineDispatcher

@@ -1,5 +1,8 @@
 package com.ssafy.s15p21a206.tiger.session
 
+import com.ssafy.s15p21a206.tiger.core.model.session.ValidationError
+import com.ssafy.s15p21a206.tiger.core.model.session.ValidationResult
+
 object RecordingInputValidator {
     private val controlCharacter = Regex("[\\u0000-\\u001F\\u007F]")
     private val pathSeparator = Regex("[/\\\\]")
@@ -32,19 +35,4 @@ object RecordingInputValidator {
         }
         return ValidationResult.Valid
     }
-}
-
-sealed interface ValidationResult {
-    data object Valid : ValidationResult
-
-    data class Invalid(
-        val error: ValidationError,
-    ) : ValidationResult
-}
-
-enum class ValidationError {
-    EMPTY_TASK,
-    EMPTY_OBJECT,
-    INVALID_TASK,
-    UNSUPPORTED_CAMERA_CONFIG,
 }

@@ -2,8 +2,8 @@ package com.ssafy.s15p21a206.tiger.ui.capture
 
 import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraCapabilities
 import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.session.RecordingResolution
-import com.ssafy.s15p21a206.tiger.session.SessionBundle
 
 /**
  * 수동 촬영 설정 패널의 상태.

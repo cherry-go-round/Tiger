@@ -1,7 +1,7 @@
 package com.ssafy.s15p21a206.tiger.capture.writer
 
-import com.ssafy.s15p21a206.tiger.session.EpisodeMarker
-import com.ssafy.s15p21a206.tiger.session.EpisodeState
+import com.ssafy.s15p21a206.tiger.core.model.session.EpisodeMarker
+import com.ssafy.s15p21a206.tiger.core.model.session.EpisodeState
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

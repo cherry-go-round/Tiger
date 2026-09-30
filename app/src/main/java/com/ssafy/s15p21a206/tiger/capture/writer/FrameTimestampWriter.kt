@@ -1,6 +1,6 @@
 package com.ssafy.s15p21a206.tiger.capture.writer
 
-import com.ssafy.s15p21a206.tiger.session.SessionBundle
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import java.io.File
 
 open class CsvWriter(

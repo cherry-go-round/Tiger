@@ -1,5 +1,8 @@
 package com.ssafy.s15p21a206.tiger.session
 
+import com.ssafy.s15p21a206.tiger.core.model.session.BundleValidationResult
+import com.ssafy.s15p21a206.tiger.core.model.session.FinalizeResult
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -92,14 +95,3 @@ private data class ManifestEntry(
     val sizeBytes: Long,
     val sha256: String,
 )
-
-sealed interface FinalizeResult {
-    data class Completed(
-        val directory: File,
-        val checksums: Map<String, String>,
-    ) : FinalizeResult
-
-    data class Failed(
-        val reason: String,
-    ) : FinalizeResult
-}

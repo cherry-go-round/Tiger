@@ -1,7 +1,7 @@
 package com.ssafy.s15p21a206.tiger.upload
 
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadResult
-import com.ssafy.s15p21a206.tiger.session.SessionBundle
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.runBlocking

@@ -1,5 +1,7 @@
 package com.ssafy.s15p21a206.tiger.session
 
+import com.ssafy.s15p21a206.tiger.core.model.session.FinalizeResult
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.jsonArray

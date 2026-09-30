@@ -1,5 +1,7 @@
 package com.ssafy.s15p21a206.tiger.session
 
+import com.ssafy.s15p21a206.tiger.core.model.session.BundleValidationResult
+import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
@@ -153,18 +155,4 @@ object SessionBundleValidator {
     )
 
     private val SHA_256 = Regex("[0-9a-f]{64}")
-}
-
-sealed interface BundleValidationResult {
-    val isValid: Boolean
-
-    data object Valid : BundleValidationResult {
-        override val isValid = true
-    }
-
-    data class Invalid(
-        val reason: String,
-    ) : BundleValidationResult {
-        override val isValid = false
-    }
 }
