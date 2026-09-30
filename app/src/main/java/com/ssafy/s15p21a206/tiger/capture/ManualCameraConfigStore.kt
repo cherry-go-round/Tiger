@@ -1,6 +1,8 @@
 package com.ssafy.s15p21a206.tiger.capture
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.core.content.edit
 
 /**
  * 직전에 맞춘 촬영 조건을 기억한다.
@@ -29,14 +31,13 @@ class ManualCameraConfigStore(
     }
 
     fun save(config: ManualCameraConfig) {
-        preferences
-            .edit()
-            .putFloat(KEY_FOCUS, config.focusDistanceDiopter)
-            .putInt(KEY_ISO, config.iso)
-            .putLong(KEY_EXPOSURE, config.exposureTimeNs)
-            .putLong(KEY_FRAME_DURATION, config.frameDurationNs)
-            .apply()
-        saveWhiteBalance(config.whiteBalance)
+        preferences.edit {
+            putFloat(KEY_FOCUS, config.focusDistanceDiopter)
+            putInt(KEY_ISO, config.iso)
+            putLong(KEY_EXPOSURE, config.exposureTimeNs)
+            putLong(KEY_FRAME_DURATION, config.frameDurationNs)
+            putWhiteBalance(config.whiteBalance)
+        }
     }
 
     private fun loadWhiteBalance(): FixedWhiteBalance? {
@@ -51,19 +52,17 @@ class ManualCameraConfigStore(
         )
     }
 
-    private fun saveWhiteBalance(whiteBalance: FixedWhiteBalance?) {
-        val editor = preferences.edit()
+    /** 고정하지 않았으면 transform만 지운다. [loadWhiteBalance]는 transform이 없으면 null로 읽는다. */
+    private fun SharedPreferences.Editor.putWhiteBalance(whiteBalance: FixedWhiteBalance?) {
         if (whiteBalance == null) {
-            editor.remove(KEY_WB_TRANSFORM).apply()
-            return
+            remove(KEY_WB_TRANSFORM)
+        } else {
+            putFloat(KEY_WB_RED, whiteBalance.redGain)
+            putFloat(KEY_WB_GREEN_EVEN, whiteBalance.greenEvenGain)
+            putFloat(KEY_WB_GREEN_ODD, whiteBalance.greenOddGain)
+            putFloat(KEY_WB_BLUE, whiteBalance.blueGain)
+            putString(KEY_WB_TRANSFORM, whiteBalance.transform.joinToString(","))
         }
-        editor
-            .putFloat(KEY_WB_RED, whiteBalance.redGain)
-            .putFloat(KEY_WB_GREEN_EVEN, whiteBalance.greenEvenGain)
-            .putFloat(KEY_WB_GREEN_ODD, whiteBalance.greenOddGain)
-            .putFloat(KEY_WB_BLUE, whiteBalance.blueGain)
-            .putString(KEY_WB_TRANSFORM, whiteBalance.transform.joinToString(","))
-            .apply()
     }
 
     private companion object {

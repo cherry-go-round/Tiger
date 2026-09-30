@@ -1,6 +1,7 @@
 package com.ssafy.s15p21a206.tiger.capture
 
 import android.content.Context
+import androidx.core.content.edit
 import com.ssafy.s15p21a206.tiger.episode.RecordingInputValidator
 import com.ssafy.s15p21a206.tiger.episode.RecordingResolution
 
@@ -23,11 +24,10 @@ class RecordingResolutionStore(
     }
 
     fun save(resolution: RecordingResolution) {
-        preferences
-            .edit()
-            .putInt(KEY_WIDTH, resolution.width)
-            .putInt(KEY_HEIGHT, resolution.height)
-            .apply()
+        preferences.edit {
+            putInt(KEY_WIDTH, resolution.width)
+            putInt(KEY_HEIGHT, resolution.height)
+        }
     }
 
     private companion object {
