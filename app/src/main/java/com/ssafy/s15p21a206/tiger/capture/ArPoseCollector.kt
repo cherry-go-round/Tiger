@@ -141,20 +141,6 @@ class ArPoseCollector(
     }
 
     /**
-     * 수집 스레드를 멈추고 기다린다.
-     *
-     * ARCore Session을 닫기 전에 불러야 한다. 스레드가 `session.update()` 안에 있는 동안 Session이
-     * 닫히면 native 쪽에서 죽는다.
-     */
-    fun stop() {
-        running = false
-        thread?.join(JOIN_TIMEOUT_MS)
-        thread = null
-        poses = null
-        cameraMetadata = null
-    }
-
-    /**
      * 첫 유효 프레임에서 촬영 Camera의 Intrinsic을 1회 확보한다.
      *
      * ARCore의 GPU 텍스처 스트림 기준 값이며, MediaRecorder 해상도를 같은 `cameraConfig.textureSize`로
@@ -184,6 +170,20 @@ class ArPoseCollector(
                 distortionCoefficients = optics.distortionCoefficients,
             )
         }.onFailure { Log.w(CAPTURE_LOG_TAG, "Could not read camera metadata", it) }.getOrNull()
+
+    /**
+     * 수집 스레드를 멈추고 기다린다.
+     *
+     * ARCore Session을 닫기 전에 불러야 한다. 스레드가 `session.update()` 안에 있는 동안 Session이
+     * 닫히면 native 쪽에서 죽는다.
+     */
+    fun stop() {
+        running = false
+        thread?.join(JOIN_TIMEOUT_MS)
+        thread = null
+        poses = null
+        cameraMetadata = null
+    }
 
     private companion object {
         /** ARCore frame 갱신이 실패했을 때 다음 시도까지 쉬는 시간. 실패가 이어져도 CPU를 태우지 않는다. */
