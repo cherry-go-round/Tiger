@@ -38,9 +38,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.capture.ManualCameraCapabilities
-import com.ssafy.s15p21a206.tiger.capture.ManualCameraConfig
-import com.ssafy.s15p21a206.tiger.capture.ShutterPreset
+import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraCapabilities
+import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.capture.manual.ShutterPreset
 import com.ssafy.s15p21a206.tiger.episode.RecordingInputValidator
 import com.ssafy.s15p21a206.tiger.episode.RecordingResolution
 import com.ssafy.s15p21a206.tiger.ui.theme.CaptureChoiceSelected

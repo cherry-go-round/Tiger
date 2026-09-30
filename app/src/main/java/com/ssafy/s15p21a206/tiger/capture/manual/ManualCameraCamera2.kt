@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.capture
+package com.ssafy.s15p21a206.tiger.capture.manual
 
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
@@ -7,6 +7,7 @@ import android.hardware.camera2.CaptureResult
 import android.hardware.camera2.params.ColorSpaceTransform
 import android.hardware.camera2.params.RggbChannelVector
 import android.util.Log
+import com.ssafy.s15p21a206.tiger.capture.CAPTURE_LOG_TAG
 import com.ssafy.s15p21a206.tiger.episode.ActualCaptureSettings
 import kotlin.math.abs
 import android.hardware.camera2.CameraMetadata as Camera2Metadata

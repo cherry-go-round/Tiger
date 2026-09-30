@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.capture
+package com.ssafy.s15p21a206.tiger.capture.manual
 
 /**
  * 한 Session 내내 고정할 촬영 조건.

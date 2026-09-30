@@ -28,12 +28,12 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.capture.AndroidCaptureRuntime
 import com.ssafy.s15p21a206.tiger.capture.CaptureSessionCoordinator
-import com.ssafy.s15p21a206.tiger.capture.ManualCameraConfig
-import com.ssafy.s15p21a206.tiger.capture.ManualCameraConfigStore
-import com.ssafy.s15p21a206.tiger.capture.ManualCameraProfile
 import com.ssafy.s15p21a206.tiger.capture.MonotonicClock
 import com.ssafy.s15p21a206.tiger.capture.camera.PreviewCameraSession
 import com.ssafy.s15p21a206.tiger.capture.camera.RecordingResolutionStore
+import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfigStore
+import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraProfile
 import com.ssafy.s15p21a206.tiger.episode.CaptureSession
 import com.ssafy.s15p21a206.tiger.episode.EpisodeState
 import com.ssafy.s15p21a206.tiger.episode.FinalizeResult

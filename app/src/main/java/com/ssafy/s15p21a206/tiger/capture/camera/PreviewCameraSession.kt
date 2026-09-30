@@ -16,10 +16,10 @@ import android.util.Log
 import android.view.Surface
 import androidx.core.content.ContextCompat
 import com.ssafy.s15p21a206.tiger.capture.CAPTURE_LOG_TAG
-import com.ssafy.s15p21a206.tiger.capture.FixedWhiteBalance
-import com.ssafy.s15p21a206.tiger.capture.ManualCameraConfig
-import com.ssafy.s15p21a206.tiger.capture.applyManualCamera
-import com.ssafy.s15p21a206.tiger.capture.readConvergedWhiteBalance
+import com.ssafy.s15p21a206.tiger.capture.manual.FixedWhiteBalance
+import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.capture.manual.applyManualCamera
+import com.ssafy.s15p21a206.tiger.capture.manual.readConvergedWhiteBalance
 import java.util.concurrent.Executor
 
 class PreviewCameraSession(
