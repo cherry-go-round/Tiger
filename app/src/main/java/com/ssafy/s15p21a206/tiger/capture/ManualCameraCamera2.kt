@@ -91,6 +91,8 @@ private fun CaptureRequest.Builder.applyWhiteBalance(whiteBalance: FixedWhiteBal
     }
 }
 
+private fun FixedWhiteBalance.toGains() = RggbChannelVector(redGain, greenEvenGain, greenOddGain, blueGain)
+
 /** 이 요청이 우리가 건 수동 요청인지. ARCore가 제 요청으로 갈아 끼웠는지 가리는 데 쓴다. */
 fun CaptureRequest.carriesManualCamera(): Boolean = get(CaptureRequest.CONTROL_AE_MODE) == Camera2Metadata.CONTROL_AE_MODE_OFF
 
@@ -125,6 +127,34 @@ fun CaptureResult.readAppliedCameraSettings(): ActualCaptureSettings =
         awbMode = awbModeName(get(CaptureResult.CONTROL_AWB_MODE)),
         awbLocked = get(CaptureResult.CONTROL_AWB_LOCK),
     )
+
+private fun afModeName(mode: Int?) =
+    when (mode) {
+        null -> null
+        Camera2Metadata.CONTROL_AF_MODE_OFF -> MODE_OFF
+        Camera2Metadata.CONTROL_AF_MODE_AUTO -> "AUTO"
+        Camera2Metadata.CONTROL_AF_MODE_MACRO -> "MACRO"
+        Camera2Metadata.CONTROL_AF_MODE_CONTINUOUS_VIDEO -> "CONTINUOUS_VIDEO"
+        Camera2Metadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE -> "CONTINUOUS_PICTURE"
+        Camera2Metadata.CONTROL_AF_MODE_EDOF -> "EDOF"
+        else -> "UNKNOWN($mode)"
+    }
+
+private fun aeModeName(mode: Int?) =
+    when (mode) {
+        null -> null
+        Camera2Metadata.CONTROL_AE_MODE_OFF -> MODE_OFF
+        Camera2Metadata.CONTROL_AE_MODE_ON -> "ON"
+        else -> "ON_VARIANT($mode)"
+    }
+
+private fun awbModeName(mode: Int?) =
+    when (mode) {
+        null -> null
+        Camera2Metadata.CONTROL_AWB_MODE_OFF -> MODE_OFF
+        Camera2Metadata.CONTROL_AWB_MODE_AUTO -> "AUTO"
+        else -> "PRESET($mode)"
+    }
 
 /**
  * 요청값과 실제값이 어긋났으면 남긴다.
@@ -162,36 +192,6 @@ private fun MutableList<String>.addIfDiffers(
     if (actual == null) return
     if (abs(actual.toDouble() - requested.toDouble()) > tolerance.toDouble()) add("$name=$actual (requested $requested)")
 }
-
-private fun FixedWhiteBalance.toGains() = RggbChannelVector(redGain, greenEvenGain, greenOddGain, blueGain)
-
-private fun afModeName(mode: Int?) =
-    when (mode) {
-        null -> null
-        Camera2Metadata.CONTROL_AF_MODE_OFF -> MODE_OFF
-        Camera2Metadata.CONTROL_AF_MODE_AUTO -> "AUTO"
-        Camera2Metadata.CONTROL_AF_MODE_MACRO -> "MACRO"
-        Camera2Metadata.CONTROL_AF_MODE_CONTINUOUS_VIDEO -> "CONTINUOUS_VIDEO"
-        Camera2Metadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE -> "CONTINUOUS_PICTURE"
-        Camera2Metadata.CONTROL_AF_MODE_EDOF -> "EDOF"
-        else -> "UNKNOWN($mode)"
-    }
-
-private fun aeModeName(mode: Int?) =
-    when (mode) {
-        null -> null
-        Camera2Metadata.CONTROL_AE_MODE_OFF -> MODE_OFF
-        Camera2Metadata.CONTROL_AE_MODE_ON -> "ON"
-        else -> "ON_VARIANT($mode)"
-    }
-
-private fun awbModeName(mode: Int?) =
-    when (mode) {
-        null -> null
-        Camera2Metadata.CONTROL_AWB_MODE_OFF -> MODE_OFF
-        Camera2Metadata.CONTROL_AWB_MODE_AUTO -> "AUTO"
-        else -> "PRESET($mode)"
-    }
 
 private const val MODE_OFF = "OFF"
 
