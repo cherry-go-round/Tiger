@@ -2,6 +2,7 @@ package com.ssafy.s15p21a206.tiger.feature.capture
 
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraUnsupportedReason
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 
@@ -17,8 +18,8 @@ internal data class ManualCameraUiState(
     val config: ManualCameraConfig? = null,
     val panelOpen: Boolean = false,
 ) {
-    /** 수동 설정을 쓸 수 없는 이유. 패널은 조작 대신 이 문구를 보여 준다. */
-    val unsupportedReason: String? get() = capabilities?.unsupportedReason
+    /** 수동 설정을 쓸 수 없는 이유. 패널은 조작 대신 이 이유의 문구를 보여 준다. */
+    val unsupportedReason: ManualCameraUnsupportedReason? get() = capabilities?.unsupportedReason
 
     val supported: Boolean get() = capabilities != null && unsupportedReason == null
 

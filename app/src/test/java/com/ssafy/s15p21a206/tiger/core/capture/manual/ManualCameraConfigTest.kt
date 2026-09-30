@@ -3,6 +3,7 @@ package com.ssafy.s15p21a206.tiger.core.capture.manual
 import com.ssafy.s15p21a206.tiger.core.model.capture.FixedWhiteBalance
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraUnsupportedReason
 import com.ssafy.s15p21a206.tiger.core.model.capture.ShutterPreset
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -88,9 +89,10 @@ class ManualCameraConfigTest {
     @Test
     fun `explains why a camera without manual sensor support cannot be driven by hand`() {
         assertNull(galaxyS10.unsupportedReason)
-        assertNotNull(galaxyS10.copy(manualSensor = false).unsupportedReason)
-        assertNotNull(galaxyS10.copy(aeOffSupported = false).unsupportedReason)
-        assertNotNull(galaxyS10.copy(isoRange = null).unsupportedReason)
+        assertEquals(ManualCameraUnsupportedReason.NO_MANUAL_SENSOR, galaxyS10.copy(manualSensor = false).unsupportedReason)
+        assertEquals(ManualCameraUnsupportedReason.NO_MANUAL_EXPOSURE, galaxyS10.copy(aeOffSupported = false).unsupportedReason)
+        assertEquals(ManualCameraUnsupportedReason.ISO_RANGE_UNKNOWN, galaxyS10.copy(isoRange = null).unsupportedReason)
+        assertEquals(ManualCameraUnsupportedReason.EXPOSURE_RANGE_UNKNOWN, galaxyS10.copy(exposureRangeNs = null).unsupportedReason)
     }
 
     @Test

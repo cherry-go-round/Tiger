@@ -2,11 +2,11 @@ package com.ssafy.s15p21a206.tiger.feature.capture
 
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraUnsupportedReason
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
@@ -303,7 +303,7 @@ class CaptureStateTest {
                 .reduce(CaptureIntent.Open("task", hd))
                 .reduce(CaptureIntent.ManualCameraProfiled(unsupported, unsupported.defaultConfig()))
 
-        assertNotNull(state.manualCamera.unsupportedReason)
+        assertEquals(ManualCameraUnsupportedReason.NO_MANUAL_SENSOR, state.manualCamera.unsupportedReason)
         assertFalse(state.manualCamera.supported)
         assertNull(state.manualCamera.appliedConfig)
     }

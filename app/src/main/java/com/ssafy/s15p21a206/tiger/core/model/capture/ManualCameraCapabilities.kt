@@ -29,14 +29,14 @@ data class ManualCameraCapabilities(
     /** gain을 직접 거는 방식이라 `AWB_MODE_OFF`가 있어야 한다. lock 가능 여부는 참고로만 든다. */
     val whiteBalanceSupported: Boolean get() = awbOffSupported
 
-    /** 수동 설정을 쓸 수 없는 이유. null이면 쓸 수 있다. 화면은 이 문구를 그대로 보여 준다. */
-    val unsupportedReason: String?
+    /** 수동 설정을 쓸 수 없는 이유. null이면 쓸 수 있다. 화면은 이 이유를 문구로 옮겨 보여 준다. */
+    val unsupportedReason: ManualCameraUnsupportedReason?
         get() =
             when {
-                !manualSensor -> "이 카메라는 MANUAL_SENSOR를 지원하지 않습니다"
-                !aeOffSupported -> "이 카메라는 노출 수동 제어를 지원하지 않습니다"
-                isoRange == null -> "ISO 범위를 읽을 수 없습니다"
-                exposureRangeNs == null -> "셔터 범위를 읽을 수 없습니다"
+                !manualSensor -> ManualCameraUnsupportedReason.NO_MANUAL_SENSOR
+                !aeOffSupported -> ManualCameraUnsupportedReason.NO_MANUAL_EXPOSURE
+                isoRange == null -> ManualCameraUnsupportedReason.ISO_RANGE_UNKNOWN
+                exposureRangeNs == null -> ManualCameraUnsupportedReason.EXPOSURE_RANGE_UNKNOWN
                 else -> null
             }
 
@@ -95,4 +95,17 @@ data class ManualCameraCapabilities(
 
         const val DEFAULT_ISO = 100
     }
+}
+
+/**
+ * 수동 설정을 쓸 수 없는 이유.
+ *
+ * 문구가 아니라 이유만 든다. 문구는 화면이 문자열 리소스에서 고른다. 기기 능력 모델이 앱 리소스를
+ * 알 이유가 없다.
+ */
+enum class ManualCameraUnsupportedReason {
+    NO_MANUAL_SENSOR,
+    NO_MANUAL_EXPOSURE,
+    ISO_RANGE_UNKNOWN,
+    EXPOSURE_RANGE_UNKNOWN,
 }

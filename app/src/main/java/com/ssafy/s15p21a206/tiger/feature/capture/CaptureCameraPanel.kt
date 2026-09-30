@@ -102,7 +102,7 @@ internal fun CaptureCameraPanel(
         val reason = state.unsupportedReason
         if (capabilities == null || config == null || reason != null) {
             Text(
-                text = reason ?: stringResource(R.string.capture_camera_reading),
+                text = stringResource(reason?.labelRes ?: R.string.capture_camera_reading),
                 style = TigerText.overlaySupporting,
                 color = CaptureOverlaySupporting,
             )

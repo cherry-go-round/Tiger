@@ -102,6 +102,10 @@
     <string name="capture_camera_close">카메라 설정 닫기</string>
     <string name="capture_camera_resolution">녹화 해상도</string>
     <string name="capture_camera_reading">카메라 정보를 읽는 중입니다.</string>
+    <string name="capture_camera_unsupported_manual_sensor">이 카메라는 MANUAL_SENSOR를 지원하지 않습니다</string>
+    <string name="capture_camera_unsupported_manual_exposure">이 카메라는 노출 수동 제어를 지원하지 않습니다</string>
+    <string name="capture_camera_unsupported_iso_range">ISO 범위를 읽을 수 없습니다</string>
+    <string name="capture_camera_unsupported_shutter_range">셔터 범위를 읽을 수 없습니다</string>
     <string name="capture_camera_focus">초점</string>
     <string name="capture_camera_focus_value">%1$.2f D</string>
     <string name="capture_camera_focus_far">FAR</string>
