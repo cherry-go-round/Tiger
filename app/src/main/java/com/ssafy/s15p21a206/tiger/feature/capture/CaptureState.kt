@@ -3,6 +3,7 @@ package com.ssafy.s15p21a206.tiger.feature.capture
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraUnsupportedReason
+import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingFormat
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 
@@ -52,9 +53,9 @@ internal data class CaptureUiState(
     val task: String = "",
     val objectName: String = "",
     /** 이번 Session으로 녹화할 크기. 수집이 시작되면 ARCore가 실제로 고른 값으로 갱신된다. */
-    val resolution: RecordingResolution = DEFAULT_RESOLUTION,
+    val resolution: RecordingResolution = RecordingFormat.DEFAULT_RESOLUTION,
     /** 유휴 프리뷰 Camera2 session이 열려 있는 크기. [resolution]과 어긋나면 session을 다시 연다. */
-    val idlePreviewSize: RecordingResolution = DEFAULT_RESOLUTION,
+    val idlePreviewSize: RecordingResolution = RecordingFormat.DEFAULT_RESOLUTION,
     val previewReady: Boolean = false,
     val previewFailed: Boolean = false,
     /** 비동기 작업이 도는 동안 제어를 잠근다. */
@@ -80,10 +81,6 @@ internal data class CaptureUiState(
     /** 마감 중이거나 마감이 실패한 동안은 판이 덮으므로 작업 공간의 것들을 걷는다. */
     val chromeVisible: Boolean
         get() = phase != CaptureWorkspaceControlState.Finalizing && finalizeFailure == null
-
-    private companion object {
-        val DEFAULT_RESOLUTION = RecordingResolution(1920, 1080)
-    }
 }
 
 /**
