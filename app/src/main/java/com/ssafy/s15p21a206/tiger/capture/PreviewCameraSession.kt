@@ -173,31 +173,36 @@ class PreviewCameraSession(
         token: Int,
     ) {
         val request = buildRequest(device, surface, manual)
-        val callback =
-            object : CameraCaptureSession.StateCallback() {
-                override fun onConfigured(configured: CameraCaptureSession) {
-                    if (!isCurrent(token)) {
-                        runCatching { configured.close() }
-                        return
-                    }
-                    session = configured
-                    // 요청 직전에 device가 닫히는 경합이 남아 있어, 실패를 프로세스 종료로 키우지 않는다.
-                    runCatching { configured.setRepeatingRequest(request, previewCallback, handler) }
-                        .onFailure { fail("Camera preview could not be started") }
-                }
-
-                override fun onConfigureFailed(configured: CameraCaptureSession) {
-                    if (isCurrent(token)) fail("Camera preview configuration failed")
-                }
-            }
         device.createCaptureSession(
             SessionConfiguration(
                 SessionConfiguration.SESSION_REGULAR,
                 listOf(OutputConfiguration(surface)),
                 Executor(handler::post),
-                callback,
+                sessionCallback(request, handler, token),
             ),
         )
+    }
+
+    /** 세션이 준비되면 [request]를 반복 요청으로 건다. 준비에 실패하면 알리고 닫는다. */
+    private fun sessionCallback(
+        request: CaptureRequest,
+        handler: Handler,
+        token: Int,
+    ) = object : CameraCaptureSession.StateCallback() {
+        override fun onConfigured(configured: CameraCaptureSession) {
+            if (!isCurrent(token)) {
+                runCatching { configured.close() }
+                return
+            }
+            session = configured
+            // 요청 직전에 device가 닫히는 경합이 남아 있어, 실패를 프로세스 종료로 키우지 않는다.
+            runCatching { configured.setRepeatingRequest(request, previewCallback, handler) }
+                .onFailure { fail("Camera preview could not be started") }
+        }
+
+        override fun onConfigureFailed(configured: CameraCaptureSession) {
+            if (isCurrent(token)) fail("Camera preview configuration failed")
+        }
     }
 
     /** [token]을 받은 열기가 그 뒤의 release나 prepare로 무효가 되지 않았는지. */
