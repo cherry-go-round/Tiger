@@ -491,7 +491,7 @@ private fun sessionRow(
     recordingStartMonotonicTimestampNs = startNs,
     recordingEndMonotonicTimestampNs = endNs,
     bundlePath = bundlePath,
-    recordingStartEpochMs = System.currentTimeMillis(),
+    recordedAtEpochMs = System.currentTimeMillis(),
     task = task,
     objectName = objectName,
 )

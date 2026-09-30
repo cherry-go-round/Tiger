@@ -32,7 +32,7 @@ data class CaptureSession(
     @SerialName("recording_start_monotonic_timestamp_ns") val recordingStartMonotonicTimestampNs: Long,
     @SerialName("recording_end_monotonic_timestamp_ns") val recordingEndMonotonicTimestampNs: Long? = null,
     @SerialName("bundle_path") val bundlePath: String,
-    @SerialName("recording_start_epoch_ms") val recordingStartEpochMs: Long = 0L,
+    @SerialName("recorded_at_epoch_ms") val recordedAtEpochMs: Long = 0L,
     /**
      * 수집 정보 입력에서 받은 두 이름. 기본값을 두지 않는다.
      *
@@ -49,7 +49,7 @@ data class SessionSummary(
     val sessionId: String,
     val displayNumber: Int,
     val uploadState: UploadState,
-    val recordingStartEpochMs: Long,
+    val recordedAtEpochMs: Long,
     val recordingStartMonotonicTimestampNs: Long,
     val recordingEndMonotonicTimestampNs: Long?,
     val bundlePath: String,

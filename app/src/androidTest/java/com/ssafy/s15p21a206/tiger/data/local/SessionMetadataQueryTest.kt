@@ -84,7 +84,7 @@ class SessionMetadataQueryTest {
             recordingStartNs = 1L,
             recordingEndNs = 2L,
             bundlePath = "/bundles/$sessionId",
-            recordingStartEpochMs = 100L,
+            recordedAtEpochMs = 100L,
             task = "mvi-check",
             objectName = "cup",
         )

@@ -121,7 +121,7 @@ internal fun SessionDetailScreen(
                     text =
                         java.text.DateFormat
                             .getDateTimeInstance()
-                            .format(java.util.Date(summary.recordingStartEpochMs)),
+                            .format(java.util.Date(summary.recordedAtEpochMs)),
                     style = TigerText.itemTitle,
                 )
                 // 묶음마다 이름표를 붙인다. 이 화면에는 성격이 다른 것이 둘 있다. 이 수집이 무엇인지
@@ -288,7 +288,7 @@ private fun SessionInfoSheet(
                 value =
                     java.text.DateFormat
                         .getDateTimeInstance()
-                        .format(java.util.Date(summary.recordingStartEpochMs)),
+                        .format(java.util.Date(summary.recordedAtEpochMs)),
             )
             SessionInfoRow(
                 label = stringResource(R.string.session_info_episodes),

@@ -54,4 +54,19 @@ class TigerDatabaseMigrationTest {
         assertEquals(7, MIGRATION_6_7.endVersion)
         assertEquals(listOf("DROP TABLE IF EXISTS capture_logs"), CAPTURE_LOG_REMOVAL_MIGRATION_SQL)
     }
+
+    /**
+     * 열 이름만 바꾸고 값은 그대로 옮긴다. minSdk 28의 SQLite가 `RENAME COLUMN`을 받지 않아 테이블을
+     * 다시 만든다. 실제 SQLite와 Room 스키마 검증은 `RecordedAtMigrationTest`가 확인한다.
+     */
+    @Test
+    fun `version eight migration renames the wall clock column without touching its values`() {
+        assertEquals(7, MIGRATION_7_8.startVersion)
+        assertEquals(8, MIGRATION_7_8.endVersion)
+        val (create, copy, drop, rename) = RECORDED_AT_MIGRATION_SQL
+        assertTrue(create.contains("recordedAtEpochMs INTEGER NOT NULL"))
+        assertTrue(copy.contains("bundlePath, recordingStartEpochMs, task, objectName"))
+        assertEquals("DROP TABLE sessions", drop)
+        assertEquals("ALTER TABLE sessions_recorded_at RENAME TO sessions", rename)
+    }
 }

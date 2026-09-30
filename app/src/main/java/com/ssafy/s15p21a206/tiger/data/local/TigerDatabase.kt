@@ -21,7 +21,13 @@ data class CaptureSessionEntity(
     val recordingStartNs: Long,
     val recordingEndNs: Long?,
     val bundlePath: String,
-    val recordingStartEpochMs: Long = 0L,
+    /**
+     * 영상이 만들어진 벽시계 시각. 녹화를 멈춰 MP4가 완성되는 순간(마감·중단)에 기록한다.
+     *
+     * 목록·상세의 수집 시각이자 정렬 기준이다. 수집 길이는 [recordingStartNs]와 [recordingEndNs]로 잰다.
+     * 버전 7까지는 `recordingStartEpochMs`라는 이름이었고 [MIGRATION_7_8]이 값을 그대로 옮긴다.
+     */
+    val recordedAtEpochMs: Long = 0L,
     /**
      * 수집을 시작할 때 입력받은 Task와 Object.
      *
@@ -37,7 +43,7 @@ data class SessionSummaryEntity(
     val sessionId: String,
     val displayNumber: Int,
     val uploadState: String,
-    val recordingStartEpochMs: Long,
+    val recordedAtEpochMs: Long,
     val recordingStartNs: Long,
     val recordingEndNs: Long?,
     val bundlePath: String,
@@ -60,7 +66,7 @@ data class EpisodeMarkerEntity(
 @Dao
 interface CaptureSessionDao {
     /**
-     * 목록 정렬은 절대 시각인 [CaptureSessionEntity.recordingStartEpochMs]를 기준으로 한다.
+     * 목록 정렬은 절대 시각인 [CaptureSessionEntity.recordedAtEpochMs]를 기준으로 한다.
      * `recordingStartNs`는 부팅 이후 경과 시간이라 재부팅하면 0으로 돌아가므로,
      * 재부팅 경계를 걸친 Session끼리 순서가 뒤섞인다. 화면에 표시하는 수집 시각과 같은 값이어야 한다.
      *
@@ -71,7 +77,7 @@ interface CaptureSessionDao {
     @Query(
         """
         SELECT sessions.sessionId, sessions.displayNumber, sessions.uploadState,
-               sessions.recordingStartEpochMs, sessions.recordingStartNs, sessions.recordingEndNs,
+               sessions.recordedAtEpochMs, sessions.recordingStartNs, sessions.recordingEndNs,
                sessions.bundlePath,
                COUNT(CASE WHEN episode_markers.outcome = 'COMPLETED' THEN 1 END) AS completedEpisodeCount,
                sessions.task AS taskName, sessions.objectName AS objectName
@@ -79,7 +85,7 @@ interface CaptureSessionDao {
         LEFT JOIN episode_markers ON episode_markers.sessionId = sessions.sessionId
         WHERE sessions.recordingState = 'COMPLETED'
         GROUP BY sessions.sessionId
-        ORDER BY sessions.recordingStartEpochMs DESC
+        ORDER BY sessions.recordedAtEpochMs DESC
         """,
     )
     fun observeCompletedSummaries(): Flow<List<SessionSummaryEntity>>
@@ -109,7 +115,7 @@ interface CaptureSessionDao {
     @Query("SELECT * FROM sessions WHERE recordingState IN ('INITIALIZING', 'READY', 'FINALIZING', 'INTERRUPTED')")
     suspend fun recoverableSessions(): List<CaptureSessionEntity>
 
-    @Query("SELECT * FROM sessions ORDER BY recordingStartEpochMs ASC, recordingStartNs ASC, sessionId ASC")
+    @Query("SELECT * FROM sessions ORDER BY recordedAtEpochMs ASC, recordingStartNs ASC, sessionId ASC")
     suspend fun sessionsInCaptureOrder(): List<CaptureSessionEntity>
 
     @Query("UPDATE sessions SET displayNumber = :displayNumber WHERE sessionId = :sessionId")
@@ -143,7 +149,7 @@ interface EpisodeMarkerDao {
     suspend fun deleteForSession(sessionId: String)
 }
 
-@Database(entities = [CaptureSessionEntity::class, EpisodeMarkerEntity::class], version = 7, exportSchema = false)
+@Database(entities = [CaptureSessionEntity::class, EpisodeMarkerEntity::class], version = 8, exportSchema = false)
 abstract class TigerDatabase : RoomDatabase() {
     abstract fun captureSessionDao(): CaptureSessionDao
 
@@ -271,3 +277,46 @@ val MIGRATION_6_7 =
  * 견주므로 불일치로 잡힌다. 5→6에서 내보내기 컬럼을 걷어낼 때와 같은 이유다.
  */
 val CAPTURE_LOG_REMOVAL_MIGRATION_SQL = listOf("DROP TABLE IF EXISTS capture_logs")
+
+val MIGRATION_7_8 =
+    object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            RECORDED_AT_MIGRATION_SQL.forEach(db::execSQL)
+        }
+    }
+
+/**
+ * `recordingStartEpochMs`를 `recordedAtEpochMs`로 바꾼다. 값은 그대로 옮긴다.
+ *
+ * 이름은 "수집 시작 시각"이었지만 앱은 마감과 중단 때 그 순간의 벽시계 시각을 넣어 왔다. 그 순간은
+ * MP4가 완성되는 때라 영상이 만들어진 시각이다. 저장된 값의 뜻은 이미 그것이므로 바꾸지 않고
+ * 이름만 맞춘다.
+ *
+ * `RENAME COLUMN`을 쓰지 않는다. SQLite가 그것을 받는 것은 3.25부터이고 minSdk 28의 기기에는 더 낮은
+ * 버전이 실린다. 5→6과 같이 테이블을 다시 만들어 옮긴다.
+ */
+val RECORDED_AT_MIGRATION_SQL =
+    listOf(
+        """
+        CREATE TABLE sessions_recorded_at (
+            sessionId TEXT NOT NULL PRIMARY KEY,
+            displayNumber INTEGER NOT NULL,
+            recordingState TEXT NOT NULL,
+            uploadState TEXT NOT NULL,
+            recordingStartNs INTEGER NOT NULL,
+            recordingEndNs INTEGER,
+            bundlePath TEXT NOT NULL,
+            recordedAtEpochMs INTEGER NOT NULL,
+            task TEXT NOT NULL,
+            objectName TEXT NOT NULL
+        )
+        """,
+        """
+        INSERT INTO sessions_recorded_at
+        SELECT sessionId, displayNumber, recordingState, uploadState, recordingStartNs, recordingEndNs,
+               bundlePath, recordingStartEpochMs, task, objectName
+        FROM sessions
+        """,
+        "DROP TABLE sessions",
+        "ALTER TABLE sessions_recorded_at RENAME TO sessions",
+    )

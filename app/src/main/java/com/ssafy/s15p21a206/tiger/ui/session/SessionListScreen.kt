@@ -321,7 +321,7 @@ private fun SessionSummaryItem(
     val captureTime =
         java.text.DateFormat
             .getDateTimeInstance()
-            .format(java.util.Date(summary.recordingStartEpochMs))
+            .format(java.util.Date(summary.recordedAtEpochMs))
     val sessionLabel = stringResource(R.string.session_list_item_content_description, captureTime)
     val deleteAction = SessionDeleteAction.from(summary.uploadState)
     var menuExpanded by remember { mutableStateOf(false) }

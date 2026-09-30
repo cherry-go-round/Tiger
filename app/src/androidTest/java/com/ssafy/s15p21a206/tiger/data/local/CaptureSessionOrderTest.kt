@@ -57,6 +57,6 @@ class CaptureSessionOrderTest {
         recordingStartNs = startNs,
         recordingEndNs = startNs + 1_000_000_000L,
         bundlePath = "/bundles/$sessionId",
-        recordingStartEpochMs = startEpochMs,
+        recordedAtEpochMs = startEpochMs,
     )
 }

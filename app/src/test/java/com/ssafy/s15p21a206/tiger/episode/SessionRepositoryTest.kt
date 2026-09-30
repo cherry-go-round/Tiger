@@ -147,8 +147,8 @@ class SessionRepositoryTest {
             val dao =
                 FakeSessionDao(
                     listOf(
-                        session("newest", newest.path).copy(recordingStartEpochMs = 20),
-                        session("oldest", oldest.path).copy(recordingStartEpochMs = 10),
+                        session("newest", newest.path).copy(recordedAtEpochMs = 20),
+                        session("oldest", oldest.path).copy(recordedAtEpochMs = 10),
                     ),
                 )
             val repository = SessionRepository(dao, FakeMarkerDao(), store)
@@ -300,7 +300,7 @@ class SessionRepositoryTest {
         override suspend fun sessionsInCaptureOrder(): List<CaptureSessionEntity> =
             values.values.sortedWith(
                 compareBy(
-                    CaptureSessionEntity::recordingStartEpochMs,
+                    CaptureSessionEntity::recordedAtEpochMs,
                     CaptureSessionEntity::recordingStartNs,
                     CaptureSessionEntity::sessionId,
                 ),

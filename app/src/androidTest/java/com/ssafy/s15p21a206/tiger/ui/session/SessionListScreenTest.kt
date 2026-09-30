@@ -55,7 +55,7 @@ class SessionListScreenTest {
     fun sessionSummaryShowsDetailsAndOpensDetail() {
         val summary = summary()
         var selectedSessionId: String? = null
-        val captureTime = DateFormat.getDateTimeInstance().format(Date(summary.recordingStartEpochMs))
+        val captureTime = DateFormat.getDateTimeInstance().format(Date(summary.recordedAtEpochMs))
         val sessionLabel = string(R.string.session_list_item_content_description, captureTime)
 
         composeRule.setContent {
@@ -86,7 +86,7 @@ class SessionListScreenTest {
     @Test
     fun aSessionWithoutAnObjectShowsNoObjectLine() {
         val summary = summary().copy(objectName = "")
-        val captureTime = DateFormat.getDateTimeInstance().format(Date(summary.recordingStartEpochMs))
+        val captureTime = DateFormat.getDateTimeInstance().format(Date(summary.recordedAtEpochMs))
 
         composeRule.setContent {
             TaskSessionListScreen(
@@ -110,7 +110,7 @@ class SessionListScreenTest {
     fun longPressDeletesASessionOnlyAfterConfirmation() {
         val summary = summary()
         var deletedSessionId: String? = null
-        val captureTime = DateFormat.getDateTimeInstance().format(Date(summary.recordingStartEpochMs))
+        val captureTime = DateFormat.getDateTimeInstance().format(Date(summary.recordedAtEpochMs))
         val sessionLabel = string(R.string.session_list_item_content_description, captureTime)
 
         composeRule.setContent {
@@ -141,7 +141,7 @@ class SessionListScreenTest {
     @Test
     fun longPressOnAnUploadingSessionOffersNoEnabledDeleteAction() {
         val summary = summary().copy(uploadState = UploadState.UPLOADING)
-        val captureTime = DateFormat.getDateTimeInstance().format(Date(summary.recordingStartEpochMs))
+        val captureTime = DateFormat.getDateTimeInstance().format(Date(summary.recordedAtEpochMs))
         val sessionLabel = string(R.string.session_list_item_content_description, captureTime)
 
         composeRule.setContent {
@@ -221,7 +221,7 @@ class SessionListScreenTest {
             sessionId = "session-12345678",
             displayNumber = 1,
             uploadState = UploadState.FAILED,
-            recordingStartEpochMs = 0L,
+            recordedAtEpochMs = 0L,
             recordingStartMonotonicTimestampNs = 1L,
             recordingEndMonotonicTimestampNs = 2L,
             bundlePath = "/managed/session-12345678",

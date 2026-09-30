@@ -99,7 +99,7 @@ class SessionDetailObjectTest {
             sessionId = "ce9c7947-0000-0000-0000-000000000000",
             displayNumber = 1,
             uploadState = UploadState.LOCAL_ONLY,
-            recordingStartEpochMs = 0L,
+            recordedAtEpochMs = 0L,
             recordingStartMonotonicTimestampNs = 1L,
             recordingEndMonotonicTimestampNs = 1_000_000_001L,
             bundlePath = "/bundles/ce9c7947",

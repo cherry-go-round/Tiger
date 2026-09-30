@@ -136,7 +136,7 @@ private fun CaptureSessionEntity.toCaptureSession() =
         recordingStartNs,
         recordingEndNs,
         bundlePath,
-        recordingStartEpochMs,
+        recordedAtEpochMs,
         task,
         objectName,
     )
@@ -146,7 +146,7 @@ private fun SessionSummaryEntity.toSessionSummary() =
         sessionId,
         displayNumber,
         UploadState.valueOf(uploadState),
-        recordingStartEpochMs,
+        recordedAtEpochMs,
         recordingStartNs,
         recordingEndNs,
         bundlePath,
@@ -164,7 +164,7 @@ private fun CaptureSession.toEntity() =
         recordingStartMonotonicTimestampNs,
         recordingEndMonotonicTimestampNs,
         bundlePath,
-        recordingStartEpochMs = recordingStartEpochMs,
+        recordedAtEpochMs = recordedAtEpochMs,
         task = task,
         objectName = objectName,
     )
