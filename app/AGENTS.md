@@ -123,7 +123,17 @@ Room 데이터베이스와 `SessionRepository`, `SessionUploadService`는 `Tiger
 
 ## 수집 파이프라인의 구성
 
-`capture/`도 책임별로 갈라져 있다. `AndroidCaptureRuntime`이 한 번의 수집을 시작하고 마감하되, 실제 일은 아래에 맡긴다.
+`capture/`는 책임별 하위 패키지로 갈라져 있다. 루트에는 한 번의 수집을 조율하는 것만 두고, 실제 일은 하위 패키지가 맡는다.
+
+| 패키지 | 두는 것 |
+|---|---|
+| `capture` | `AndroidCaptureRuntime`(여닫는 순서), `CaptureSessionCoordinator`(Tracking 게이트·Episode 경계), 공용 로그 태그 |
+| `capture.camera` | Camera2를 여닫는 것. 녹화용 `ArSharedCameraSession`, 녹화 전 프리뷰용 `PreviewCameraSession`, 녹화 해상도 선택·기억 |
+| `capture.manual` | MASK 수동 촬영 설정. 설정 값, 기기 능력, Camera2 key 변환, 저장 |
+| `capture.arcore` | ARCore 프레임 처리. `ArPoseCollector`와 그것만 쓰는 GL 그리기 |
+| `capture.writer` | 번들 CSV 기록기. IMU, Episode 경계, 프레임 시각 |
+
+`AndroidCaptureRuntime`이 한 번의 수집을 시작하고 마감하되, 실제 일은 아래에 맡긴다.
 
 | | 맡는 것 |
 |---|---|
@@ -132,6 +142,7 @@ Room 데이터베이스와 `SessionRepository`, `SessionUploadService`는 `Tiger
 | `ArPoseCollector` | ARCore 프레임 스레드. pose 기록·프리뷰 그리기·tracking 노출·Intrinsic 확보 |
 | `SensorLogWriter` | IMU 표본 CSV |
 | `EpisodeLogWriter` | 에피소드 경계 CSV |
+| `FrameTimestampWriter` | 녹화 프레임 시각 CSV |
 
 **순서가 이 배치의 전부다.** ARCore Session은 capture session이 완전히 닫힌 뒤에 닫아야 하고, pose 스레드는 Session을 닫기 전에 멈춰야 한다. 어긋나면 네이티브에서 죽는다. 그래서 닫기가 `closeSession`과 `closeThread` 둘로 나뉘어 있고, 사이에 ARCore Session이 들어간다. 한 함수로 합치지 않는다.
 
