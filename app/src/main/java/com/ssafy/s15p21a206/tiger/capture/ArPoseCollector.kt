@@ -122,22 +122,36 @@ class ArPoseCollector(
         if (timestampNs == 0L || timestampNs == lastPoseTimestampNs) return
         lastPoseTimestampNs = timestampNs
         val camera = frame.camera
-        val isTracking = camera.trackingState == TrackingState.TRACKING
-        // 유실 구간에서는 첫 유실 pose 시각을 계속 실어 보낸다. 화면 ticker는 100 ms
-        // 주기로 읽으므로, 매 프레임 최신 시각을 덮어쓰면 그사이 진행한 pose 시각이
-        // 기록에 들어가 `end_timestamp_ns`가 첫 유실 + 0.5초보다 늦어진다.
-        lossStartedAtNs = if (isTracking) null else lossStartedAtNs ?: timestampNs
-        trackingState.value = TrackingSample(isTracking, lossStartedAtNs ?: timestampNs)
+        publishTracking(camera.trackingState == TrackingState.TRACKING, timestampNs)
         if (cameraMetadata == null) {
             // 회전하지 않는다. 녹화본이 회전 전 가로 프레임 그대로이고,
             // `arcore_poses.csv`의 Camera 좌표계도 같은 기준이다.
             cameraMetadata = readCameraMetadata(session, camera)
         }
-        val translation = camera.pose.translation
-        val rotation = camera.pose.rotationQuaternion
-        poses?.appendText(
-            "$timestampNs,${translation[0]},${translation[1]},${translation[2]},${rotation[0]},${rotation[1]},${rotation[2]},${rotation[3]},${camera.trackingState.name},${camera.trackingFailureReason}\n",
-        )
+        val row =
+            poseRow(
+                timestampNs,
+                camera.pose.translation,
+                camera.pose.rotationQuaternion,
+                camera.trackingState.name,
+                camera.trackingFailureReason.toString(),
+            )
+        poses?.appendText("$row\n")
+    }
+
+    /**
+     * tracking 관측을 발행한다.
+     *
+     * 유실 구간에서는 첫 유실 pose 시각을 계속 실어 보낸다. 화면 ticker는 100 ms 주기로 읽으므로,
+     * 매 프레임 최신 시각을 덮어쓰면 그사이 진행한 pose 시각이 기록에 들어가 `end_timestamp_ns`가
+     * 첫 유실 + 0.5초보다 늦어진다.
+     */
+    private fun publishTracking(
+        isTracking: Boolean,
+        timestampNs: Long,
+    ) {
+        lossStartedAtNs = if (isTracking) null else lossStartedAtNs ?: timestampNs
+        trackingState.value = TrackingSample(isTracking, lossStartedAtNs ?: timestampNs)
     }
 
     /**
@@ -193,6 +207,32 @@ class ArPoseCollector(
         const val JOIN_TIMEOUT_MS = 500L
     }
 }
+
+/**
+ * `arcore_poses.csv`의 한 행.
+ *
+ * [SessionBundle.ARCORE_POSES_HEADER]의 열 순서 그대로다. 카메라 시각, 위치 3개, 회전 사원수 4개(x, y, z, w),
+ * tracking 상태와 유실 사유.
+ */
+internal fun poseRow(
+    timestampNs: Long,
+    translation: FloatArray,
+    rotation: FloatArray,
+    trackingState: String,
+    failureReason: String,
+): String =
+    listOf(
+        timestampNs,
+        translation[0],
+        translation[1],
+        translation[2],
+        rotation[0],
+        rotation[1],
+        rotation[2],
+        rotation[3],
+        trackingState,
+        failureReason,
+    ).joinToString(",")
 
 /**
  * ARCore가 카메라 프레임을 올릴 GL 텍스처. 프리뷰 Surface가 있으면 그 프레임을 그려 보여 준다.
