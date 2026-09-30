@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.capture
+package com.ssafy.s15p21a206.tiger.capture.arcore
 
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
