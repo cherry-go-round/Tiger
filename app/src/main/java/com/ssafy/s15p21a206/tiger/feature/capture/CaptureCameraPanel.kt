@@ -46,9 +46,9 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlaySupporti
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingFormat
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.capture.ShutterPreset
-import com.ssafy.s15p21a206.tiger.core.session.RecordingInputValidator
 
 /**
  * 수집 전에 촬영 조건을 맞추는 패널.
@@ -112,7 +112,7 @@ internal fun CaptureCameraPanel(
         IsoRow(capabilities, config, enabled, onChange)
         ShutterRow(capabilities, config, enabled, onChange)
         Text(
-            text = stringResource(R.string.capture_camera_fps_fixed, RecordingInputValidator.TARGET_FPS),
+            text = stringResource(R.string.capture_camera_fps_fixed, RecordingFormat.TARGET_FPS),
             style = TigerText.overlaySupporting,
             color = CaptureOverlaySupporting,
         )
@@ -218,7 +218,7 @@ private fun ShutterRow(
  * 이번 Session으로 녹화할 해상도.
  *
  * 후보는 실기기에서 확인한 ARCore Camera config의 `textureSize`이며, 순서는
- * [RecordingInputValidator.supportedResolutions]를 따른다.
+ * [RecordingFormat.supportedResolutions]를 따른다.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Suppress("FunctionName")
@@ -234,7 +234,7 @@ private fun ResolutionRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        RecordingInputValidator.supportedResolutions.forEach { option ->
+        RecordingFormat.supportedResolutions.forEach { option ->
             PanelChoice(
                 label = stringResource(R.string.capture_resolution_option, option.width, option.height),
                 selected = option == resolution,

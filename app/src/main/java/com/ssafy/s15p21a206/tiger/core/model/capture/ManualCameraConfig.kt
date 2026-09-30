@@ -30,7 +30,7 @@ data class ManualCameraConfig(
     val awbFixed: Boolean get() = whiteBalance != null
 
     companion object {
-        /** `RecordingInputValidator.TARGET_FPS`(30 fps)의 프레임 간격. dataset contract가 고정한 값이다. */
+        /** 30 fps인 [RecordingFormat.TARGET_FPS]의 프레임 간격. dataset contract가 고정한 값이다. */
         const val TARGET_FRAME_DURATION_NS = 33_333_333L
     }
 }

@@ -2,8 +2,8 @@ package com.ssafy.s15p21a206.tiger.core.capture.camera
 
 import android.content.Context
 import androidx.core.content.edit
+import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingFormat
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
-import com.ssafy.s15p21a206.tiger.core.session.RecordingInputValidator
 
 /**
  * 직전에 고른 녹화 해상도를 기억한다. 다음 수집의 기본값으로 쓴다.
@@ -20,7 +20,7 @@ class RecordingResolutionStore(
         val width = preferences.getInt(KEY_WIDTH, 0)
         val height = preferences.getInt(KEY_HEIGHT, 0)
         val stored = RecordingResolution(width, height)
-        return if (RecordingInputValidator.supportedResolutions.contains(stored)) stored else RecordingInputValidator.DEFAULT_RESOLUTION
+        return if (RecordingFormat.supportedResolutions.contains(stored)) stored else RecordingFormat.DEFAULT_RESOLUTION
     }
 
     fun save(resolution: RecordingResolution) {

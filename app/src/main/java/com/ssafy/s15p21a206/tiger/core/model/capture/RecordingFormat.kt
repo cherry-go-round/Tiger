@@ -1,8 +1,13 @@
-package com.ssafy.s15p21a206.tiger.core.session
+package com.ssafy.s15p21a206.tiger.core.model.capture
 
-import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
+import kotlinx.serialization.Serializable
 
-object RecordingInputValidator {
+@Serializable data class RecordingResolution(
+    val width: Int,
+    val height: Int,
+)
+
+object RecordingFormat {
     /** 카메라 설정 시트에 보여 주는 순서와 같다. 첫 항목이 기본값이다. */
     val supportedResolutions = listOf(RecordingResolution(1920, 1080), RecordingResolution(1280, 720))
     val DEFAULT_RESOLUTION = supportedResolutions.first()

@@ -17,13 +17,13 @@ import com.ssafy.s15p21a206.tiger.core.capture.writer.FrameTimestampWriter
 import com.ssafy.s15p21a206.tiger.core.capture.writer.SensorLogWriter
 import com.ssafy.s15p21a206.tiger.core.model.capture.CaptureSettingsMetadata
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
+import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingFormat
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.capture.RequestedCaptureSettings
 import com.ssafy.s15p21a206.tiger.core.model.capture.TrackingSample
 import com.ssafy.s15p21a206.tiger.core.model.session.EpisodeMarker
 import com.ssafy.s15p21a206.tiger.core.model.session.FinalizeResult
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
-import com.ssafy.s15p21a206.tiger.core.session.RecordingInputValidator
 import com.ssafy.s15p21a206.tiger.core.session.SessionBundleStore
 import com.ssafy.s15p21a206.tiger.core.session.SessionFinalizer
 import kotlinx.coroutines.flow.StateFlow
@@ -63,7 +63,7 @@ class AndroidCaptureRuntime(
 
     suspend fun start(
         displayNumber: Int,
-        resolution: RecordingResolution = RecordingInputValidator.DEFAULT_RESOLUTION,
+        resolution: RecordingResolution = RecordingFormat.DEFAULT_RESOLUTION,
         previewSurfaces: PreviewSurfaceProvider = PreviewSurfaceProvider { _, _ -> null },
         /** Session 내내 고정할 촬영 조건. null이면 기기 자동에 맡긴다. */
         manual: ManualCameraConfig? = null,
@@ -158,7 +158,7 @@ class AndroidCaptureRuntime(
             setVideoSource(MediaRecorder.VideoSource.SURFACE)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-            setVideoFrameRate(RecordingInputValidator.TARGET_FPS)
+            setVideoFrameRate(RecordingFormat.TARGET_FPS)
             setVideoSize(session.cameraConfig.textureSize.width, session.cameraConfig.textureSize.height)
             setOutputFile(bundle.mainVideo.absolutePath)
             // 회전 정보를 남기지 않는다. 폰을 가로로 눕혀 촬영하므로 센서가 내보내는
@@ -245,7 +245,7 @@ class AndroidCaptureRuntime(
                     iso = requested.iso,
                     exposureTimeNs = requested.exposureTimeNs,
                     frameDurationNs = requested.frameDurationNs,
-                    fpsTarget = RecordingInputValidator.TARGET_FPS,
+                    fpsTarget = RecordingFormat.TARGET_FPS,
                 ),
             actual = cameraSession.appliedSettings,
             awbFixed = requested.awbFixed,
