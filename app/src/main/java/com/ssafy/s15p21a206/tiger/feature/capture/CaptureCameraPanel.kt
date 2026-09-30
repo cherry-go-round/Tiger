@@ -193,7 +193,7 @@ private fun ShutterRow(
 ) {
     PanelLabel(
         label = stringResource(R.string.capture_camera_shutter),
-        value = stringResource(R.string.capture_camera_shutter_value, config.exposureTimeNs / MICROSECONDS_PER_NS),
+        value = stringResource(R.string.capture_camera_shutter_value, config.exposureTimeNs / NANOS_PER_MICROSECOND),
     )
     // preset 다섯이 한 줄에 들어가지 않으면 다음 줄로 내린다. 글자를 줄여 넣으면 장갑 낀 손으로
     // 누르기 어려워진다.
@@ -404,4 +404,4 @@ internal fun CaptureCameraSheet(
 /** 초점 슬라이더가 0 폭이 되지 않게 하는 최소 범위. 고정 초점 기기에서도 화면이 깨지지 않는다. */
 private const val MIN_SLIDER_SPAN = 1f
 
-private const val MICROSECONDS_PER_NS = 1_000L
+private const val NANOS_PER_MICROSECOND = 1_000L
