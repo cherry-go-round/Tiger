@@ -9,8 +9,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.episode.SessionSummary
-import com.ssafy.s15p21a206.tiger.episode.UploadState
+import com.ssafy.s15p21a206.tiger.session.SessionSummary
+import com.ssafy.s15p21a206.tiger.session.UploadState
 import com.ssafy.s15p21a206.tiger.string
 import com.ssafy.s15p21a206.tiger.ui.video.rememberSharedVideoPlayer
 import org.junit.Rule

@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.episode
+package com.ssafy.s15p21a206.tiger.session
 
 object RecordingInputValidator {
     private val controlCharacter = Regex("[\\u0000-\\u001F\\u007F]")

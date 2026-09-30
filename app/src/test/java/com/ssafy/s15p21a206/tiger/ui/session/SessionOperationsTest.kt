@@ -5,10 +5,10 @@ import com.ssafy.s15p21a206.tiger.database.CaptureSessionEntity
 import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerDao
 import com.ssafy.s15p21a206.tiger.database.EpisodeMarkerEntity
 import com.ssafy.s15p21a206.tiger.database.SessionSummaryEntity
-import com.ssafy.s15p21a206.tiger.episode.RecordingState
-import com.ssafy.s15p21a206.tiger.episode.SessionBundleStore
-import com.ssafy.s15p21a206.tiger.episode.SessionRepository
-import com.ssafy.s15p21a206.tiger.episode.UploadState
+import com.ssafy.s15p21a206.tiger.session.RecordingState
+import com.ssafy.s15p21a206.tiger.session.SessionBundleStore
+import com.ssafy.s15p21a206.tiger.session.SessionRepository
+import com.ssafy.s15p21a206.tiger.session.UploadState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

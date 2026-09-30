@@ -1,7 +1,7 @@
 package com.ssafy.s15p21a206.tiger.capture.writer
 
-import com.ssafy.s15p21a206.tiger.episode.EpisodeMarker
-import com.ssafy.s15p21a206.tiger.episode.SessionBundle
+import com.ssafy.s15p21a206.tiger.session.EpisodeMarker
+import com.ssafy.s15p21a206.tiger.session.SessionBundle
 import java.io.File
 
 /**

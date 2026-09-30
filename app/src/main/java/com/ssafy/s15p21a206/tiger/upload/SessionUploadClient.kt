@@ -1,8 +1,8 @@
 package com.ssafy.s15p21a206.tiger.upload
 
-import com.ssafy.s15p21a206.tiger.episode.RemoteReceipt
-import com.ssafy.s15p21a206.tiger.episode.SessionBundle
-import com.ssafy.s15p21a206.tiger.episode.SessionBundleValidator
+import com.ssafy.s15p21a206.tiger.session.RemoteReceipt
+import com.ssafy.s15p21a206.tiger.session.SessionBundle
+import com.ssafy.s15p21a206.tiger.session.SessionBundleValidator
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers

@@ -26,7 +26,7 @@ import com.ssafy.s15p21a206.tiger.capture.manual.applyManualCamera
 import com.ssafy.s15p21a206.tiger.capture.manual.carriesManualCamera
 import com.ssafy.s15p21a206.tiger.capture.manual.logCameraSettingMismatch
 import com.ssafy.s15p21a206.tiger.capture.manual.readAppliedCameraSettings
-import com.ssafy.s15p21a206.tiger.episode.ActualCaptureSettings
+import com.ssafy.s15p21a206.tiger.session.ActualCaptureSettings
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.CountDownLatch

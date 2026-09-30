@@ -41,8 +41,8 @@ import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraCapabilities
 import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.capture.manual.ShutterPreset
-import com.ssafy.s15p21a206.tiger.episode.RecordingInputValidator
-import com.ssafy.s15p21a206.tiger.episode.RecordingResolution
+import com.ssafy.s15p21a206.tiger.session.RecordingInputValidator
+import com.ssafy.s15p21a206.tiger.session.RecordingResolution
 import com.ssafy.s15p21a206.tiger.ui.theme.CaptureChoiceSelected
 import com.ssafy.s15p21a206.tiger.ui.theme.CaptureChoiceSelectedInk
 import com.ssafy.s15p21a206.tiger.ui.theme.CaptureControlDisabled

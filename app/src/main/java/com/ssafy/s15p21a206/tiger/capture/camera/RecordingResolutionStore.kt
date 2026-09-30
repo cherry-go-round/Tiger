@@ -2,8 +2,8 @@ package com.ssafy.s15p21a206.tiger.capture.camera
 
 import android.content.Context
 import androidx.core.content.edit
-import com.ssafy.s15p21a206.tiger.episode.RecordingInputValidator
-import com.ssafy.s15p21a206.tiger.episode.RecordingResolution
+import com.ssafy.s15p21a206.tiger.session.RecordingInputValidator
+import com.ssafy.s15p21a206.tiger.session.RecordingResolution
 
 /**
  * 직전에 고른 녹화 해상도를 기억한다. 다음 수집의 기본값으로 쓴다.

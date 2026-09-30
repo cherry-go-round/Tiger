@@ -10,8 +10,8 @@ import com.ssafy.s15p21a206.tiger.database.MIGRATION_5_6
 import com.ssafy.s15p21a206.tiger.database.MIGRATION_6_7
 import com.ssafy.s15p21a206.tiger.database.MIGRATION_7_8
 import com.ssafy.s15p21a206.tiger.database.TigerDatabase
-import com.ssafy.s15p21a206.tiger.episode.SessionBundleStore
-import com.ssafy.s15p21a206.tiger.episode.SessionRepository
+import com.ssafy.s15p21a206.tiger.session.SessionBundleStore
+import com.ssafy.s15p21a206.tiger.session.SessionRepository
 import com.ssafy.s15p21a206.tiger.upload.SessionUploadRequestFactory
 import com.ssafy.s15p21a206.tiger.upload.SessionUploadService
 import com.ssafy.s15p21a206.tiger.upload.SessionUploader

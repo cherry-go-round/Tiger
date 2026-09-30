@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.episode
+package com.ssafy.s15p21a206.tiger.session
 
 import android.content.Context
 import java.io.File

@@ -1,6 +1,6 @@
 package com.ssafy.s15p21a206.tiger.capture.camera
 
-import com.ssafy.s15p21a206.tiger.episode.RecordingResolution
+import com.ssafy.s15p21a206.tiger.session.RecordingResolution
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

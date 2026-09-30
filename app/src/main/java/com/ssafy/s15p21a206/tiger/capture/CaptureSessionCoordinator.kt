@@ -1,11 +1,11 @@
 package com.ssafy.s15p21a206.tiger.capture
 
-import com.ssafy.s15p21a206.tiger.episode.CaptureSession
-import com.ssafy.s15p21a206.tiger.episode.EpisodeMarker
-import com.ssafy.s15p21a206.tiger.episode.EpisodeState
-import com.ssafy.s15p21a206.tiger.episode.RecordingState
-import com.ssafy.s15p21a206.tiger.episode.TrackingState
-import com.ssafy.s15p21a206.tiger.episode.UploadState
+import com.ssafy.s15p21a206.tiger.session.CaptureSession
+import com.ssafy.s15p21a206.tiger.session.EpisodeMarker
+import com.ssafy.s15p21a206.tiger.session.EpisodeState
+import com.ssafy.s15p21a206.tiger.session.RecordingState
+import com.ssafy.s15p21a206.tiger.session.TrackingState
+import com.ssafy.s15p21a206.tiger.session.UploadState
 import java.util.UUID
 
 fun interface MonotonicClock {

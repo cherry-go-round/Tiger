@@ -31,9 +31,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.episode.SessionBundle
-import com.ssafy.s15p21a206.tiger.episode.SessionSummary
-import com.ssafy.s15p21a206.tiger.episode.UploadState
+import com.ssafy.s15p21a206.tiger.session.SessionBundle
+import com.ssafy.s15p21a206.tiger.session.SessionSummary
+import com.ssafy.s15p21a206.tiger.session.UploadState
 import com.ssafy.s15p21a206.tiger.ui.common.LabelledGroup
 import com.ssafy.s15p21a206.tiger.ui.common.LabelledValue
 import com.ssafy.s15p21a206.tiger.ui.common.NavigationHeader

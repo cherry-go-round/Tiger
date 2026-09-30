@@ -8,7 +8,7 @@ import android.view.TextureView
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import com.ssafy.s15p21a206.tiger.episode.RecordingResolution
+import com.ssafy.s15p21a206.tiger.session.RecordingResolution
 
 /**
  * 카메라 프레임이 올라오는 판.

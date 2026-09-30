@@ -1,6 +1,6 @@
 package com.ssafy.s15p21a206.tiger.upload
 
-import com.ssafy.s15p21a206.tiger.episode.SessionBundle
+import com.ssafy.s15p21a206.tiger.session.SessionBundle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

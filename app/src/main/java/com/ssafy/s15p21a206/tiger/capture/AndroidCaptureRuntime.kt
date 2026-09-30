@@ -17,15 +17,15 @@ import com.ssafy.s15p21a206.tiger.capture.manual.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.capture.writer.EpisodeLogWriter
 import com.ssafy.s15p21a206.tiger.capture.writer.FrameTimestampWriter
 import com.ssafy.s15p21a206.tiger.capture.writer.SensorLogWriter
-import com.ssafy.s15p21a206.tiger.episode.CaptureSettingsMetadata
-import com.ssafy.s15p21a206.tiger.episode.EpisodeMarker
-import com.ssafy.s15p21a206.tiger.episode.FinalizeResult
-import com.ssafy.s15p21a206.tiger.episode.RecordingInputValidator
-import com.ssafy.s15p21a206.tiger.episode.RecordingResolution
-import com.ssafy.s15p21a206.tiger.episode.RequestedCaptureSettings
-import com.ssafy.s15p21a206.tiger.episode.SessionBundle
-import com.ssafy.s15p21a206.tiger.episode.SessionBundleStore
-import com.ssafy.s15p21a206.tiger.episode.SessionFinalizer
+import com.ssafy.s15p21a206.tiger.session.CaptureSettingsMetadata
+import com.ssafy.s15p21a206.tiger.session.EpisodeMarker
+import com.ssafy.s15p21a206.tiger.session.FinalizeResult
+import com.ssafy.s15p21a206.tiger.session.RecordingInputValidator
+import com.ssafy.s15p21a206.tiger.session.RecordingResolution
+import com.ssafy.s15p21a206.tiger.session.RequestedCaptureSettings
+import com.ssafy.s15p21a206.tiger.session.SessionBundle
+import com.ssafy.s15p21a206.tiger.session.SessionBundleStore
+import com.ssafy.s15p21a206.tiger.session.SessionFinalizer
 import kotlinx.coroutines.flow.StateFlow
 import java.util.EnumSet
 

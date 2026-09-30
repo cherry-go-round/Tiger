@@ -1,7 +1,7 @@
 package com.ssafy.s15p21a206.tiger.ui
 
-import com.ssafy.s15p21a206.tiger.episode.SessionSummary
-import com.ssafy.s15p21a206.tiger.episode.UploadState
+import com.ssafy.s15p21a206.tiger.session.SessionSummary
+import com.ssafy.s15p21a206.tiger.session.UploadState
 import com.ssafy.s15p21a206.tiger.ui.session.SessionDeleteAction
 import com.ssafy.s15p21a206.tiger.ui.session.SessionDetailPresentation
 import org.junit.Assert.assertEquals
