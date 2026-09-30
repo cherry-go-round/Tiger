@@ -39,9 +39,9 @@ adb shell am instrument -w com.ssafy.s15p21a206.tigermask.test/androidx.test.run
 틀리면 `Unable to find instrumentation info`로 바로 실패한다.
 
 ```powershell
-adb shell am instrument -w -e class "com.ssafy.s15p21a206.tiger.ui.session.SessionListScreenTest" `
+adb shell am instrument -w -e class "com.ssafy.s15p21a206.tiger.feature.session.SessionListScreenTest" `
   com.ssafy.s15p21a206.tigermask.test/androidx.test.runner.AndroidJUnitRunner
-adb shell am instrument -w -e class "com.ssafy.s15p21a206.tiger.ui.session.SessionListScreenTest#anEmptyTaskSessionListExplainsHowToAddOne" `
+adb shell am instrument -w -e class "com.ssafy.s15p21a206.tiger.feature.session.SessionListScreenTest#anEmptyTaskSessionListExplainsHowToAddOne" `
   com.ssafy.s15p21a206.tigermask.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
