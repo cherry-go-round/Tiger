@@ -38,14 +38,8 @@ class SensorLogWriter(
         register(Sensor.TYPE_ROTATION_VECTOR)
     }
 
-    /** 표본 수신을 끊는다. */
-    fun stopListening() {
-        sensorManager.unregisterListener(this)
-    }
-
-    /** 기록 대상을 비운다. 이 뒤에 닿은 표본은 버려진다. */
-    fun close() {
-        files.clear()
+    private fun register(type: Int) {
+        sensorManager.getDefaultSensor(type)?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
     }
 
     override fun onSensorChanged(event: SensorEvent) {
@@ -59,8 +53,14 @@ class SensorLogWriter(
         accuracy: Int,
     ) = Unit
 
-    private fun register(type: Int) {
-        sensorManager.getDefaultSensor(type)?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
+    /** 표본 수신을 끊는다. */
+    fun stopListening() {
+        sensorManager.unregisterListener(this)
+    }
+
+    /** 기록 대상을 비운다. 이 뒤에 닿은 표본은 버려진다. */
+    fun close() {
+        files.clear()
     }
 }
 
