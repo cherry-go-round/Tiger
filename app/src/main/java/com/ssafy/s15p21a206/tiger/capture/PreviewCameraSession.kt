@@ -15,7 +15,6 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.view.Surface
-import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import java.util.concurrent.Executor
 
@@ -90,6 +89,12 @@ class PreviewCameraSession(
             }
         }
 
+    /**
+     * [surface]에 프리뷰를 연다. 이미 열었거나 여는 중이면 그대로 둔다.
+     *
+     * 열기는 카메라, 세션, 반복 요청의 세 단계를 비동기로 거친다. 어느 단계에서 실패하든 [onFailure]로
+     * 알리고 닫는다.
+     */
     fun prepare(surface: Surface) {
         // 열기는 비동기라 onOpened 전에는 device가 비어 있다. 스레드로 판단해야 여는 중에 다시 열지 않는다.
         if (thread != null) return
@@ -97,106 +102,110 @@ class PreviewCameraSession(
             onFailure("Camera permission is required for preview")
             return
         }
-        // 카메라 서비스가 응답하지 않으면 목록 조회도 던진다. 후면 카메라를 찾지 못한 것으로 다룬다.
         val cameraId =
-            runCatching {
-                cameraManager.cameraIdList.firstOrNull { id ->
-                    cameraManager.getCameraCharacteristics(id).get(CameraCharacteristics.LENS_FACING) ==
-                        CameraCharacteristics.LENS_FACING_BACK
-                }
-            }.getOrNull() ?: run {
+            findRearCameraId() ?: run {
                 onFailure("Rear camera is unavailable")
                 return
             }
-        val previewThread = HandlerThread("TigerPreview")
-        thread = previewThread
-        previewThread.start()
-        val handler = Handler(previewThread.looper)
-        this.handler = handler
+        val handler = startThread()
         activeSurface = surface
         val token = ++generation
         // openCamera는 콜백을 기다리지 않고 곧바로 던지기도 한다. 그 실패도 콜백과 같은 길로 알린다.
-        runCatching { openCamera(cameraId, surface, handler, token) }
-            .onFailure {
-                onFailure("Camera preview could not be opened")
-                release()
-            }
+        runCatching { cameraManager.openCamera(cameraId, deviceCallback(surface, handler, token), handler) }
+            .onFailure { fail("Camera preview could not be opened") }
     }
 
-    @RequiresPermission(Manifest.permission.CAMERA)
-    private fun openCamera(
-        cameraId: String,
+    /** 카메라 서비스가 응답하지 않으면 목록 조회도 던진다. 그때도 후면 카메라를 찾지 못한 것으로 다룬다. */
+    private fun findRearCameraId(): String? =
+        runCatching {
+            cameraManager.cameraIdList.firstOrNull { id ->
+                cameraManager.getCameraCharacteristics(id).get(CameraCharacteristics.LENS_FACING) ==
+                    CameraCharacteristics.LENS_FACING_BACK
+            }
+        }.getOrNull()
+
+    /** 카메라 콜백을 나를 스레드를 띄우고 그 핸들러를 돌려준다. */
+    private fun startThread(): Handler {
+        val started = HandlerThread("TigerPreview").also { it.start() }
+        thread = started
+        return Handler(started.looper).also { handler = it }
+    }
+
+    /** 카메라가 열리면 세션을 연다. 끊기거나 오류가 나면 닫고 알린다. */
+    private fun deviceCallback(
+        surface: Surface,
+        handler: Handler,
+        token: Int,
+    ) = object : CameraDevice.StateCallback() {
+        override fun onOpened(device: CameraDevice) {
+            if (!isCurrent(token)) {
+                device.close()
+                return
+            }
+            cameraDevice = device
+            runCatching { openSession(device, surface, handler, token) }
+                .onFailure { fail("Camera preview could not be prepared") }
+        }
+
+        override fun onDisconnected(device: CameraDevice) = closeAndFail(device, token, "Camera preview was disconnected")
+
+        override fun onError(
+            device: CameraDevice,
+            error: Int,
+        ) = closeAndFail(device, token, "Camera preview error: $error")
+    }
+
+    /** 끊긴 device는 언제나 닫고, 지금 여는 중인 것일 때만 실패를 알린다. */
+    private fun closeAndFail(
+        device: CameraDevice,
+        token: Int,
+        message: String,
+    ) {
+        device.close()
+        if (isCurrent(token)) fail(message)
+    }
+
+    /** 프리뷰에 걸어 둔 조건 그대로 세션을 연다. 세션을 다시 여는 경로에서도 값이 유지된다. */
+    private fun openSession(
+        device: CameraDevice,
         surface: Surface,
         handler: Handler,
         token: Int,
     ) {
-        cameraManager.openCamera(
-            cameraId,
-            object : CameraDevice.StateCallback() {
-                override fun onOpened(device: CameraDevice) {
-                    if (token != generation) {
-                        device.close()
+        val request = buildRequest(device, surface, manual)
+        val callback =
+            object : CameraCaptureSession.StateCallback() {
+                override fun onConfigured(configured: CameraCaptureSession) {
+                    if (!isCurrent(token)) {
+                        runCatching { configured.close() }
                         return
                     }
-                    cameraDevice = device
-                    // 프리뷰에 걸어 둔 조건 그대로 연다. 세션을 다시 여는 경로에서도 값이 유지된다.
-                    val request = buildRequest(device, surface, manual)
-                    runCatching {
-                        val stateCallback =
-                            object : CameraCaptureSession.StateCallback() {
-                                override fun onConfigured(configured: CameraCaptureSession) {
-                                    if (token != generation) {
-                                        runCatching { configured.close() }
-                                        return
-                                    }
-                                    session = configured
-                                    // 요청 직전에 device가 닫히는 경합이 남아 있어, 실패를 프로세스 종료로 키우지 않는다.
-                                    runCatching { configured.setRepeatingRequest(request, previewCallback, handler) }
-                                        .onFailure {
-                                            onFailure("Camera preview could not be started")
-                                            release()
-                                        }
-                                }
-
-                                override fun onConfigureFailed(configured: CameraCaptureSession) {
-                                    if (token != generation) return
-                                    onFailure("Camera preview configuration failed")
-                                    release()
-                                }
-                            }
-                        device.createCaptureSession(
-                            SessionConfiguration(
-                                SessionConfiguration.SESSION_REGULAR,
-                                listOf(OutputConfiguration(surface)),
-                                Executor(handler::post),
-                                stateCallback,
-                            ),
-                        )
-                    }.onFailure {
-                        onFailure("Camera preview could not be prepared")
-                        release()
-                    }
+                    session = configured
+                    // 요청 직전에 device가 닫히는 경합이 남아 있어, 실패를 프로세스 종료로 키우지 않는다.
+                    runCatching { configured.setRepeatingRequest(request, previewCallback, handler) }
+                        .onFailure { fail("Camera preview could not be started") }
                 }
 
-                override fun onDisconnected(device: CameraDevice) {
-                    device.close()
-                    if (token != generation) return
-                    onFailure("Camera preview was disconnected")
-                    release()
+                override fun onConfigureFailed(configured: CameraCaptureSession) {
+                    if (isCurrent(token)) fail("Camera preview configuration failed")
                 }
-
-                override fun onError(
-                    device: CameraDevice,
-                    error: Int,
-                ) {
-                    device.close()
-                    if (token != generation) return
-                    onFailure("Camera preview error: $error")
-                    release()
-                }
-            },
-            handler,
+            }
+        device.createCaptureSession(
+            SessionConfiguration(
+                SessionConfiguration.SESSION_REGULAR,
+                listOf(OutputConfiguration(surface)),
+                Executor(handler::post),
+                callback,
+            ),
         )
+    }
+
+    /** [token]을 받은 열기가 그 뒤의 release나 prepare로 무효가 되지 않았는지. */
+    private fun isCurrent(token: Int) = token == generation
+
+    private fun fail(message: String) {
+        onFailure(message)
+        release()
     }
 
     fun release() {
