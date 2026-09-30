@@ -12,12 +12,12 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerTheme
 import com.ssafy.s15p21a206.tiger.string
 import com.ssafy.s15p21a206.tiger.ui.capture.CAPTURE_CENTER_GUIDE_TAG
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureCenterGuide
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureWorkspaceControlState
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureWorkspaceControls
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule

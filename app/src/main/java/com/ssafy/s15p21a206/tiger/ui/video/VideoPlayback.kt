@@ -33,9 +33,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.ui.common.LockLandscapeWhilePlaying
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerText
 import java.io.File
 
 @Composable

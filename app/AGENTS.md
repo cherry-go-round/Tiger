@@ -13,10 +13,10 @@
 
 화면에서 크기·굵기·색·표면 색을 직접 고르지 않는다. 정해진 이름 중에서 고른다. 조합을 자리마다 손으로 만들면 축이 하나씩 늘어나고, 그러면 어느 요소도 다른 요소와 스타일을 공유하지 않아 위계가 아니라 잡음으로 읽힌다.
 
-- **글자**: `ui/theme/TigerText.kt`의 역할에서 고른다. 크기 다섯 층(28·22·16·14·12)과 잉크 세 단계가 거기서 정해진다. 새 조합이 필요하면 호출부가 아니라 이 파일에 역할을 더한다.
-- **판**: `ui/theme/TigerSurface.kt`. 카드가 얹히는 바닥과 글자가 놓이는 판 둘뿐이다.
-- **타입 스케일과 글꼴**: `ui/theme/Type.kt`. Material 3 컴포넌트가 제 안에서 집어 쓰는 눈금이라 여기를 비우면 그 컴포넌트만 앱 밖의 값을 쓴다.
-- **공용 컴포넌트**: `ui/common`의 `TigerCard`, `LabelledGroup`, `LabelledValue`, `TigerMenuItem`. 카드와 묶음과 메뉴 항목은 여기를 거친다.
+- **글자**: `core/designsystem/theme/TigerText.kt`의 역할에서 고른다. 크기 다섯 층(28·22·16·14·12)과 잉크 세 단계가 거기서 정해진다. 새 조합이 필요하면 호출부가 아니라 이 파일에 역할을 더한다.
+- **판**: `core/designsystem/theme/TigerSurface.kt`. 카드가 얹히는 바닥과 글자가 놓이는 판 둘뿐이다.
+- **타입 스케일과 글꼴**: `core/designsystem/theme/Type.kt`. Material 3 컴포넌트가 제 안에서 집어 쓰는 눈금이라 여기를 비우면 그 컴포넌트만 앱 밖의 값을 쓴다.
+- **공용 컴포넌트**: `core/designsystem/component`의 `TigerCard`, `LabelledGroup`, `LabelledValue`, `TigerMenuItem`. 카드와 묶음과 메뉴 항목은 여기를 거친다.
 
 역할은 색을 비워 두지 않는다. 비우면 놓인 자리의 콘텐츠 색을 따라 같은 역할이 자리마다 다르게 렌더된다. 예외는 `menuItem` 하나이고, 그 자리의 색은 스타일이 아니라 상태(되돌릴 수 없음·비활성)가 정하므로 컴포넌트에 맡긴다.
 

@@ -27,6 +27,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSurface
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureIntent
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureUiState
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureWorkspace
@@ -36,7 +37,6 @@ import com.ssafy.s15p21a206.tiger.ui.session.SessionDetailScreen
 import com.ssafy.s15p21a206.tiger.ui.session.SessionListScreen
 import com.ssafy.s15p21a206.tiger.ui.session.SessionOperations
 import com.ssafy.s15p21a206.tiger.ui.session.TaskSessionListScreen
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerSurface
 import com.ssafy.s15p21a206.tiger.ui.upload.cancelUploadOnStop
 import com.ssafy.s15p21a206.tiger.ui.video.FullScreenVideoScreen
 import com.ssafy.s15p21a206.tiger.ui.video.rememberSharedVideoPlayer

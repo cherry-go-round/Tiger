@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.ui.theme
+package com.ssafy.s15p21a206.tiger.core.designsystem.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

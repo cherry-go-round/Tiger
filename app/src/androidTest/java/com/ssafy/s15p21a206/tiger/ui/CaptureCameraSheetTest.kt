@@ -11,13 +11,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerTheme
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.string
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureCameraPanel
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureCameraSettingsButton
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureCameraSheet
 import com.ssafy.s15p21a206.tiger.ui.capture.ManualCameraUiState
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Rule

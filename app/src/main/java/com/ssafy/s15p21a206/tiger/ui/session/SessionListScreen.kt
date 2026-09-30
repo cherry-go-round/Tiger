@@ -41,13 +41,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.ListSectionHeader
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeaderHeight
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerCard
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
-import com.ssafy.s15p21a206.tiger.ui.common.ListSectionHeader
-import com.ssafy.s15p21a206.tiger.ui.common.NavigationHeader
-import com.ssafy.s15p21a206.tiger.ui.common.NavigationHeaderHeight
-import com.ssafy.s15p21a206.tiger.ui.common.TigerCard
-import com.ssafy.s15p21a206.tiger.ui.common.TigerMenuItem
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerText
 import com.ssafy.s15p21a206.tiger.ui.upload.labelRes
 
 @Suppress("FunctionName")

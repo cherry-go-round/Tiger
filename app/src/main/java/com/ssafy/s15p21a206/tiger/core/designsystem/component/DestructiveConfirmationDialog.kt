@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.ui.common
+package com.ssafy.s15p21a206.tiger.core.designsystem.component
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button

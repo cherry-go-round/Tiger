@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.ui.theme
+package com.ssafy.s15p21a206.tiger.core.designsystem.theme
 
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -72,7 +72,7 @@ class SurfaceAndInkTest {
         // 재어 기록해야 한다. 문서에 숫자를 옮겨 적으면 다음 기기에서 거짓이 되므로 검사가 재게 둔다.
         //
         //   adb shell am instrument -w -e class \
-        //     "com.ssafy.s15p21a206.tiger.ui.theme.SurfaceAndInkTest" \
+        //     "com.ssafy.s15p21a206.tiger.core.designsystem.theme.SurfaceAndInkTest" \
         //     com.ssafy.s15p21a206.tiger.test/androidx.test.runner.AndroidJUnitRunner
         //   adb logcat -d -s TigerSurfaceAndInk
         Log.i(LOG_TAG, report(captured))

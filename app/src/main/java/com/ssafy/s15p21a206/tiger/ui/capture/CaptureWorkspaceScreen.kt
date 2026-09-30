@@ -50,14 +50,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.ui.common.DestructiveConfirmationDialog
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureCenterGuide
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureControlDisabled
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureDestructive
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureFullScreenScrim
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureOverlayScrim
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureStart
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerText
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.DestructiveConfirmationDialog
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureCenterGuide
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureDestructive
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureFullScreenScrim
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlayScrim
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureStart
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import kotlin.math.roundToInt
 
 @Composable

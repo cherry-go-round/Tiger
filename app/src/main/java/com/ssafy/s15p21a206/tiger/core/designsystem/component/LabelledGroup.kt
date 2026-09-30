@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.ui.common
+package com.ssafy.s15p21a206.tiger.core.designsystem.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerText
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
  * 작은 이름표를 머리에 달고 내용을 카드에 담은 한 묶음이다. Apple의 grouped list가 하는 그것이다.

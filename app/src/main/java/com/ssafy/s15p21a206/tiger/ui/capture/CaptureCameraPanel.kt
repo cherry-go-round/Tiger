@@ -38,17 +38,17 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureChoiceSelected
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureChoiceSelectedInk
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlayScrim
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlaySupporting
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.capture.ShutterPreset
 import com.ssafy.s15p21a206.tiger.core.session.RecordingInputValidator
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureChoiceSelected
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureChoiceSelectedInk
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureControlDisabled
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureOverlayScrim
-import com.ssafy.s15p21a206.tiger.ui.theme.CaptureOverlaySupporting
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerText
 
 /**
  * 수집 전에 촬영 조건을 맞추는 패널.

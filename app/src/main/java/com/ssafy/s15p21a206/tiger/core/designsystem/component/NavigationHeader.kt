@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.ui.common
+package com.ssafy.s15p21a206.tiger.core.designsystem.component
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -15,7 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerText
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
  * 뒤로 가기와 제목을 담는 조회 화면 공통 헤더다. 지금은 이 헤더를 쓰는 두 화면(Task Session 목록,

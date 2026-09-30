@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerTheme
 import com.ssafy.s15p21a206.tiger.string
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureControlPolicy
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureFinalizingOverlay
@@ -21,7 +22,6 @@ import com.ssafy.s15p21a206.tiger.ui.capture.CaptureWorkspaceControlState
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureWorkspaceControls
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureWorkspaceExitControls
 import com.ssafy.s15p21a206.tiger.ui.capture.CaptureWorkspaceStatus
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

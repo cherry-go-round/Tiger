@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.ui.common
+package com.ssafy.s15p21a206.tiger.core.designsystem.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.ssafy.s15p21a206.tiger.ui.theme.TigerText
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
  * 메뉴의 한 항목이다. 글리프와 글자가 한 덩어리로 읽히게 붙여 놓는다.
