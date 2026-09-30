@@ -10,28 +10,18 @@ import com.ssafy.s15p21a206.tiger.episode.UploadState
 import java.io.File
 import java.util.UUID
 
-interface SessionWriter {
-    fun start()
-
-    fun finalizeWriter()
-}
-
 fun interface MonotonicClock {
     fun nowNs(): Long
 }
 
 class CaptureSessionCoordinator(
     private val clock: MonotonicClock,
-    private val writers: List<SessionWriter>,
-    private val onInterrupted: (CaptureSession, SessionDiagnostic) -> Unit = { _, _ -> },
     // 사용자 종료와 Tracking 유실 자동 마감이 같은 출구를 쓰도록 한다.
     private val onEpisodeClosed: (EpisodeMarker) -> Unit = {},
 ) {
     var session: CaptureSession? = null
         private set
     var activeEpisode: EpisodeMarker? = null
-        private set
-    var latestClosedEpisode: EpisodeMarker? = null
         private set
     var trackingState: TrackingState = TrackingState.INITIALIZING
         private set
@@ -53,7 +43,6 @@ class CaptureSessionCoordinator(
     ): CaptureSession {
         check(session == null) { "Session already exists" }
         check(task.isNotBlank() && objectName.isNotBlank()) { "Task and object are required" }
-        writers.forEach(SessionWriter::start)
         return CaptureSession(
             sessionId,
             displayNumber,
@@ -159,27 +148,7 @@ class CaptureSessionCoordinator(
     /** 사용자 종료와 Tracking 유실 자동 마감이 함께 지나는 출구. */
     private fun closeEpisode(closed: EpisodeMarker) {
         activeEpisode = null
-        latestClosedEpisode = closed
         onEpisodeClosed(closed)
-    }
-
-    fun interrupt(reason: String): CaptureSession {
-        writers.forEach(SessionWriter::finalizeWriter)
-        val interrupted =
-            requireNotNull(
-                session,
-            ).copy(recordingState = RecordingState.INTERRUPTED, recordingEndMonotonicTimestampNs = clock.nowNs())
-        session = interrupted
-        onInterrupted(interrupted, SessionDiagnostic(reason, clock.nowNs()))
-        return interrupted
-    }
-
-    fun finalizeSession(): CaptureSession {
-        check(activeEpisode == null) { "End or cancel the active episode first" }
-        writers.forEach(SessionWriter::finalizeWriter)
-        return requireNotNull(
-            session,
-        ).copy(recordingState = RecordingState.FINALIZING, recordingEndMonotonicTimestampNs = clock.nowNs()).also { session = it }
     }
 
     /**
@@ -191,7 +160,6 @@ class CaptureSessionCoordinator(
     fun release() {
         session = null
         activeEpisode = null
-        latestClosedEpisode = null
         trackingState = TrackingState.INITIALIZING
         readySinceNs = null
         trackingLoss = null
@@ -203,21 +171,14 @@ class CaptureSessionCoordinator(
     }
 }
 
-data class SessionDiagnostic(
-    val reason: String,
-    val timestampNs: Long,
-)
-
 open class CsvWriter(
     private val file: File,
     private val header: String,
-) : SessionWriter {
-    override fun start() {
+) {
+    fun start() {
         file.parentFile?.mkdirs()
         if (!file.exists()) file.writeText("$header\n")
     }
-
-    override fun finalizeWriter() = Unit
 
     fun append(row: String) {
         file.appendText("$row\n")

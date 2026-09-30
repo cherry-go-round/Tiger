@@ -17,9 +17,8 @@ class CaptureSessionCoordinatorTest {
 
     /** 실기기에서 측정된 ARCore pose 처리 지연(217 ms)에 해당한다. */
     private val poseLatencyNs = 217_000_000L
-    private val writer = CountingWriter()
     private val closed = mutableListOf<EpisodeMarker>()
-    private val coordinator = CaptureSessionCoordinator(MonotonicClock { now }, listOf(writer), onEpisodeClosed = closed::add)
+    private val coordinator = CaptureSessionCoordinator(MonotonicClock { now }, onEpisodeClosed = closed::add)
 
     /** Session을 시작하고 Tracking을 안정화시켜 Episode를 시작할 수 있는 상태로 만든다. */
     private fun startReadySession() {
@@ -47,14 +46,13 @@ class CaptureSessionCoordinatorTest {
         coordinator.onTracking(false)
         now += 500_000_000
         coordinator.onTracking(false)
-        assertEquals(EpisodeState.INVALID_TRACKING, coordinator.latestClosedEpisode!!.outcome)
-        assertEquals(1_500_000_000L, coordinator.latestClosedEpisode!!.endTimestampNs)
+        assertEquals(EpisodeState.INVALID_TRACKING, closed.single().outcome)
+        assertEquals(1_500_000_000L, closed.single().endTimestampNs)
     }
 
     @Test fun `starting a session does not open an episode`() {
         coordinator.start(displayNumber = 1, bundlePath = "staging", task = "Door opening", objectName = "cup")
         assertNull(coordinator.activeEpisode)
-        assertNull(coordinator.latestClosedEpisode)
         assertTrue(closed.isEmpty())
     }
 
@@ -90,12 +88,6 @@ class CaptureSessionCoordinatorTest {
         assertEquals(3, closed.size)
         assertTrue(closed.all { it.outcome == EpisodeState.COMPLETED && it.sessionId == sessionId })
         assertEquals(sessionId, coordinator.session!!.sessionId)
-    }
-
-    @Test fun `an active episode blocks session finalization`() {
-        startReadySession()
-        coordinator.startEpisode("pick", "block")
-        assertThrows(IllegalStateException::class.java) { coordinator.finalizeSession() }
     }
 
     @Test fun `episode start is rejected before the ready gate elapses`() {
@@ -213,7 +205,6 @@ class CaptureSessionCoordinatorTest {
     @Test fun `a new session can start after the previous one is released`() {
         startReadySession()
         val first = coordinator.session!!.sessionId
-        coordinator.finalizeSession()
         coordinator.release()
         coordinator.start(displayNumber = 2, bundlePath = "staging", task = "Door opening", objectName = "cup")
         assertNotEquals(first, coordinator.session!!.sessionId)
@@ -221,7 +212,6 @@ class CaptureSessionCoordinatorTest {
 
     @Test fun `a released session does not carry its tracking verdict into the next one`() {
         startReadySession()
-        coordinator.finalizeSession()
         coordinator.release()
         assertEquals(TrackingState.INITIALIZING, coordinator.trackingState)
         coordinator.start(displayNumber = 2, bundlePath = "staging", task = "Door opening", objectName = "cup")
@@ -233,33 +223,11 @@ class CaptureSessionCoordinatorTest {
         assertEquals(EpisodeState.ACTIVE, coordinator.startEpisode("pick", "block").outcome)
     }
 
-    @Test fun `release clears the closed episode of the previous session`() {
+    @Test fun `release clears the session and its active episode`() {
         startReadySession()
         coordinator.startEpisode("pick", "block")
-        coordinator.endEpisode()
         coordinator.release()
-        assertNull(coordinator.latestClosedEpisode)
+        assertNull(coordinator.session)
         assertNull(coordinator.activeEpisode)
-    }
-
-    @Test fun `fatal interruption finalizes writers once`() {
-        coordinator.start(displayNumber = 1, bundlePath = "staging", task = "Door opening", objectName = "cup")
-        coordinator.interrupt("camera")
-        assertEquals(1, writer.started)
-        assertEquals(1, writer.finalized)
-        assertEquals(RecordingState.INTERRUPTED, coordinator.session!!.recordingState)
-    }
-
-    private class CountingWriter : SessionWriter {
-        var started = 0
-        var finalized = 0
-
-        override fun start() {
-            started++
-        }
-
-        override fun finalizeWriter() {
-            finalized++
-        }
     }
 }

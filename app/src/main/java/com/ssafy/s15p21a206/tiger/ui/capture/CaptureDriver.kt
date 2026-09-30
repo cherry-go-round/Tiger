@@ -138,7 +138,6 @@ internal fun rememberCaptureDriver(
         remember {
             CaptureSessionCoordinator(
                 clock = MonotonicClock(SystemClock::elapsedRealtimeNanos),
-                writers = emptyList(),
                 onEpisodeClosed = { marker ->
                     // 사용자 종료와 Tracking 유실 자동 마감이 같은 경로로 기록된다.
                     if (marker.outcome == EpisodeState.INVALID_TRACKING) onIntent(CaptureIntent.Notify(episodeInvalidatedMessage))
