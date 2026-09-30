@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class RecordingState {
-    IDLE,
     INITIALIZING,
     READY,
     FINALIZING,
@@ -15,13 +14,12 @@ enum class RecordingState {
 
 @Serializable
 enum class EpisodeState {
-    NONE,
     ACTIVE,
     COMPLETED,
     INVALID_TRACKING,
 }
 
-@Serializable enum class TrackingState { INITIALIZING, READY, PAUSED, STOPPED }
+@Serializable enum class TrackingState { INITIALIZING, READY, PAUSED }
 
 @Serializable enum class UploadState { LOCAL_ONLY, UPLOADING, UPLOADED, FAILED }
 
