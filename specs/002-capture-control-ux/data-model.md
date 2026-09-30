@@ -10,7 +10,7 @@
 | `displayNumber` | 기존 bundle·metadata 호환성을 위해 보존하는 내부 순번. 목록의 주 식별자로 표시하지 않는다. |
 | `recordingState` | bundle이 관리되는 내부 completed root에 있을 때만 `COMPLETED` Session을 목록·상세·업로드 대상으로 한다. |
 | `uploadState` | `LOCAL_ONLY`, `UPLOADING`, `UPLOADED`, `FAILED` |
-| `recordedAtEpochMs` | 영상이 만들어진 로컬 벽시계 시각. 녹화를 멈춰 `main_rgb.mp4`가 완성되는 순간(마감 또는 중단)에 기록하며, 목록·상세에 표시하는 수집 시각이자 목록 정렬 기준이다. 수집 도중 프로세스가 끝나 복구된 Session은 시작 때 기록한 값이 남는다. 수집 길이는 이 값이 아니라 아래 monotonic 값으로 계산한다. 버전 8 migration이 이전 이름 `recordingStartEpochMs`에서 값을 그대로 옮긴다. migration은 안전한 legacy 기본값을 제공하며 legacy 행은 경로 기준으로 제외한다. |
+| `recordedAtEpochMs` | 영상이 만들어진 로컬 벽시계 시각. 녹화를 멈춰 `main_rgb.mp4`가 완성되는 순간(마감 또는 중단)에 기록하며, 목록·상세에 표시하는 수집 시각이자 목록 정렬 기준이다. 수집을 시작할 때 만드는 행은 아직 영상이 없으므로 `0`으로 둔다. 수집 도중 프로세스가 끝나 다음 실행에서 복구된 Session은 끝에서 기록할 기회가 없었으므로, 복구할 때 `main_rgb.mp4`의 수정 시각(녹화가 멈춘 순간)으로 채운다. 수집 길이는 이 값이 아니라 아래 monotonic 값으로 계산한다. 버전 8 migration이 이전 이름 `recordingStartEpochMs`에서 값을 그대로 옮긴다. migration은 안전한 legacy 기본값을 제공하며 legacy 행은 경로 기준으로 제외한다. |
 | `recordingStartMonotonicTimestampNs` / `recordingEndMonotonicTimestampNs` | 수집 길이 계산에 사용하는 monotonic 값. 색인 컬럼은 `recordingStartNs` / `recordingEndNs`다. |
 | `bundlePath` | 내부 completed root 하위 canonical 경로. legacy 외부 경로는 이전·삭제 없이 제외한다. |
 | `completedEpisodeCount` | outcome이 `COMPLETED`인 하위 Episode marker 개수 |
