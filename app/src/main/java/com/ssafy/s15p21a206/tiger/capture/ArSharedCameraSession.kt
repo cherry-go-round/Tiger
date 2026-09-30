@@ -116,38 +116,6 @@ class ArSharedCameraSession(
             ?: error("Timed out starting ARCore shared camera")
     }
 
-    /** 프레임 공급을 끊는다. 이미 진행 중인 프레임은 계속 인코딩된다. */
-    fun stopRepeating() {
-        // 감시자를 먼저 내린다. 남겨 두면 정지 중에 반복 요청을 다시 걸어 프레임 공급이 되살아난다.
-        manualGuard = null
-        runCatching { session?.stopRepeating() }
-            .onFailure { Log.w(CAPTURE_LOG_TAG, "Could not stop the repeating request", it) }
-    }
-
-    /**
-     * capture session과 camera device를 닫는다.
-     *
-     * ARCore Session보다 먼저 닫아야 한다. capture session이 닫힐 때 ARCore가
-     * `onCaptureSessionClosed`에서 native Session을 건드리는데, Session이 먼저 닫혀 있으면
-     * 콜백 스레드에서 잡히지 않는 예외가 나 프로세스가 죽는다.
-     */
-    fun closeSession() {
-        runCatching { session?.close() }
-        session = null
-        // close는 비동기다. onClosed가 끝난 것을 확인한 뒤 돌아간다.
-        val closed = closedLatch?.await(CLOSE_TIMEOUT_SECONDS, TimeUnit.SECONDS) ?: true
-        if (!closed) Log.w(CAPTURE_LOG_TAG, "Capture session did not report closing in time")
-        closedLatch = null
-        runCatching { device?.close() }
-        device = null
-    }
-
-    /** 콜백을 나르던 핸들러 스레드를 정리한다. 콜백이 모두 전달된 뒤에 부른다. */
-    fun closeThread() {
-        thread?.quitSafely()
-        thread = null
-    }
-
     /**
      * 카메라 프레임 시각이 IMU와 같은 시계에서 오는지 본다.
      *
@@ -317,6 +285,38 @@ class ArSharedCameraSession(
                 Log.w(CAPTURE_LOG_TAG, "Manual settings did not stick after $attempts attempts; leaving ARCore's request in place")
             }
         }
+    }
+
+    /** 프레임 공급을 끊는다. 이미 진행 중인 프레임은 계속 인코딩된다. */
+    fun stopRepeating() {
+        // 감시자를 먼저 내린다. 남겨 두면 정지 중에 반복 요청을 다시 걸어 프레임 공급이 되살아난다.
+        manualGuard = null
+        runCatching { session?.stopRepeating() }
+            .onFailure { Log.w(CAPTURE_LOG_TAG, "Could not stop the repeating request", it) }
+    }
+
+    /**
+     * capture session과 camera device를 닫는다.
+     *
+     * ARCore Session보다 먼저 닫아야 한다. capture session이 닫힐 때 ARCore가
+     * `onCaptureSessionClosed`에서 native Session을 건드리는데, Session이 먼저 닫혀 있으면
+     * 콜백 스레드에서 잡히지 않는 예외가 나 프로세스가 죽는다.
+     */
+    fun closeSession() {
+        runCatching { session?.close() }
+        session = null
+        // close는 비동기다. onClosed가 끝난 것을 확인한 뒤 돌아간다.
+        val closed = closedLatch?.await(CLOSE_TIMEOUT_SECONDS, TimeUnit.SECONDS) ?: true
+        if (!closed) Log.w(CAPTURE_LOG_TAG, "Capture session did not report closing in time")
+        closedLatch = null
+        runCatching { device?.close() }
+        device = null
+    }
+
+    /** 콜백을 나르던 핸들러 스레드를 정리한다. 콜백이 모두 전달된 뒤에 부른다. */
+    fun closeThread() {
+        thread?.quitSafely()
+        thread = null
     }
 
     private companion object {
