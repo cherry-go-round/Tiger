@@ -295,8 +295,6 @@ class SessionRepositoryTest {
 
         override suspend fun session(sessionId: String): CaptureSessionEntity? = values[sessionId]
 
-        override suspend fun activeSessions(): List<CaptureSessionEntity> = emptyList()
-
         override suspend fun recoverableSessions(): List<CaptureSessionEntity> = values.values.toList()
 
         override suspend fun sessionsInCaptureOrder(): List<CaptureSessionEntity> =

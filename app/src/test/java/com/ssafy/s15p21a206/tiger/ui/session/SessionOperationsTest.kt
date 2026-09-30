@@ -131,8 +131,6 @@ class SessionOperationsTest {
 
         override suspend fun session(sessionId: String): CaptureSessionEntity? = stored
 
-        override suspend fun activeSessions(): List<CaptureSessionEntity> = emptyList()
-
         override suspend fun recoverableSessions(): List<CaptureSessionEntity> = emptyList()
 
         override suspend fun sessionsInCaptureOrder(): List<CaptureSessionEntity> = listOfNotNull(stored)
