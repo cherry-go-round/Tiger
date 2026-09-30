@@ -41,7 +41,7 @@ Finalizing ──완료──> Idle
 
 ## 2. TrackingState (유지)
 
-`INITIALIZING`, `READY`, `PAUSED`, `STOPPED`. `CaptureSessionCoordinator`가 소유하며 파일에 직접 기록되지 않는다. 화면 상태 `Initializing` / `Ready`의 판단 근거다.
+`INITIALIZING`, `READY`, `PAUSED`. `CaptureSessionCoordinator`가 소유하며 파일에 직접 기록되지 않는다. 화면 상태 `Initializing` / `Ready`의 판단 근거다. Session을 닫으면 멈춘 상태를 따로 두지 않고 `INITIALIZING`으로 되돌려, 다음 Session이 이전 판정을 물려받지 않게 한다.
 
 ARCore가 보고하는 원시 tracking 값은 지금과 동일하게 `arcore_poses.csv`의 `tracking_state` 열에 계속 기록된다. 이번 변경은 그 값을 Episode 유효성 판정에 **사용**하는 것을 추가할 뿐, 기록 형식을 바꾸지 않는다.
 
@@ -49,7 +49,7 @@ ARCore가 보고하는 원시 tracking 값은 지금과 동일하게 `arcore_pos
 
 ## 3. EpisodeState (유지)
 
-`NONE`, `ACTIVE`, `COMPLETED`, `INVALID_TRACKING`과 전이 규칙이 이미 정의되어 있다. 변경 없음.
+`ACTIVE`, `COMPLETED`, `INVALID_TRACKING`. Episode는 시작하는 순간 `ACTIVE`로 만들어지고 `COMPLETED` 또는 `INVALID_TRACKING`으로 끝난다. 진행 중인 Episode가 없는 것은 값으로 두지 않고 진행 중 Episode가 없음(null)으로 나타낸다.
 
 이번 작업은 `ACTIVE → INVALID_TRACKING` 전이를 **실제로 발생시키는 경로를 연결**하는 것이다. 현재 이 전이는 코드상 정의만 되어 있고 production에서 한 번도 일어나지 않는다.
 
