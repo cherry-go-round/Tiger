@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.capture
+package com.ssafy.s15p21a206.tiger.capture.writer
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent
