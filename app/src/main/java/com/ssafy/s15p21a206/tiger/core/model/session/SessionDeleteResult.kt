@@ -1,6 +1,6 @@
 package com.ssafy.s15p21a206.tiger.core.model.session
 
-/** [SessionRepository.delete]의 결과. */
+/** [SessionRepository.delete][com.ssafy.s15p21a206.tiger.core.session.SessionRepository.delete]의 결과. */
 enum class SessionDeleteResult {
     /** 색인과 번들이 모두 사라졌다. */
     DELETED,

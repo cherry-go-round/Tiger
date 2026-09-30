@@ -44,7 +44,7 @@ data class ManualCameraConfig(
  * 들고 건너가는 것만이 두 session에서 같은 색을 보장한다.
  *
  * Camera2 타입(`RggbChannelVector`, `ColorSpaceTransform`) 대신 순수 값으로 두어 단위 테스트에서
- * 다룰 수 있게 한다. Camera2 타입으로의 변환은 [applyManualCamera]가 한다.
+ * 다룰 수 있게 한다. Camera2 타입으로의 변환은 [applyManualCamera][com.ssafy.s15p21a206.tiger.core.capture.manual.applyManualCamera]가 한다.
  */
 data class FixedWhiteBalance(
     val redGain: Float,
