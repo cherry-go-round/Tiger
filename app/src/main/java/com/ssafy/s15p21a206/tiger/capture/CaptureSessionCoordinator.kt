@@ -124,6 +124,12 @@ class CaptureSessionCoordinator(
         return candidate
     }
 
+    /** 판정은 [detectedAtNs](단조 시계)로, 기록은 [startedAtNs](가능하면 카메라 시각)로 한다. */
+    private data class TrackingLoss(
+        val detectedAtNs: Long,
+        val startedAtNs: Long,
+    )
+
     fun startEpisode(
         task: String,
         objectName: String,
@@ -190,12 +196,6 @@ class CaptureSessionCoordinator(
         readySinceNs = null
         trackingLoss = null
     }
-
-    /** 판정은 [detectedAtNs](단조 시계)로, 기록은 [startedAtNs](가능하면 카메라 시각)로 한다. */
-    private data class TrackingLoss(
-        val detectedAtNs: Long,
-        val startedAtNs: Long,
-    )
 
     companion object {
         const val READY_GATE_NS = 1_000_000_000L
