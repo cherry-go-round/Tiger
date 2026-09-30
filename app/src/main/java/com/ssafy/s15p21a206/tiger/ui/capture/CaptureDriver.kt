@@ -338,12 +338,14 @@ internal fun rememberCaptureDriver(
                 ) {
                     is FinalizeResult.Completed -> {
                         bundle?.let {
+                            // 백그라운드에서 마감됐으면 전송을 걸지 않고 실패로 남긴다.
+                            val startUpload = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
                             val completedSession =
                                 CaptureSession(
                                     bundle.sessionId,
                                     bundle.displayNumber,
                                     RecordingState.COMPLETED,
-                                    UploadState.LOCAL_ONLY,
+                                    if (startUpload) UploadState.LOCAL_ONLY else UploadState.FAILED,
                                     startedAtNs,
                                     SystemClock.elapsedRealtimeNanos(),
                                     result.directory.absolutePath,
@@ -352,9 +354,6 @@ internal fun rememberCaptureDriver(
                                     state.objectName,
                                 )
                             repository.save(completedSession)
-                            // 백그라운드에서 마감됐으면 전송을 걸지 않고 실패로 남긴다.
-                            val startUpload = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
-                            if (!startUpload) repository.save(completedSession.copy(uploadState = UploadState.FAILED))
                             // 어디로 갈지는 부모가 정한다. 수집은 목적지를 모른다.
                             onCompleted(bundle.sessionId, startUpload)
                         }
