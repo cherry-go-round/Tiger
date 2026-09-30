@@ -8,6 +8,7 @@ import android.hardware.camera2.params.ColorSpaceTransform
 import android.hardware.camera2.params.RggbChannelVector
 import android.util.Log
 import com.ssafy.s15p21a206.tiger.episode.ActualCaptureSettings
+import kotlin.math.abs
 import android.hardware.camera2.CameraMetadata as Camera2Metadata
 
 /*
@@ -134,33 +135,32 @@ fun logCameraSettingMismatch(
     requested: ManualCameraConfig,
     actual: ActualCaptureSettings,
 ) {
-    val complaints =
+    val mismatches =
         buildList {
-            if (actual.afMode != AF_OFF) add("af_mode=${actual.afMode}")
-            if (actual.aeMode != AE_OFF) add("ae_mode=${actual.aeMode}")
-            if (requested.awbFixed && actual.awbMode != AWB_OFF) add("awb_mode=${actual.awbMode}")
-            actual.focusDistanceDiopter?.let {
-                if (kotlin.math.abs(it - requested.focusDistanceDiopter) > FOCUS_TOLERANCE_DIOPTER) {
-                    add("focus=$it (요청 ${requested.focusDistanceDiopter})")
-                }
-            }
-            actual.iso?.let { if (it != requested.iso) add("iso=$it (요청 ${requested.iso})") }
-            actual.exposureTimeNs?.let {
-                if (kotlin.math.abs(it - requested.exposureTimeNs) > NS_QUANTIZATION_TOLERANCE) {
-                    add("exposure=$it (요청 ${requested.exposureTimeNs})")
-                }
-            }
-            actual.frameDurationNs?.let {
-                if (kotlin.math.abs(it - requested.frameDurationNs) > NS_QUANTIZATION_TOLERANCE) {
-                    add("frame_duration=$it (요청 ${requested.frameDurationNs})")
-                }
-            }
+            if (actual.afMode != MODE_OFF) add("af_mode=${actual.afMode}")
+            if (actual.aeMode != MODE_OFF) add("ae_mode=${actual.aeMode}")
+            if (requested.awbFixed && actual.awbMode != MODE_OFF) add("awb_mode=${actual.awbMode}")
+            addIfDiffers("focus", requested.focusDistanceDiopter, actual.focusDistanceDiopter, FOCUS_TOLERANCE_DIOPTER)
+            addIfDiffers("iso", requested.iso, actual.iso, tolerance = 0)
+            addIfDiffers("exposure", requested.exposureTimeNs, actual.exposureTimeNs, NS_QUANTIZATION_TOLERANCE)
+            addIfDiffers("frame_duration", requested.frameDurationNs, actual.frameDurationNs, NS_QUANTIZATION_TOLERANCE)
         }
-    if (complaints.isEmpty()) {
+    if (mismatches.isEmpty()) {
         Log.i(CAPTURE_LOG_TAG, "Manual camera settings applied as requested: $requested")
-        return
+    } else {
+        Log.w(CAPTURE_LOG_TAG, "Manual camera settings differ from the request: ${mismatches.joinToString("; ")}")
     }
-    Log.w(CAPTURE_LOG_TAG, "Manual camera settings differ from the request: ${complaints.joinToString("; ")}")
+}
+
+/** 센서가 값을 돌려줬고 요청과 [tolerance]보다 크게 다르면 `name=실제 (requested 요청)`을 더한다. */
+private fun MutableList<String>.addIfDiffers(
+    name: String,
+    requested: Number,
+    actual: Number?,
+    tolerance: Number,
+) {
+    if (actual == null) return
+    if (abs(actual.toDouble() - requested.toDouble()) > tolerance.toDouble()) add("$name=$actual (requested $requested)")
 }
 
 private fun FixedWhiteBalance.toGains() = RggbChannelVector(redGain, greenEvenGain, greenOddGain, blueGain)
@@ -168,7 +168,7 @@ private fun FixedWhiteBalance.toGains() = RggbChannelVector(redGain, greenEvenGa
 private fun afModeName(mode: Int?) =
     when (mode) {
         null -> null
-        Camera2Metadata.CONTROL_AF_MODE_OFF -> AF_OFF
+        Camera2Metadata.CONTROL_AF_MODE_OFF -> MODE_OFF
         Camera2Metadata.CONTROL_AF_MODE_AUTO -> "AUTO"
         Camera2Metadata.CONTROL_AF_MODE_MACRO -> "MACRO"
         Camera2Metadata.CONTROL_AF_MODE_CONTINUOUS_VIDEO -> "CONTINUOUS_VIDEO"
@@ -180,7 +180,7 @@ private fun afModeName(mode: Int?) =
 private fun aeModeName(mode: Int?) =
     when (mode) {
         null -> null
-        Camera2Metadata.CONTROL_AE_MODE_OFF -> AE_OFF
+        Camera2Metadata.CONTROL_AE_MODE_OFF -> MODE_OFF
         Camera2Metadata.CONTROL_AE_MODE_ON -> "ON"
         else -> "ON_VARIANT($mode)"
     }
@@ -188,14 +188,12 @@ private fun aeModeName(mode: Int?) =
 private fun awbModeName(mode: Int?) =
     when (mode) {
         null -> null
-        Camera2Metadata.CONTROL_AWB_MODE_OFF -> AWB_OFF
+        Camera2Metadata.CONTROL_AWB_MODE_OFF -> MODE_OFF
         Camera2Metadata.CONTROL_AWB_MODE_AUTO -> "AUTO"
         else -> "PRESET($mode)"
     }
 
-private const val AF_OFF = "OFF"
-private const val AE_OFF = "OFF"
-private const val AWB_OFF = "OFF"
+private const val MODE_OFF = "OFF"
 
 private const val FOCUS_TOLERANCE_DIOPTER = 0.05f
 
