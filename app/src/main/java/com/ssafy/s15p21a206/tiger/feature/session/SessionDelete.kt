@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.DestructiveConfirmationDialog
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 
 /**
@@ -69,3 +70,19 @@ private val SessionDeleteAction.messageRes: Int
             SessionDeleteAction.DeleteLocalCopy -> R.string.session_delete_message_local_copy
             SessionDeleteAction.DeleteOnlyCopy -> R.string.session_delete_message_only_copy
         }
+
+/** 세션을 지우는 메뉴 항목. 목록 카드의 메뉴와 상세 헤더의 메뉴가 같은 모양으로 둔다. */
+@Composable
+@Suppress("FunctionName")
+internal fun SessionDeleteMenuItem(
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    TigerMenuItem(
+        label = stringResource(R.string.session_delete),
+        icon = R.drawable.ic_session_delete,
+        enabled = enabled,
+        destructive = true,
+        onClick = onClick,
+    )
+}

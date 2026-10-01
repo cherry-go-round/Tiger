@@ -41,6 +41,7 @@ import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteConfirmation
+import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteMenuItem
 import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
 import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
 import com.ssafy.s15p21a206.tiger.feature.session.labelRes
@@ -161,11 +162,11 @@ private fun SessionDetail(
  *
  * 둘 다 이 화면의 주 동작이 아니다. 본문의 전송 버튼이 주 동작을 맡고 있고, 이쪽은 확인하거나
  * 정리하러 들어왔을 때만 찾는다. 제목이 없는 헤더에 흐린 글리프를 나란히 세우면 둘 다 무엇인지
- * 추측해야 하는 표가 된다. 메뉴로 접으면 글자로 이름이 붙고 헤더에는 뒤로 가기만 남는다. 메뉴
- * 글리프는 뒤로 가기와 같은 급으로 보이지 않도록 작고 옅게 둔다.
+ * 추측해야 하는 표가 된다. 메뉴로 접으면 글자로 이름이 붙고 헤더에는 뒤로 가기만 남는다.
  *
  * 삭제는 되돌릴 수 없으므로 메뉴를 여는 한 단계가 더 있는 편이 낫다. 업로드가 번들을 읽고 있는
- * 동안은 누를 수 없으며, 흐린 아이콘과 달리 흐린 글자는 무엇이 막혔는지를 스스로 말한다.
+ * 동안([deleteAction]이 null)은 누를 수 없으며, 흐린 아이콘과 달리 흐린 글자는 무엇이 막혔는지를
+ * 스스로 말한다.
  */
 @Composable
 @Suppress("FunctionName")
@@ -175,35 +176,38 @@ private fun SessionDetailMenu(
     onRequestDelete: (SessionDeleteAction) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+
+    fun closeAnd(action: () -> Unit) {
+        expanded = false
+        action()
+    }
     Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                painter = painterResource(R.drawable.ic_more_actions),
-                contentDescription = stringResource(R.string.session_detail_more_actions),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(HEADER_MENU_ICON_SIZE),
-            )
-        }
+        MoreActionsButton(onClick = { expanded = true })
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             TigerMenuItem(
                 label = stringResource(R.string.session_info_title),
                 icon = R.drawable.ic_session_info,
-                onClick = {
-                    expanded = false
-                    onOpenSessionInfo()
-                },
+                onClick = { closeAnd(onOpenSessionInfo) },
             )
-            TigerMenuItem(
-                label = stringResource(R.string.session_delete),
-                icon = R.drawable.ic_session_delete,
+            SessionDeleteMenuItem(
                 enabled = deleteAction != null,
-                destructive = true,
-                onClick = {
-                    expanded = false
-                    deleteAction?.let(onRequestDelete)
-                },
+                onClick = { closeAnd { deleteAction?.let(onRequestDelete) } },
             )
         }
+    }
+}
+
+/** 메뉴를 여는 헤더 단추. 뒤로 가기와 같은 급으로 보이지 않도록 글리프를 작고 옅게 둔다. */
+@Composable
+@Suppress("FunctionName")
+private fun MoreActionsButton(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(
+            painter = painterResource(R.drawable.ic_more_actions),
+            contentDescription = stringResource(R.string.session_detail_more_actions),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(HEADER_MENU_ICON_SIZE),
+        )
     }
 }
 

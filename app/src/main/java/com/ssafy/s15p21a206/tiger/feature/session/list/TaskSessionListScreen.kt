@@ -34,12 +34,12 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.PortraitScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerCard
-import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteConfirmation
+import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteMenuItem
 import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
 import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
 import com.ssafy.s15p21a206.tiger.feature.session.labelRes
@@ -262,13 +262,7 @@ private fun SessionCardMenu(
 ) {
     Box(modifier = Modifier.offset { anchor }) {
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-            TigerMenuItem(
-                label = stringResource(R.string.session_delete),
-                icon = R.drawable.ic_session_delete,
-                enabled = deleteEnabled,
-                destructive = true,
-                onClick = onDelete,
-            )
+            SessionDeleteMenuItem(enabled = deleteEnabled, onClick = onDelete)
         }
     }
 }
