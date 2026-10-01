@@ -170,7 +170,7 @@ flowchart LR
 <table>
   <tr>
     <td align="center" width="33%"><h3>기능 3개 · 작업 177개</h3>Spec Kit으로 명세 → 계획 → 작업</td>
-    <td align="center" width="33%"><h3>커밋 337 / 429</h3>AI 에이전트와 함께 작성</td>
+    <td align="center" width="33%"><h3>커밋의 약 80%</h3>AI 에이전트와 함께 작성</td>
     <td align="center" width="33%"><h3>테스트 190개</h3>단위 148 · 계측 42</td>
   </tr>
 </table>
