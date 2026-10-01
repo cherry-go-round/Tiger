@@ -81,7 +81,8 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 | | 맡는 것 |
 |---|---|
 | `CaptureWorkspace` | 그리기만 한다. 카메라도 목적지도 모른다 |
-| `CaptureDriver` | Session의 수명. ARCore 확인·카메라 권한·시작·tracking 폴링·중단·마감 |
+| `CaptureDriver` | composition에 묶인 연결. 카메라 권한 launcher, tracking 폴링·알림·`ON_STOP` effect, 셋을 이은 조작 묶음 |
+| `CaptureSessionActions` | Session의 시작·진행·마감. ARCore 확인, 시작, Episode, tracking 반영, 중단, 마감 |
 | `IdlePreview` | Session 전 유휴 Camera2 프리뷰. Surface, 프리뷰 권한, 되살리기 |
 | `ManualCameraControls` | 수동 촬영 조건. 녹화 카메라 능력 읽기, 프리뷰에 걸기, 기억 |
 | `CaptureState` | `CaptureUiState`·`CaptureIntent`·`reduce` |
@@ -95,7 +96,7 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 
 ### 드라이버가 평범한 클래스가 아닌 이유
 
-`rememberCaptureDriver`는 Composable이다. 권한 `rememberLauncherForActivityResult`는 composition에서만 만들 수 있고, tracking 폴링과 `ON_STOP`·`ON_START` 처리도 composition의 effect다. 무거운 것들은 `remember`로 한 번만 만들고, 돌려주는 `CaptureDriver`는 매 composition 새로 만든다 — 콜백이 `remember`에 갇히면 옛 상태를 보게 된다.
+`rememberCaptureDriver`는 Composable이다. 권한 `rememberLauncherForActivityResult`는 composition에서만 만들 수 있고, tracking 폴링과 `ON_STOP`·`ON_START` 처리도 composition의 effect다. 그 밖의 로직은 plain class state holder(`CaptureSessionActions`)로 뺀다. 이 holder는 `remember`로 한 번 만들고 작업 공간 상태는 조작을 부를 때 인자로 받는다. 한 번 만든 객체가 생성자로 상태를 받으면 첫 값에 갇히기 때문이다. 돌려주는 `CaptureDriver`는 매 composition 새로 만든다.
 
 프리뷰 Surface와 SurfaceTexture가 `IdlePreview`에 있는 것은 Camera2 session을 여는 쪽이 거기이기 때문이다. 화면은 Surface가 생기고 사라졌다는 사실만 알린다.
 
