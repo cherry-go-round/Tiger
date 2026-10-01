@@ -159,8 +159,8 @@ internal fun rememberCaptureDriver(
     val arCoreInstallMessage = stringResource(R.string.arcore_install_requested)
     val arCoreSessionStartFailed = stringResource(R.string.arcore_session_start_failed)
 
-    // ARCore가 카메라를 놓은 뒤 유휴 Camera2 프리뷰를 되살린다.
-    // prepare()는 이미 열려 있으면 즉시 반환하므로 먼저 닫아야 실제로 다시 연다.
+    // 유휴 Camera2 프리뷰를 (다시) 연다.
+    // prepare()는 이미 열려 있으면 즉시 반환하므로 먼저 닫아야 실제로 다시 연다. Surface가 없으면 열 곳이 없다.
     fun restoreIdlePreview() {
         val surface = previewSurface ?: return
         previewSession.release()
@@ -244,13 +244,7 @@ internal fun rememberCaptureDriver(
         }
     val previewPermission =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            val surface = previewSurface
-            if (granted && surface != null) {
-                previewSession.release()
-                previewSession.prepare(surface)
-            } else if (!granted) {
-                onIntent(CaptureIntent.PreviewFailed(previewFailureMessage))
-            }
+            if (granted) restoreIdlePreview() else onIntent(CaptureIntent.PreviewFailed(previewFailureMessage))
         }
     LaunchedEffect(state.open) {
         if (state.open) {
