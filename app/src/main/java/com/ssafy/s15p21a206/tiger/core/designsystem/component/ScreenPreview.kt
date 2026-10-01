@@ -17,7 +17,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerTheme
  * 검게 준다. 크기는 [PortraitScreenPreview]와 [LandscapeScreenPreview]가 정한다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun ScreenPreview(
     background: Color = TigerSurface.listBackground,
     content: @Composable () -> Unit,

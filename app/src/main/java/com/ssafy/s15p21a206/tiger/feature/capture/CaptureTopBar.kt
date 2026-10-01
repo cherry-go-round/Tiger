@@ -36,7 +36,6 @@ import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraSettings
  * 왼쪽 자리는 Session 전에는 촬영 조건을 여는 톱니바퀴, 시작한 뒤에는 tracking 상태 배지가 쓴다.
  * 시작하면 조건이 잠기고, 그 전에는 상태가 늘 IDLE이라 배지가 알려 줄 것이 없다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun CaptureTopBar(
     state: CaptureUiState,
@@ -74,7 +73,6 @@ internal fun CaptureTopBar(
 
 /** 현재 수집 상태를 프리뷰 위에 표시한다. Tracking 안정화 여부를 사용자가 바로 알 수 있어야 한다. */
 @Composable
-@Suppress("FunctionName")
 internal fun CaptureWorkspaceStatus(
     state: CaptureWorkspaceControlState,
     modifier: Modifier = Modifier,
@@ -108,7 +106,6 @@ private val CaptureWorkspaceControlState.statusLabelRes: Int
  * 배경 없는 글리프는 영상과 레터박스 경계에 걸쳐 떠 보이므로 다른 오버레이와 같은 판에 올린다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun CaptureWorkspaceExitControls(
     policy: CaptureControlPolicy,
     onExit: () -> Unit,

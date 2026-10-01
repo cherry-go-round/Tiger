@@ -19,7 +19,6 @@ import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
  * [applyTransform]은 유휴 프리뷰에서만 켠다. 수집이 시작되면 ARCore가 같은 Surface에 표시 기하를
  * 반영해 직접 그리므로, `TextureView` 변환이 남아 있으면 그 위에 한 번 더 돌아간다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun CapturePreviewSurface(
     bufferSize: RecordingResolution,

@@ -32,7 +32,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
  * 컨트롤이 뜨지 않으므로, 뒤로 가기가 사라지지 않게 처음부터 보이게 둔다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun FullScreenVideoScreen(
     bundlePath: String?,
     sharedPlayer: SharedVideoPlayer,
@@ -74,7 +73,6 @@ internal fun FullScreenVideoScreen(
  * 컷아웃이 좌우로 오므로 상단 여백만으로는 모자라 `safeDrawingPadding`을 쓴다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun BoxScope.FullScreenTopControls(
     playable: Boolean,
     landscapeLocked: Boolean,
@@ -104,7 +102,6 @@ private fun BoxScope.FullScreenTopControls(
  * 가로 고정을 켜고 끄는 플레이어 컨트롤이다. Media3는 회전 버튼을 제공하지 않아 직접 만든다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun LandscapeLockButton(
     landscapeLocked: Boolean,
     onToggle: () -> Unit,
@@ -131,7 +128,6 @@ private fun LandscapeLockButton(
 /** 재생할 영상이 없는 경우. 재생기 대신 문구가 서고 뒤로 가기만 남는다. */
 @PortraitScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun FullScreenVideoScreenPreview() {
     ScreenPreview(background = Color.Black) {
         FullScreenVideoScreen(bundlePath = null, sharedPlayer = rememberSharedVideoPlayer(), onBack = {})

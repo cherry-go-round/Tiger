@@ -34,7 +34,6 @@ private val LightColorScheme =
      */
     )
 
-@Suppress("FunctionName")
 @Composable
 fun TigerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

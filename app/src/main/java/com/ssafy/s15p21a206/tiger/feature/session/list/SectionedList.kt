@@ -34,7 +34,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
  * @param topPadding 이름표 위 여백. 헤더가 없는 홈은 헤더 높이만큼 더 비워 두 화면의 이름표 높이를 맞춘다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun SectionedList(
     title: String,
     count: String,
@@ -89,7 +88,6 @@ internal fun SectionedList(
  * 문장이므로 카드 안 메타 정보와 같은 크기일 이유도 없다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun EmptyListMessage(
     text: String,
     modifier: Modifier = Modifier,

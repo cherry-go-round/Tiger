@@ -46,7 +46,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
  * 묶음과 묶음 사이는 호출부가 벌린다.
  */
 @Composable
-@Suppress("FunctionName")
 fun LabelledGroup(
     label: String,
     modifier: Modifier = Modifier,
@@ -78,7 +77,6 @@ fun LabelledGroup(
  * 어느 것이 무엇의 표지인지 흐려진다.
  */
 @Composable
-@Suppress("FunctionName")
 fun LabelledValue(
     label: String,
     value: String,
@@ -96,7 +94,6 @@ fun LabelledValue(
 
 @Preview
 @Composable
-@Suppress("FunctionName")
 private fun LabelledGroupPreview() {
     ComponentPreview {
         LabelledGroup(label = stringResource(R.string.session_group_info)) {

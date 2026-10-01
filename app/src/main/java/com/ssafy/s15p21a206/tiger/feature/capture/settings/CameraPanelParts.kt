@@ -19,7 +19,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlaySupporting
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
-@Suppress("FunctionName")
 @Composable
 internal fun PanelLabel(
     label: String,
@@ -35,7 +34,6 @@ internal fun PanelLabel(
 }
 
 /** 이름표와 안내처럼 판 위에서 한 단계 물러난 글자. */
-@Suppress("FunctionName")
 @Composable
 internal fun PanelNote(text: String) {
     Text(text = text, style = TigerText.overlaySupporting, color = CaptureOverlaySupporting)
@@ -43,7 +41,6 @@ internal fun PanelNote(text: String) {
 
 /** 여럿 중 하나를 고르는 단추들. 한 줄에 들어가지 않으면 다음 줄로 내린다. 글자를 줄여 넣으면 장갑 낀 손으로 누르기 어려워진다. */
 @OptIn(ExperimentalLayoutApi::class)
-@Suppress("FunctionName")
 @Composable
 internal fun PanelChoices(content: @Composable () -> Unit) {
     FlowRow(
@@ -60,7 +57,6 @@ internal fun PanelChoices(content: @Composable () -> Unit) {
  * 강조색(초록)으로 채우지 않는다. 그 색은 재생 버튼의 "시작"이라는 뜻을 이미 갖고 있고, 어두운
  * 판 위에서 흰 글자와의 대비도 낮아 무엇을 골랐는지가 한눈에 들어오지 않았다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun PanelChoice(
     label: String,

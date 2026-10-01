@@ -45,7 +45,6 @@ import com.ssafy.s15p21a206.tiger.feature.capture.ManualCameraUiState
  * 없어진다. 해상도는 카메라가 수동 제어를 지원하지 않아도 고를 수 있어 사유 문구보다 위에 둔다.
  * 가로 화면에서 항목이 한 번에 들어가지 않는 기기가 있어 잘라내는 대신 굴린다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun CaptureCameraPanel(
     state: ManualCameraUiState,
@@ -88,7 +87,6 @@ internal fun CaptureCameraPanel(
  * 패널 제목과 닫기. 값은 바꾸는 즉시 걸리므로 확정할 것이 없다. "적용"이라 부르면 누르기 전에는 안
  * 걸린 것처럼 읽혀서 닫기만 둔다.
  */
-@Suppress("FunctionName")
 @Composable
 private fun PanelHeader(onClose: () -> Unit) {
     val closeDescription = stringResource(R.string.capture_camera_close)
@@ -110,7 +108,6 @@ private fun PanelHeader(onClose: () -> Unit) {
  * 후보는 실기기에서 확인한 ARCore Camera config의 `textureSize`이며, 순서는
  * [RecordingFormat.supportedResolutions]를 따른다.
  */
-@Suppress("FunctionName")
 @Composable
 private fun ResolutionRow(
     resolution: RecordingResolution,
@@ -135,7 +132,6 @@ private fun resolutionLabel(resolution: RecordingResolution): String =
     stringResource(R.string.capture_resolution_option, resolution.width, resolution.height)
 
 /** 초점 거리. 0 D가 무한대, 최대 diopter가 최단 거리라 슬라이더를 오른쪽으로 밀수록 가까워진다. */
-@Suppress("FunctionName")
 @Composable
 private fun FocusRow(
     capabilities: ManualCameraCapabilities,
@@ -167,7 +163,6 @@ private fun FocusRow(
     }
 }
 
-@Suppress("FunctionName")
 @Composable
 private fun IsoRow(
     capabilities: ManualCameraCapabilities,
@@ -192,7 +187,6 @@ private fun IsoRow(
  * 셔터 preset. 기기가 못 내는 셔터와 30 fps 프레임 간격을 넘는 셔터는 끈다. 노출이 프레임 간격보다
  * 길면 센서가 간격을 늘려 30 fps가 깨진다.
  */
-@Suppress("FunctionName")
 @Composable
 private fun ShutterRow(
     capabilities: ManualCameraCapabilities,
@@ -222,7 +216,6 @@ private fun ShutterRow(
  * Kelvin이나 RGB gain을 직접 고르는 화면은 만들지 않는다. 목적이 정확한 색을 지정하는 것이 아니라
  * 촬영 내내, 그리고 calibration 촬영과 dataset 수집 사이에 색이 변하지 않게 하는 것이기 때문이다.
  */
-@Suppress("FunctionName")
 @Composable
 private fun WhiteBalanceRow(
     state: ManualCameraUiState,
@@ -254,7 +247,6 @@ private fun WhiteBalanceRow(
 /** 수동 설정을 다 쓸 수 있는 기기. */
 @CameraSheetPreview
 @Composable
-@Suppress("FunctionName")
 private fun CaptureCameraPanelPreview() {
     val capabilities = sampleCapabilities(manualSensor = true)
     CaptureCameraPanelSample(ManualCameraUiState(capabilities, capabilities.defaultConfig(), panelOpen = true))
@@ -263,7 +255,6 @@ private fun CaptureCameraPanelPreview() {
 /** 수동 설정을 쓸 수 없는 기기. 조작 대신 사유가 서고 해상도만 고를 수 있다. */
 @CameraSheetPreview
 @Composable
-@Suppress("FunctionName")
 private fun UnsupportedCaptureCameraPanelPreview() {
     CaptureCameraPanelSample(ManualCameraUiState(sampleCapabilities(manualSensor = false), panelOpen = true))
 }
@@ -271,13 +262,11 @@ private fun UnsupportedCaptureCameraPanelPreview() {
 /** 기기 능력을 아직 읽는 중. */
 @CameraSheetPreview
 @Composable
-@Suppress("FunctionName")
 private fun ReadingCaptureCameraPanelPreview() {
     CaptureCameraPanelSample(ManualCameraUiState(panelOpen = true))
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun CaptureCameraPanelSample(state: ManualCameraUiState) {
     ScreenPreview(background = colorResource(R.color.capture_camera_sheet)) {
         CaptureCameraPanel(

@@ -47,7 +47,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
  * 앱바에 둔다. 가운데 띄우는 다이얼로그는 가로 화면에서 키보드가 올라오면 아래쪽 버튼이 가려져
  * 닿을 방법이 없다. 앱바는 키보드와 겹치지 않으므로 방향과 무관하게 항상 누를 수 있다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun CaptureMetadataDialog(
     task: String,
@@ -85,7 +84,6 @@ internal fun CaptureMetadataDialog(
  *
  * @param onKeyboardDone 키보드의 완료가 할 일. 두 칸이 다 채워지지 않았으면 null이다.
  */
-@Suppress("FunctionName")
 @Composable
 private fun MetadataForm(
     task: String,
@@ -112,7 +110,6 @@ private fun MetadataForm(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("FunctionName")
 @Composable
 private fun MetadataTopBar(
     ready: Boolean,
@@ -143,7 +140,6 @@ private fun MetadataTopBar(
  *
  * @param onDone 키보드의 완료가 할 일. 두 칸이 다 채워지지 않았으면 null이고 완료는 아무것도 하지 않는다.
  */
-@Suppress("FunctionName")
 @Composable
 private fun MetadataFields(
     task: String,
@@ -193,7 +189,6 @@ private fun MetadataFields(
  */
 @LandscapeScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun MetadataFormPreview() {
     ScreenPreview {
         MetadataForm(

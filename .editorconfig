@@ -5,3 +5,6 @@ indent_style = space
 indent_size = 4
 insert_final_newline = true
 ktlint_code_style = ktlint_official
+# Composable은 UI 요소를 나타내므로 PascalCase로 짓는다(Compose API 지침). ktlint의 function-naming이
+# 이를 위반으로 보지 않게 한다. 함수마다 @Suppress("FunctionName")을 달지 않는다.
+ktlint_function_naming_ignore_when_annotated_with = Composable

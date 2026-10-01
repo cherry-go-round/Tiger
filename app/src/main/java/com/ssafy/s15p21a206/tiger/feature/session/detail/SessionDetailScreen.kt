@@ -64,7 +64,6 @@ import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoAspectRatio
  * - 이름과 각 묶음은 같은 간격([DETAIL_GROUP_GAP])으로 띄운다. 가르는 일은 카드가 한다.
  * - 재생 영역 높이와 전송 상태에 따라 내용이 화면을 넘으므로 굴린다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun SessionDetailScreen(
     summary: SessionSummary?,
@@ -94,7 +93,6 @@ internal fun SessionDetailScreen(
 
 /** 목록에서 사라진 세션을 연 경우. 보일 것도 할 일도 없어 헤더에는 뒤로 가기만 둔다. */
 @Composable
-@Suppress("FunctionName")
 private fun MissingSessionDetail(onBack: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
         NavigationHeader(title = "", onBack = onBack)
@@ -107,7 +105,6 @@ private fun MissingSessionDetail(onBack: () -> Unit) {
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun SessionDetail(
     summary: SessionSummary,
     onBack: () -> Unit,
@@ -169,7 +166,6 @@ private fun SessionDetail(
  * 스스로 말한다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun SessionDetailMenu(
     deleteAction: SessionDeleteAction?,
     onOpenSessionInfo: () -> Unit,
@@ -199,7 +195,6 @@ private fun SessionDetailMenu(
 
 /** 메뉴를 여는 헤더 단추. 뒤로 가기와 같은 급으로 보이지 않도록 글리프를 작고 옅게 둔다. */
 @Composable
-@Suppress("FunctionName")
 private fun MoreActionsButton(onClick: () -> Unit) {
     IconButton(onClick = onClick) {
         Icon(
@@ -216,7 +211,6 @@ private fun MoreActionsButton(onClick: () -> Unit) {
  * 영역만 줄고 얻는 것이 없다. 영상이 없으면 그렇다고 알리는 문구는 본문이라 본문 여백을 둔다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun SessionVideoPreview(
     bundlePath: String,
     sharedPlayer: SharedVideoPlayer,
@@ -247,7 +241,6 @@ private fun SessionVideoPreview(
 
 /** 영상 아래 본문. 이름, 세션 정보, 전송 상태, 삭제 실패 사유, 전송 버튼 순이다. */
 @Composable
-@Suppress("FunctionName")
 private fun SessionDetailBody(
     summary: SessionSummary,
     presentation: SessionDetailPresentation,
@@ -280,7 +273,6 @@ private fun SessionDetailBody(
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun SessionInfoGroup(summary: SessionSummary) {
     LabelledGroup(stringResource(R.string.session_group_info)) {
         if (summary.taskName.isNotBlank()) {
@@ -301,7 +293,6 @@ private fun SessionInfoGroup(summary: SessionSummary) {
  * 값이 아니라 상태를 설명하는 줄이다. 사유는 앱을 다시 켜면 남지 않는다. 기록하는 컬럼이 없다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun UploadStatusGroup(
     uploadState: UploadState,
     failureReason: String?,
@@ -316,7 +307,6 @@ private fun UploadStatusGroup(
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun UploadButton(
     action: SessionDetailPresentation.UploadAction,
     onUpload: () -> Unit,
@@ -337,7 +327,6 @@ private fun UploadButton(
  * 재생기가 파일을 다시 열 일이 없어 사라진 뒤에 읽으려 드는 경우가 생기지 않는다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun PausePlaybackWhileConfirmingDelete(
     pendingDelete: SessionDeleteAction?,
     sharedPlayer: SharedVideoPlayer,
@@ -350,7 +339,6 @@ private fun PausePlaybackWhileConfirmingDelete(
 /** 아직 올리지 않은 세션. 전송 상태 묶음 대신 업로드 버튼이 선다. */
 @PortraitScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun LocalSessionDetailScreenPreview() {
     SessionDetailSample(SessionPreviewSamples.withState(UploadState.LOCAL_ONLY))
 }
@@ -358,7 +346,6 @@ private fun LocalSessionDetailScreenPreview() {
 /** 전송과 삭제가 모두 실패한 세션. 두 사유가 다 보인다. */
 @PortraitScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun FailedSessionDetailScreenPreview() {
     SessionDetailSample(
         summary = SessionPreviewSamples.withState(UploadState.FAILED),
@@ -370,13 +357,11 @@ private fun FailedSessionDetailScreenPreview() {
 /** 목록에서 사라진 세션을 연 경우. */
 @PortraitScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun MissingSessionDetailScreenPreview() {
     SessionDetailSample(summary = null)
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun SessionDetailSample(
     summary: SessionSummary?,
     deleteFailureReason: String? = null,

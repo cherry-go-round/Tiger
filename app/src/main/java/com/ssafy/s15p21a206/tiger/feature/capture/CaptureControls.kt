@@ -32,7 +32,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureStart
  * [CaptureOverlayDimens.controlEndInset]이다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun CaptureWorkspaceControls(
     policy: CaptureControlPolicy,
     onPlay: () -> Unit,
@@ -64,7 +63,6 @@ internal fun CaptureWorkspaceControls(
 
 /** Session 전에는 Session을, 그 뒤에는 Episode를 시작한다. 이름([description])만 다르다. */
 @Composable
-@Suppress("FunctionName")
 private fun PlayControl(
     @StringRes description: Int,
     enabled: Boolean,
@@ -74,7 +72,6 @@ private fun PlayControl(
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun PauseControl(
     enabled: Boolean,
     onClick: () -> Unit,
@@ -83,7 +80,6 @@ private fun PauseControl(
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun StopControl(
     enabled: Boolean,
     onClick: () -> Unit,
@@ -92,7 +88,6 @@ private fun StopControl(
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun CaptureControlIcon(
     @DrawableRes iconRes: Int,
     @StringRes contentDescriptionRes: Int,
@@ -117,7 +112,6 @@ private fun CaptureControlIcon(
 }
 
 @Composable
-@Suppress("FunctionName")
 internal fun CaptureStopConfirmation(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,

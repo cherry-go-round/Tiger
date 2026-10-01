@@ -47,7 +47,6 @@ internal enum class SessionDeleteAction {
  * 세션 종료 확인과 같은 판을 쓴다. 같은 무게의 결정이 화면마다 다르게 생길 이유가 없다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun SessionDeleteConfirmation(
     action: SessionDeleteAction,
     onConfirm: () -> Unit,
@@ -73,7 +72,6 @@ private val SessionDeleteAction.messageRes: Int
 
 /** 세션을 지우는 메뉴 항목. 목록 카드의 메뉴와 상세 헤더의 메뉴가 같은 모양으로 둔다. */
 @Composable
-@Suppress("FunctionName")
 internal fun SessionDeleteMenuItem(
     enabled: Boolean,
     onClick: () -> Unit,

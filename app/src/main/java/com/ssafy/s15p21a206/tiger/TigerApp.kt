@@ -72,7 +72,6 @@ private data class SessionVideoRoute(
  * 여기가 목적지와 세션 운용(전송·삭제)을 쥐고, 수집은 [CaptureWorkspace]가 가져간다.
  * 수집 상태는 이 화면이 소유하는데, 작업 공간을 여는 것이 조회 화면의 동작이기 때문이다.
  */
-@Suppress("FunctionName", "LongMethod")
 @Composable
 fun TigerApp() {
     val context = LocalContext.current
@@ -284,7 +283,6 @@ fun TigerApp() {
  * 창 배경 위에 겹쳐 그려져 이전 화면이 비쳐 보인다. `TigerTheme`에는 `Surface`가 없고 각 화면도
  * 배경을 그리지 않아, 판은 목적지마다 깔아야 한다.
  */
-@Suppress("FunctionName")
 @Composable
 private fun DestinationSurface(
     color: Color,

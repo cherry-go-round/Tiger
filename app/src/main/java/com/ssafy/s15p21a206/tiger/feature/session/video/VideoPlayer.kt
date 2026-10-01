@@ -25,7 +25,6 @@ import java.io.File
  * 리스너는 [PlayerView]를 만들 때 한 번만 걸므로, 콜백은 최신 값을 따라가게 감싸 넘긴다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun VideoPlayer(
     player: ExoPlayer,
     fullscreen: Boolean,

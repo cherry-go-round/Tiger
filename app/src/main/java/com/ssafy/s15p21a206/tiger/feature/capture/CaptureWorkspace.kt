@@ -37,7 +37,6 @@ import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureSettingsContro
  *
  * [state]는 부모가 소유한다. 부모가 [CaptureIntent.Open]으로 작업 공간을 열기 때문이다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun CaptureWorkspace(
     state: CaptureUiState,
@@ -71,7 +70,6 @@ internal fun CaptureWorkspace(
  * 프리뷰 위에 상단 줄, 설정 시트, 알림, 우측 제어를 얹고, 그 위를 덮는 판(수집 정보 입력, 마감, 정지
  * 확인)을 띄운다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun CaptureWorkspaceContent(
     state: CaptureUiState,
@@ -118,7 +116,6 @@ internal fun CaptureWorkspaceContent(
     CaptureWorkspaceModals(state, onIntent, driver)
 }
 
-@Suppress("FunctionName")
 @Composable
 private fun CaptureSettingsSheet(
     state: CaptureUiState,
@@ -140,7 +137,6 @@ private fun CaptureSettingsSheet(
 }
 
 /** 작업 공간을 덮는 판. 수집 정보 입력, 마감 중·실패, 정지 확인이다. */
-@Suppress("FunctionName")
 @Composable
 private fun CaptureWorkspaceModals(
     state: CaptureUiState,
@@ -174,7 +170,6 @@ private fun CaptureWorkspaceModals(
 /** 수집 정보를 받고 Session을 시작하기 전. 왼쪽 위에 카메라 설정 단추가 선다. */
 @LandscapeScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun IdleCaptureWorkspacePreview() {
     CaptureWorkspaceSample(sampleCaptureState(CaptureWorkspaceControlState.Idle))
 }
@@ -182,7 +177,6 @@ private fun IdleCaptureWorkspacePreview() {
 /** Episode를 찍는 중. 왼쪽 위가 상태 배지로 바뀌고 우측 제어가 일시 정지·정지가 된다. */
 @LandscapeScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun EpisodeActiveCaptureWorkspacePreview() {
     CaptureWorkspaceSample(sampleCaptureState(CaptureWorkspaceControlState.EpisodeActive))
 }
@@ -190,14 +184,12 @@ private fun EpisodeActiveCaptureWorkspacePreview() {
 /** 마감 중. 판이 작업 공간을 덮는다. */
 @LandscapeScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun FinalizingCaptureWorkspacePreview() {
     CaptureWorkspaceSample(sampleCaptureState(CaptureWorkspaceControlState.Finalizing))
 }
 
 @LandscapeScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun FinalizeFailedCaptureWorkspacePreview() {
     CaptureWorkspaceSample(
         sampleCaptureState(CaptureWorkspaceControlState.Idle).copy(
@@ -207,7 +199,6 @@ private fun FinalizeFailedCaptureWorkspacePreview() {
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun CaptureWorkspaceSample(state: CaptureUiState) {
     ScreenPreview(background = Color.Black) {
         CaptureWorkspaceContent(state = state, onIntent = {}, driver = remember { idleCaptureDriver() })

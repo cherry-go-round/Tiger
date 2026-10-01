@@ -30,7 +30,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
  * 맡는다.
  */
 @Composable
-@Suppress("FunctionName")
 fun NavigationHeader(
     title: String,
     onBack: () -> Unit,
@@ -61,7 +60,6 @@ fun NavigationHeader(
 
 @Preview
 @Composable
-@Suppress("FunctionName")
 private fun NavigationHeaderPreview() {
     ComponentPreview {
         NavigationHeader(title = "", onBack = {})

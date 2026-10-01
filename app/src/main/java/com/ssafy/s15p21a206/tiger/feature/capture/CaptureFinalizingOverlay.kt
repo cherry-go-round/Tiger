@@ -37,7 +37,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
  * 없으므로 넘어갈 곳이 없다. 작업 공간에 머물러야 프리뷰가 살아 있는 채로 다시 찍을 수 있다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun CaptureFinalizingOverlay(
     failure: String?,
     onDismissFailure: () -> Unit,
@@ -62,7 +61,6 @@ internal fun CaptureFinalizingOverlay(
 private fun Modifier.blockTouchesBelow(): Modifier = clickable(enabled = false, onClick = {})
 
 @Composable
-@Suppress("FunctionName")
 private fun FinalizingProgress() {
     val finalizing = stringResource(R.string.capture_finalizing)
     CircularProgressIndicator(
@@ -77,7 +75,6 @@ private fun FinalizingProgress() {
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun FinalizeFailure(
     failure: String,
     onDismiss: () -> Unit,

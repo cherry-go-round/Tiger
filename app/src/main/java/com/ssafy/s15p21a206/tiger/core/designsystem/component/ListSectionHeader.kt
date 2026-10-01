@@ -22,7 +22,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
  * 두므로 이것을 쓰지 않는다.
  */
 @Composable
-@Suppress("FunctionName")
 fun ListSectionHeader(
     title: String,
     supporting: String?,
@@ -36,7 +35,6 @@ fun ListSectionHeader(
 
 @Preview
 @Composable
-@Suppress("FunctionName")
 private fun ListSectionHeaderPreview() {
     ComponentPreview {
         ListSectionHeader(title = stringResource(R.string.session_list_title), supporting = stringResource(R.string.task_list_count, 3))

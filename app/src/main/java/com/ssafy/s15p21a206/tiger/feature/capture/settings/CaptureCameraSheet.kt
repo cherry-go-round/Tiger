@@ -28,7 +28,6 @@ import com.ssafy.s15p21a206.tiger.feature.capture.CaptureTooltip
  *
  * 다른 수집 오버레이와 같은 판에 올린다. 윤곽선만 있는 단추는 밝은 장면의 프리뷰 위에서 묻혔다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun CaptureCameraSettingsButton(
     enabled: Boolean,
@@ -60,7 +59,6 @@ internal fun CaptureCameraSettingsButton(
  * 시트의 내용은 이 자리의 composition을 부모로 삼아 그린다. 테마와 CompositionLocal이 그대로
  * 이어지고, [content]가 바뀌면 시트 안도 다시 그려진다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun CaptureCameraSheet(
     onDismiss: () -> Unit,

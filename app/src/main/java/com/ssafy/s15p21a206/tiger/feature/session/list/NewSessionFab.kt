@@ -29,7 +29,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
  * 보인다. 그림자도 기본 6dp는 과해서 떠 있는 정도만 남긴다. 오른쪽 끝은 카드와 같은 [TigerSpacing.screenEdge]에 맞춘다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun NewSessionFab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,

@@ -21,7 +21,6 @@ import com.ssafy.s15p21a206.tiger.R
  * 글씨 색만으로는 두 선택이 같은 무게로 보인다.
  */
 @Composable
-@Suppress("FunctionName")
 fun DestructiveConfirmationDialog(
     title: String,
     message: String,
@@ -49,7 +48,6 @@ fun DestructiveConfirmationDialog(
 
 @Preview
 @Composable
-@Suppress("FunctionName")
 private fun DestructiveConfirmationDialogPreview() {
     ComponentPreview {
         DestructiveConfirmationDialog(

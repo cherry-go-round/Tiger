@@ -39,7 +39,6 @@ import kotlin.math.roundToInt
  * 옮긴다. 화면에만 그리므로 저장되는 영상에는 들어가지 않는다. 장식이라 접근성 트리에 내놓지 않는다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun CaptureCenterGuide(modifier: Modifier = Modifier) {
     val view = LocalView.current
     var shift by remember { mutableIntStateOf(0) }

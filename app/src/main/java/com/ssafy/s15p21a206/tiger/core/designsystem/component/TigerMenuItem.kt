@@ -32,7 +32,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
  * 글리프에는 접근성 이름을 두지 않는다. 바로 옆 글자가 이미 이름을 말하므로 두 번 읽게 된다.
  */
 @Composable
-@Suppress("FunctionName")
 fun TigerMenuItem(
     label: String,
     icon: Int,
@@ -70,7 +69,6 @@ fun TigerMenuItem(
 
 @Preview
 @Composable
-@Suppress("FunctionName")
 private fun TigerMenuItemPreview() {
     ComponentPreview {
         TigerCard {

@@ -52,7 +52,6 @@ import com.ssafy.s15p21a206.tiger.feature.session.labelRes
  * 입력하지 않는다. 마지막 세션을 지우면 빈 채로 남으므로 홈과 같은 짜임으로 안내를 가운데에 둔다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun TaskSessionListScreen(
     taskName: String,
     sessions: List<SessionSummary>,
@@ -99,7 +98,6 @@ internal fun TaskSessionListScreen(
  * 발견성은 상세 화면의 메뉴가 담당한다. 여기 제스처는 아는 사람을 위한 지름길이다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun SessionSummaryItem(
     summary: SessionSummary,
     onOpenSession: (String) -> Unit,
@@ -141,7 +139,6 @@ private fun SessionSummaryItem(
 
 /** 탭하면 열고 길게 누르면 메뉴를 부르는 카드. 누른 자리를 [onPress]로 알려 메뉴가 그 자리에서 열리게 한다. */
 @Composable
-@Suppress("FunctionName")
 private fun SessionSummaryCard(
     summary: SessionSummary,
     onOpen: () -> Unit,
@@ -210,7 +207,6 @@ private fun Modifier.recordPressPosition(onPress: (IntOffset) -> Unit): Modifier
  *   잡음으로 읽힌다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun SessionSummaryCardContent(
     summary: SessionSummary,
     captureTime: String,
@@ -252,7 +248,6 @@ private fun SessionSummaryCardContent(
  * 읽고 있는 동안은 삭제를 끈다. 이유는 카드의 전송 상태가 말한다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun SessionCardMenu(
     expanded: Boolean,
     anchor: IntOffset,
@@ -269,7 +264,6 @@ private fun SessionCardMenu(
 
 @PortraitScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun TaskSessionListScreenPreview() {
     TaskSessionListSample(SessionPreviewSamples.sessions)
 }
@@ -277,13 +271,11 @@ private fun TaskSessionListScreenPreview() {
 /** 마지막 세션을 지운 Task. */
 @PortraitScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun EmptyTaskSessionListScreenPreview() {
     TaskSessionListSample(emptyList())
 }
 
 @Composable
-@Suppress("FunctionName")
 private fun TaskSessionListSample(sessions: List<SessionSummary>) {
     ScreenPreview {
         TaskSessionListScreen(

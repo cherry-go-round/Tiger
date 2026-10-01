@@ -26,7 +26,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
  * 여기에 그림자까지 더하면 한 항목에 경계가 셋이 된다.
  */
 @Composable
-@Suppress("FunctionName")
 fun TigerCard(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
@@ -44,7 +43,6 @@ fun TigerCard(
 
 @Preview
 @Composable
-@Suppress("FunctionName")
 private fun TigerCardPreview() {
     ComponentPreview {
         TigerCard(modifier = Modifier.fillMaxWidth()) {

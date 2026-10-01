@@ -33,7 +33,6 @@ import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoResolution
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Suppress("FunctionName")
 internal fun SessionInfoSheet(
     summary: SessionSummary,
     durationSeconds: Long,
@@ -46,7 +45,6 @@ internal fun SessionInfoSheet(
 
 /** 시트 안의 내용. 해상도는 파일에서 읽어야 하므로 읽은 결과([resolution])만 받는다. */
 @Composable
-@Suppress("FunctionName")
 private fun SessionInfoContent(
     summary: SessionSummary,
     durationSeconds: Long,
@@ -94,7 +92,6 @@ private fun resolutionText(resolution: VideoResolutionState): String =
  * 들어가 행 높이가 고르게 된다.
  */
 @Composable
-@Suppress("FunctionName")
 private fun SessionInfoRow(
     label: String,
     value: String,
@@ -108,7 +105,6 @@ private fun SessionInfoRow(
 /** 시트는 창을 따로 띄워 Preview에 그려지지 않으므로 내용만 시트와 같은 바닥에 올린다. */
 @Preview
 @Composable
-@Suppress("FunctionName")
 private fun SessionInfoContentPreview() {
     val summary = SessionPreviewSamples.sessions.first()
     ComponentPreview {

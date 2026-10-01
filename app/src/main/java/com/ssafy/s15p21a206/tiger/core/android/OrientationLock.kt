@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.LocalContext
  * 바뀌면 프리뷰가 돌아간다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun LockLandscapeWhileVisible() {
     val activity = LocalContext.current.findActivity() ?: return
     DisposableEffect(activity) {
@@ -31,7 +30,6 @@ internal fun LockLandscapeWhileVisible() {
  * 가로 고정을 켤 때만 가로로 묶고, 끄면 진입 시점 설정으로 돌아간다. 화면을 벗어날 때도 같다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun LockLandscapeWhilePlaying(landscapeLocked: Boolean) {
     val activity = LocalContext.current.findActivity() ?: return
     val entryOrientation = remember(activity) { activity.requestedOrientation }

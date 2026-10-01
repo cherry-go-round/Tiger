@@ -19,7 +19,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerTheme
  * [TigerSurface.listBackground]다. 흰 카드가 그 위에 놓여야 카드의 경계가 보인다.
  */
 @Composable
-@Suppress("FunctionName")
 internal fun ComponentPreview(content: @Composable ColumnScope.() -> Unit) {
     TigerTheme(dynamicColor = false) {
         Column(

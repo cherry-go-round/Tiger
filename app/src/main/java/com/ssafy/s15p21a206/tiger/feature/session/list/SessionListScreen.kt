@@ -32,7 +32,6 @@ import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
  * 이 화면에는 헤더가 없지만 헤더만큼 비우고 본문을 시작한다. Task 화면은 헤더 아래에서 본문을
  * 시작하므로, 그래야 화면을 오갈 때 이름표가 제자리에 머무르는 것으로 보인다.
  */
-@Suppress("FunctionName")
 @Composable
 internal fun SessionListScreen(
     sessions: List<SessionSummary>,
@@ -65,7 +64,6 @@ internal fun SessionListScreen(
 
 /** 홈의 Task 카드. 섹션 이름표 아래에 놓이므로 이름은 제목보다 한 단계 작다. */
 @Composable
-@Suppress("FunctionName")
 private fun TaskSummaryItem(
     taskName: String,
     sessionCount: Int,
@@ -87,7 +85,6 @@ private fun TaskSummaryItem(
 
 @PortraitScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun SessionListScreenPreview() {
     ScreenPreview {
         SessionListScreen(sessions = SessionPreviewSamples.sessions, onStartCapture = {}, onOpenTask = {})
@@ -96,7 +93,6 @@ private fun SessionListScreenPreview() {
 
 @PortraitScreenPreview
 @Composable
-@Suppress("FunctionName")
 private fun EmptySessionListScreenPreview() {
     ScreenPreview {
         SessionListScreen(sessions = emptyList(), onStartCapture = {}, onOpenTask = {})

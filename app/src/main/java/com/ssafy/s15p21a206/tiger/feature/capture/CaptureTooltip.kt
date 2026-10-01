@@ -15,7 +15,6 @@ import androidx.compose.ui.res.stringResource
 /** 길게 누르면 [label]을 보여 준다. 수집 화면의 글리프 버튼들이 이름을 드러내는 방법이다. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Suppress("FunctionName")
 internal fun CaptureTooltip(
     @StringRes label: Int,
     modifier: Modifier = Modifier,
