@@ -1,6 +1,8 @@
 package com.ssafy.s15p21a206.tiger.feature.session.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -11,11 +13,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.ComponentPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSurface
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
+import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
 import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
 import com.ssafy.s15p21a206.tiger.feature.session.video.VideoResolutionState
 import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoResolution
@@ -37,29 +42,40 @@ internal fun SessionInfoSheet(
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = TigerSurface.content) {
-        Column(
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.session_info_title),
-                style = TigerText.itemName,
-            )
-            SessionInfoRow(stringResource(R.string.session_info_id), summary.sessionId)
-            SessionInfoRow(stringResource(R.string.session_info_captured_at), formatCaptureTime(summary.recordedAtEpochMs))
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_episodes),
-                value = stringResource(R.string.session_info_episode_count, summary.completedEpisodeCount),
-            )
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_duration),
-                value = stringResource(R.string.session_detail_duration, durationSeconds),
-            )
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_resolution),
-                value = resolutionText(rememberVideoResolution(summary.bundlePath)),
-            )
-        }
+        SessionInfoContent(summary, durationSeconds, rememberVideoResolution(summary.bundlePath))
+    }
+}
+
+/** 시트 안의 내용. 해상도는 파일에서 읽어야 하므로 읽은 결과([resolution])만 받는다. */
+@Composable
+@Suppress("FunctionName")
+private fun SessionInfoContent(
+    summary: SessionSummary,
+    durationSeconds: Long,
+    resolution: VideoResolutionState,
+) {
+    Column(
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.session_info_title),
+            style = TigerText.itemName,
+        )
+        SessionInfoRow(stringResource(R.string.session_info_id), summary.sessionId)
+        SessionInfoRow(stringResource(R.string.session_info_captured_at), formatCaptureTime(summary.recordedAtEpochMs))
+        SessionInfoRow(
+            label = stringResource(R.string.session_info_episodes),
+            value = stringResource(R.string.session_info_episode_count, summary.completedEpisodeCount),
+        )
+        SessionInfoRow(
+            label = stringResource(R.string.session_info_duration),
+            value = stringResource(R.string.session_detail_duration, durationSeconds),
+        )
+        SessionInfoRow(
+            label = stringResource(R.string.session_info_resolution),
+            value = resolutionText(resolution),
+        )
     }
 }
 
@@ -88,5 +104,22 @@ private fun SessionInfoRow(
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(text = label, style = TigerText.supporting)
         Text(text = value, style = TigerText.value)
+    }
+}
+
+/** 시트는 창을 따로 띄워 Preview에 그려지지 않으므로 내용만 시트와 같은 바닥에 올린다. */
+@Preview
+@Composable
+@Suppress("FunctionName")
+private fun SessionInfoContentPreview() {
+    val summary = SessionPreviewSamples.sessions.first()
+    ComponentPreview {
+        Box(Modifier.background(TigerSurface.content).padding(top = 16.dp)) {
+            SessionInfoContent(
+                summary = summary,
+                durationSeconds = SessionDetailPresentation.from(summary).durationSeconds,
+                resolution = VideoResolutionState.Available(width = 1920, height = 1080),
+            )
+        }
     }
 }

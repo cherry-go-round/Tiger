@@ -6,14 +6,20 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.android.LockLandscapeWhileVisible
 import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.LandscapeScreenPreview
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
 import com.ssafy.s15p21a206.tiger.feature.capture.preview.CapturePreviewSurface
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraPanel
@@ -164,6 +170,80 @@ private fun CaptureWorkspaceModals(
         )
     }
 }
+
+/** 수집 정보를 받고 Session을 시작하기 전. 왼쪽 위에 카메라 설정 단추가 선다. */
+@LandscapeScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun IdleCaptureWorkspacePreview() {
+    CaptureWorkspaceContentPreview(sampleCaptureState(CaptureWorkspaceControlState.Idle))
+}
+
+/** Episode를 찍는 중. 왼쪽 위가 상태 배지로 바뀌고 우측 제어가 일시 정지·정지가 된다. */
+@LandscapeScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun EpisodeActiveCaptureWorkspacePreview() {
+    CaptureWorkspaceContentPreview(sampleCaptureState(CaptureWorkspaceControlState.EpisodeActive))
+}
+
+/** 마감 중. 판이 작업 공간을 덮는다. */
+@LandscapeScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun FinalizingCaptureWorkspacePreview() {
+    CaptureWorkspaceContentPreview(sampleCaptureState(CaptureWorkspaceControlState.Finalizing))
+}
+
+@LandscapeScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun FinalizeFailedCaptureWorkspacePreview() {
+    CaptureWorkspaceContentPreview(
+        sampleCaptureState(CaptureWorkspaceControlState.Idle).copy(
+            finalizeFailure = stringResource(R.string.capture_finalize_failed),
+        ),
+    )
+}
+
+@Composable
+@Suppress("FunctionName")
+private fun CaptureWorkspaceContentPreview(state: CaptureUiState) {
+    ScreenPreview(background = Color.Black) {
+        CaptureWorkspaceContent(state = state, onIntent = {}, driver = remember { idleCaptureDriver() })
+    }
+}
+
+/** 수집 정보를 받았고 카메라 프레임이 오고 있는 상태. 단계만 [phase]로 고른다. */
+private fun sampleCaptureState(phase: CaptureWorkspaceControlState) =
+    CaptureUiState(
+        open = true,
+        phase = phase,
+        task = "컵 집기",
+        objectName = "머그컵",
+        previewReady = true,
+    )
+
+/** 아무 일도 하지 않는 조작. [CaptureWorkspaceContent]는 조작을 부르기만 하므로 그리는 데는 이것으로 족하다. */
+private fun idleCaptureDriver() =
+    CaptureDriver(
+        snackbarHostState = SnackbarHostState(),
+        onSurfaceAvailable = { _, _ -> },
+        onSurfaceDestroyed = {},
+        play = {},
+        pause = {},
+        requestExit = {},
+        confirmStop = {},
+        confirmMetadata = {},
+        releaseIdlePreview = {},
+        captureSettings =
+            CaptureSettingsControls(
+                selectResolution = {},
+                editManualCamera = {},
+                fixWhiteBalance = {},
+                releaseWhiteBalance = {},
+            ),
+    )
 
 /**
  * 프리뷰와 영상의 가로세로 비. 두 녹화 해상도 모두 16:9라 선택과 무관하게 같다.

@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.PortraitScreenPreview
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerCard
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
@@ -39,6 +41,7 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteConfirmation
+import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
 import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
 import com.ssafy.s15p21a206.tiger.feature.session.labelRes
 
@@ -268,6 +271,36 @@ private fun SessionCardMenu(
                 onClick = onDelete,
             )
         }
+    }
+}
+
+@PortraitScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun TaskSessionListScreenPreview() {
+    TaskSessionListScreenPreview(SessionPreviewSamples.sessions)
+}
+
+/** 마지막 세션을 지운 Task. */
+@PortraitScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun EmptyTaskSessionListScreenPreview() {
+    TaskSessionListScreenPreview(emptyList())
+}
+
+@Composable
+@Suppress("FunctionName")
+private fun TaskSessionListScreenPreview(sessions: List<SessionSummary>) {
+    ScreenPreview {
+        TaskSessionListScreen(
+            taskName = "컵 집기",
+            sessions = sessions,
+            onBack = {},
+            onOpenSession = {},
+            onDeleteSession = {},
+            onStartCapture = {},
+        )
     }
 }
 

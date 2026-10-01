@@ -17,11 +17,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlaySupporting
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
@@ -248,6 +251,66 @@ private fun WhiteBalanceRow(
         )
     }
 }
+
+/** 수동 설정을 다 쓸 수 있는 기기. */
+@CameraSheetPreview
+@Composable
+@Suppress("FunctionName")
+private fun CaptureCameraPanelPreview() {
+    val capabilities = sampleCapabilities(manualSensor = true)
+    CaptureCameraPanelPreview(ManualCameraUiState(capabilities, capabilities.defaultConfig(), panelOpen = true))
+}
+
+/** 수동 설정을 쓸 수 없는 기기. 조작 대신 사유가 서고 해상도만 고를 수 있다. */
+@CameraSheetPreview
+@Composable
+@Suppress("FunctionName")
+private fun UnsupportedCaptureCameraPanelPreview() {
+    CaptureCameraPanelPreview(ManualCameraUiState(sampleCapabilities(manualSensor = false), panelOpen = true))
+}
+
+/** 기기 능력을 아직 읽는 중. */
+@CameraSheetPreview
+@Composable
+@Suppress("FunctionName")
+private fun ReadingCaptureCameraPanelPreview() {
+    CaptureCameraPanelPreview(ManualCameraUiState(panelOpen = true))
+}
+
+@Composable
+@Suppress("FunctionName")
+private fun CaptureCameraPanelPreview(state: ManualCameraUiState) {
+    ScreenPreview(background = colorResource(R.color.capture_camera_sheet)) {
+        CaptureCameraPanel(
+            state = state,
+            resolution = RecordingFormat.DEFAULT_RESOLUTION,
+            enabled = true,
+            onChange = {},
+            onResolutionChange = {},
+            onFixWhiteBalance = {},
+            onClearWhiteBalance = {},
+            onClose = {},
+        )
+    }
+}
+
+private fun sampleCapabilities(manualSensor: Boolean) =
+    ManualCameraCapabilities(
+        cameraId = "0",
+        manualSensor = manualSensor,
+        aeOffSupported = true,
+        afOffSupported = true,
+        awbOffSupported = true,
+        awbLockSupported = true,
+        maxFocusDiopter = 10f,
+        isoRange = 50..3200,
+        exposureRangeNs = 100_000L..100_000_000L,
+        maxFrameDurationNs = null,
+    )
+
+/** 시트의 크기. 폭은 `Widget.Tiger.CameraSheet`의 320dp, 높이는 시트가 가로 화면에서 받는 높이다. */
+@Preview(widthDp = 320, heightDp = 411)
+private annotation class CameraSheetPreview
 
 /** 초점 슬라이더가 0 폭이 되지 않게 하는 최소 범위. 고정 초점 기기에서도 화면이 깨지지 않는다. */
 private const val MIN_SLIDER_SPAN = 1f

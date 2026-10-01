@@ -32,6 +32,8 @@ import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.LabelledGroup
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.LabelledValue
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.PortraitScreenPreview
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
@@ -39,11 +41,13 @@ import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteConfirmation
+import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
 import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
 import com.ssafy.s15p21a206.tiger.feature.session.labelRes
 import com.ssafy.s15p21a206.tiger.feature.session.video.SharedVideoPlayer
 import com.ssafy.s15p21a206.tiger.feature.session.video.VideoPlayer
 import com.ssafy.s15p21a206.tiger.feature.session.video.playableMainVideo
+import com.ssafy.s15p21a206.tiger.feature.session.video.rememberSharedVideoPlayer
 import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoAspectRatio
 
 /**
@@ -304,6 +308,55 @@ private fun PausePlaybackWhileConfirmingDelete(
 ) {
     LaunchedEffect(pendingDelete) {
         if (pendingDelete != null) sharedPlayer.pause()
+    }
+}
+
+/** 아직 올리지 않은 세션. 전송 상태 묶음 대신 업로드 버튼이 선다. */
+@PortraitScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun LocalSessionDetailScreenPreview() {
+    SessionDetailScreenPreview(SessionPreviewSamples.withState(UploadState.LOCAL_ONLY))
+}
+
+/** 전송과 삭제가 모두 실패한 세션. 두 사유가 다 보인다. */
+@PortraitScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun FailedSessionDetailScreenPreview() {
+    SessionDetailScreenPreview(
+        summary = SessionPreviewSamples.withState(UploadState.FAILED),
+        deleteFailureReason = stringResource(R.string.session_delete_failed),
+        uploadFailureReason = "Network upload failed",
+    )
+}
+
+/** 목록에서 사라진 세션을 연 경우. */
+@PortraitScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun MissingSessionDetailScreenPreview() {
+    SessionDetailScreenPreview(summary = null)
+}
+
+@Composable
+@Suppress("FunctionName")
+private fun SessionDetailScreenPreview(
+    summary: SessionSummary?,
+    deleteFailureReason: String? = null,
+    uploadFailureReason: String? = null,
+) {
+    ScreenPreview {
+        SessionDetailScreen(
+            summary = summary,
+            onBack = {},
+            onUpload = {},
+            onDelete = {},
+            deleteFailureReason = deleteFailureReason,
+            uploadFailureReason = uploadFailureReason,
+            sharedPlayer = rememberSharedVideoPlayer(),
+            onOpenFullscreenVideo = {},
+        )
     }
 }
 

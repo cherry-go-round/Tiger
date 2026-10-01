@@ -21,10 +21,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeaderHeight
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.PortraitScreenPreview
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerCard
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
+import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
 
 /**
  * 홈. 완료된 Session을 Task별로 묶어 보인다.
@@ -82,6 +85,24 @@ private fun TaskSummaryItem(
             Text(text = taskName, style = TigerText.itemName)
             Text(text = stringResource(R.string.task_list_session_count, sessionCount), style = TigerText.supporting)
         }
+    }
+}
+
+@PortraitScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun SessionListScreenPreview() {
+    ScreenPreview {
+        SessionListScreen(sessions = SessionPreviewSamples.sessions, onStartCapture = {}, onOpenTask = {})
+    }
+}
+
+@PortraitScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun EmptySessionListScreenPreview() {
+    ScreenPreview {
+        SessionListScreen(sessions = emptyList(), onStartCapture = {}, onOpenTask = {})
     }
 }
 

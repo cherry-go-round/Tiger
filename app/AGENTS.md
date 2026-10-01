@@ -18,6 +18,7 @@
 - **타입 스케일과 글꼴**: `core/designsystem/theme/Type.kt`. Material 3 컴포넌트가 제 안에서 집어 쓰는 눈금이라 여기를 비우면 그 컴포넌트만 앱 밖의 값을 쓴다.
 - **여백**: `core/designsystem/theme/TigerSpacing.kt`. 조회 화면의 좌우 가장자리와 카드 안쪽 여백은 여기서 고른다. 한 화면에서만 쓰는 간격은 그 화면에 둔다. 수집 화면 오버레이의 크기·여백은 `feature/capture/CaptureOverlayDimens.kt`에 있다.
 - **공용 컴포넌트**: `core/designsystem/component`의 `TigerCard`, `LabelledGroup`, `LabelledValue`, `TigerMenuItem`. 카드와 묶음과 메뉴 항목은 여기를 거친다.
+- **Preview**: 컴포넌트는 `ComponentPreview`, 화면은 `ScreenPreview`에 올리고 크기는 `@PortraitScreenPreview`·`@LandscapeScreenPreview`로 고른다. 어두운 테마 변형은 두지 않는다. 다이얼로그·시트는 창을 따로 띄워 그려지지 않으므로 안의 판을 떼어 그린다. Preview를 따로 두지 않는 것은 카메라 `TextureView`(`CapturePreviewSurface`), Media3 `PlayerView`(`VideoPlayer`), View 기반 `SideSheetDialog`(`CaptureCameraSheet`)다.
 
 역할은 색을 비워 두지 않는다. 비우면 놓인 자리의 콘텐츠 색을 따라 같은 역할이 자리마다 다르게 렌더된다. 예외는 `menuItem` 하나이고, 그 자리의 색은 스타일이 아니라 상태(되돌릴 수 없음·비활성)가 정하므로 컴포넌트에 맡긴다.
 

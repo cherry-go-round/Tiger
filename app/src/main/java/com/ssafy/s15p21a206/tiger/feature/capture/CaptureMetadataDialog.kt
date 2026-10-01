@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.LandscapeScreenPreview
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 
 /**
  * 수집을 시작하기 전에 Task·Object를 받는다.
@@ -65,17 +67,46 @@ internal fun CaptureMetadataDialog(
         onDismissRequest = onCancel,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-                MetadataTopBar(ready = ready, onConfirm = onConfirm, onCancel = onCancel)
-                MetadataFields(
-                    task = task,
-                    objectName = objectName,
-                    onTaskChange = onTaskChange,
-                    onObjectNameChange = onObjectNameChange,
-                    onDone = confirmFromKeyboard.takeIf { ready },
-                )
-            }
+        MetadataForm(
+            task = task,
+            objectName = objectName,
+            ready = ready,
+            onTaskChange = onTaskChange,
+            onObjectNameChange = onObjectNameChange,
+            onConfirm = onConfirm,
+            onCancel = onCancel,
+            onKeyboardDone = confirmFromKeyboard.takeIf { ready },
+        )
+    }
+}
+
+/**
+ * 다이얼로그 창 안을 채우는 전체화면 판. 상단 앱바와 입력 칸이다.
+ *
+ * @param onKeyboardDone 키보드의 완료가 할 일. 두 칸이 다 채워지지 않았으면 null이다.
+ */
+@Suppress("FunctionName")
+@Composable
+private fun MetadataForm(
+    task: String,
+    objectName: String,
+    ready: Boolean,
+    onTaskChange: (String) -> Unit,
+    onObjectNameChange: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+    onKeyboardDone: (() -> Unit)?,
+) {
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+            MetadataTopBar(ready = ready, onConfirm = onConfirm, onCancel = onCancel)
+            MetadataFields(
+                task = task,
+                objectName = objectName,
+                onTaskChange = onTaskChange,
+                onObjectNameChange = onObjectNameChange,
+                onDone = onKeyboardDone,
+            )
         }
     }
 }
@@ -151,6 +182,29 @@ private fun MetadataFields(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions =
                 KeyboardActions(onDone = { onDone?.invoke() }),
+        )
+    }
+}
+
+/**
+ * Task 화면에서 시작해 Task가 채워진 채로 연 경우. Object가 비어 확인을 아직 누를 수 없다.
+ *
+ * 다이얼로그는 창을 따로 띄워 Preview에 그려지지 않으므로 그 안의 판을 그린다.
+ */
+@LandscapeScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun MetadataFormPreview() {
+    ScreenPreview {
+        MetadataForm(
+            task = "컵 집기",
+            objectName = "",
+            ready = false,
+            onTaskChange = {},
+            onObjectNameChange = {},
+            onConfirm = {},
+            onCancel = {},
+            onKeyboardDone = null,
         )
     }
 }

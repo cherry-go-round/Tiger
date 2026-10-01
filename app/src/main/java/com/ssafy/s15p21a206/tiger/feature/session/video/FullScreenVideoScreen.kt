@@ -21,6 +21,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.android.LockLandscapeWhilePlaying
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.PortraitScreenPreview
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
@@ -123,5 +125,15 @@ private fun LandscapeLockButton(
             contentDescription = description,
             tint = Color.White,
         )
+    }
+}
+
+/** 재생할 영상이 없는 경우. 재생기 대신 문구가 서고 뒤로 가기만 남는다. */
+@PortraitScreenPreview
+@Composable
+@Suppress("FunctionName")
+private fun FullScreenVideoScreenPreview() {
+    ScreenPreview(background = Color.Black) {
+        FullScreenVideoScreen(bundlePath = null, sharedPlayer = rememberSharedVideoPlayer(), onBack = {})
     }
 }
