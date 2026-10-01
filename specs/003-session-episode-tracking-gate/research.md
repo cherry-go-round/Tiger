@@ -6,8 +6,8 @@
 
 코드를 확인한 결과, 이번 요청의 상당 부분은 신규 구현이 아니라 **이미 구현된 도메인 로직을 production 호출 경로에 연결하는 작업**이다. 이 사실이 이후 모든 결정의 전제가 된다.
 
-- [`CaptureSessionCoordinator`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/capture/CaptureSessionCoordinator.kt)에 안정화 게이트(`READY_GATE_NS` = 1초), 유실 판정(`TRACKING_LOSS_NS` = 0.5초), `INVALID_TRACKING` 마감, `startEpisode`의 `READY` 선행 조건이 이미 정확히 구현되어 있고 단위 테스트도 있다. 그러나 이 클래스는 테스트에서만 인스턴스화되며 `MainActivity`도 `AndroidCaptureRuntime`도 참조하지 않는다.
-- [`FrameTimestampWriter`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/capture/CaptureSessionCoordinator.kt)는 `append(frameNumber, timestampNs)` 시그니처로 올바른 형식을 쓰지만 역시 미사용이다. 실제 기록은 `AndroidCaptureRuntime`이 `"$timestampNs,$timestampNs,SENSOR_TIMESTAMP"`를 직접 써서 수행한다.
+- [`CaptureSessionCoordinator`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/core/capture/CaptureSessionCoordinator.kt)에 안정화 게이트(`READY_GATE_NS` = 1초), 유실 판정(`TRACKING_LOSS_NS` = 0.5초), `INVALID_TRACKING` 마감, `startEpisode`의 `READY` 선행 조건이 이미 정확히 구현되어 있고 단위 테스트도 있다. 그러나 이 클래스는 테스트에서만 인스턴스화되며 `MainActivity`도 `AndroidCaptureRuntime`도 참조하지 않는다.
+- [`FrameTimestampWriter`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/core/capture/CaptureSessionCoordinator.kt)는 `append(frameNumber, timestampNs)` 시그니처로 올바른 형식을 쓰지만 역시 미사용이다. 실제 기록은 `AndroidCaptureRuntime`이 `"$timestampNs,$timestampNs,SENSOR_TIMESTAMP"`를 직접 써서 수행한다.
 - `EpisodeState.INVALID_TRACKING`과 `RecordingState`의 전이 규칙도 이미 정의되어 있다.
 
 `specs/AGENTS.md`의 완료 판정 규칙이 말하는 전형적인 `미연결` 사례다. 따라서 이번 구현은 새 상태 기계를 설계하는 것이 아니라, 기존 상태 기계를 실제 런타임의 유일한 판단 주체로 승격시키는 방향으로 진행한다.
@@ -31,7 +31,7 @@
 
 ## 결정 2: 수집 화면 상태 이름을 명세 어휘에 맞춘다
 
-**결정**: [`CaptureWorkspaceControlState`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/ui/capture/CaptureControlPolicy.kt)를 `Idle`, `Initializing`, `Ready`, `EpisodeActive`, `Finalizing` 다섯 값으로 재정의한다.
+**결정**: [`CaptureWorkspaceControlState`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/feature/capture/state/CaptureControlPolicy.kt)를 `Idle`, `Initializing`, `Ready`, `EpisodeActive`, `Finalizing` 다섯 값으로 재정의한다.
 
 | 기존 | 신규 | 의미 |
 |---|---|---|
@@ -112,7 +112,7 @@
 | `sensor_width_mm` / `sensor_height_mm` | Camera2 `SENSOR_INFO_PHYSICAL_SIZE` | 대체로 |
 | `distortion_coefficients` | Camera2 `LENS_DISTORTION` | 기기 의존 |
 
-**근거**: `getImageIntrinsics()`는 ARCore가 실제로 사용하는 CPU 이미지 스트림에 대응하는 값을 돌려준다. 그리고 현행 구현은 MediaRecorder 해상도를 `session.cameraConfig.imageSize`로 설정하므로([`AndroidCaptureRuntime`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/capture/AndroidCaptureRuntime.kt)), **녹화 해상도와 intrinsics 기준 해상도가 자동으로 일치한다.** 수신 측이 요구한 "기기 대표값이 아니라 실제 촬영 Camera ID 및 Resolution에 대응하는 값"이 별도 보정 없이 충족된다. FR-022와 SC-007의 근거가 이것이다.
+**근거**: `getImageIntrinsics()`는 ARCore가 실제로 사용하는 CPU 이미지 스트림에 대응하는 값을 돌려준다. 그리고 현행 구현은 MediaRecorder 해상도를 `session.cameraConfig.imageSize`로 설정하므로([`AndroidCaptureRuntime`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/core/capture/AndroidCaptureRuntime.kt)), **녹화 해상도와 intrinsics 기준 해상도가 자동으로 일치한다.** 수신 측이 요구한 "기기 대표값이 아니라 실제 촬영 Camera ID 및 Resolution에 대응하는 값"이 별도 보정 없이 충족된다. FR-022와 SC-007의 근거가 이것이다.
 
 `LENS_DISTORTION`은 API 28 이상에서 정의되지만 기기가 제공하지 않으면 `null`이다. FR-024에 따라 이 경우 값을 계산해 채우지 않고 `null`로 남긴다.
 
@@ -128,7 +128,7 @@
 
 **근거**: FR-025가 명시적으로 요구한다. 수집이 끝난 영상·IMU·Pose 데이터는 그 자체로 가치가 있으므로, 부가 메타데이터 획득 실패로 Session 전체를 잃어서는 안 된다.
 
-**호환성 확인**: [`SessionBundleValidator`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/episode/EpisodeBundleValidator.kt)는 `metadata.json`에서 `session_id`, `camera_streams`, `files`만 읽고 알 수 없는 키는 무시한다. 새 필드 추가는 검증을 깨지 않는다. FR-026과 SC-008이 충족된다.
+**호환성 확인**: [`SessionBundleValidator`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/core/session/SessionBundleValidator.kt)는 `metadata.json`에서 `session_id`, `camera_streams`, `files`만 읽고 알 수 없는 키는 무시한다. 새 필드 추가는 검증을 깨지 않는다. FR-026과 SC-008이 충족된다.
 
 ---
 

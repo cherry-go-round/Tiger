@@ -6,7 +6,7 @@
 
 수집 화면의 Session 시작과 Episode 시작을 분리하고, ARCore Tracking 상태를 Episode 유효성 판정에 연결한다. 또한 `main_frame_timestamps.csv`의 `frame_number`를 순차 frame index로 정정하고, 촬영에 사용된 Camera의 ID·해상도·Intrinsic을 `metadata.json`에 기록한다.
 
-핵심 접근은 **신규 상태 기계 설계가 아니라 기존 도메인 로직의 배선**이다. [`CaptureSessionCoordinator`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/capture/CaptureSessionCoordinator.kt)에 안정화 게이트(1초), 유실 판정(0.5초), `INVALID_TRACKING` 마감, `startEpisode`의 `READY` 선행 조건이 이미 구현되어 단위 테스트까지 있으나 production 호출 경로에 연결되어 있지 않다. `FrameTimestampWriter`도 올바른 `frame_number` 형식을 갖고 있으나 미사용이다. 이번 작업은 이 둘을 수집 화면과 `AndroidCaptureRuntime`의 유일한 판단 주체로 승격시킨다.
+핵심 접근은 **신규 상태 기계 설계가 아니라 기존 도메인 로직의 배선**이다. [`CaptureSessionCoordinator`](../../app/src/main/java/com/ssafy/s15p21a206/tiger/core/capture/CaptureSessionCoordinator.kt)에 안정화 게이트(1초), 유실 판정(0.5초), `INVALID_TRACKING` 마감, `startEpisode`의 `READY` 선행 조건이 이미 구현되어 단위 테스트까지 있으나 production 호출 경로에 연결되어 있지 않다. `FrameTimestampWriter`도 올바른 `frame_number` 형식을 갖고 있으나 미사용이다. 이번 작업은 이 둘을 수집 화면과 `AndroidCaptureRuntime`의 유일한 판단 주체로 승격시킨다.
 
 ARCore pose 스레드가 Tracking 여부를 노출하고, 수집 화면이 100ms ticker로 Coordinator에 반복 전달해 시간 기반 판정이 발화하도록 한다. Camera Intrinsic은 첫 유효 ARCore 프레임에서 1회 획득해 Session 마감 시 기록하며, 획득 실패가 Session 마감을 막지 않는다. 파일 레이아웃과 업로드 계약은 `metadata.json`에 `camera` 객체를 추가하는 것 외에 바꾸지 않는다.
 
