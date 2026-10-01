@@ -163,22 +163,6 @@ private fun NewSessionFab(
 }
 
 /**
- * 목록 이름표가 첫 카드에 붙지 않도록 두는 여백.
- *
- * 목록 자체의 8dp 간격에 더해져 카드와 카드 사이보다 넓어야 한 묶음을 이끄는 줄로 읽힌다.
- */
-private val SECTION_HEADER_BOTTOM_PADDING = 8.dp
-
-/** 이름표가 화면 맨 위나 헤더에 붙지 않도록 본문 위에 두는 여백. 두 목록 화면이 같은 값을 쓴다. */
-private val LIST_CONTENT_TOP_PADDING = 8.dp
-
-private const val HOME_SECTION_KEY = "home-section"
-private const val TASK_SESSIONS_SECTION_KEY = "task-sessions-section"
-
-/** FAB가 마지막 카드나 안내를 가리지 않도록 목록 아래에 두는 여백. */
-private val FAB_CLEARANCE = 88.dp
-
-/**
  * 목록이 비었을 때 남은 공간 가운데에 놓는 안내다.
  *
  * 목록 항목처럼 왼쪽 위에 붙여 두면 곧 채워질 자리를 기다리는 빈 행으로 읽힌다. 화면에 혼자 있는
@@ -198,18 +182,6 @@ private fun EmptyListMessage(
         )
     }
 }
-
-/** 카드가 안쪽에 두는 여백. 카드 바깥의 글자를 카드 안 글자와 맞출 때 같은 값을 쓴다. */
-private val CARD_CONTENT_PADDING = 16.dp
-
-/**
- * 카드 안 두 줄 사이.
- *
- * 안쪽 여백의 절반이다. 이름과 그에 딸린 값이 한 덩어리로 읽히려면 둘을 가르는 간격이 덩어리를
- * 감싸는 여백보다 뚜렷하게 작아야 한다. 전에는 줄상자의 남는 여백까지 더해져 실제 13dp였고, 카드
- * 여백 18~20dp와 맞먹어 두 줄이 따로 떴다.
- */
-private val CARD_LINE_GAP = 8.dp
 
 @Composable
 @Suppress("FunctionName")
@@ -459,3 +431,31 @@ private fun SessionSummaryItem(
         )
     }
 }
+
+/**
+ * 목록 이름표가 첫 카드에 붙지 않도록 두는 여백.
+ *
+ * 목록 자체의 8dp 간격에 더해져 카드와 카드 사이보다 넓어야 한 묶음을 이끄는 줄로 읽힌다.
+ */
+private val SECTION_HEADER_BOTTOM_PADDING = 8.dp
+
+/** 이름표가 화면 맨 위나 헤더에 붙지 않도록 본문 위에 두는 여백. 두 목록 화면이 같은 값을 쓴다. */
+private val LIST_CONTENT_TOP_PADDING = 8.dp
+
+private const val HOME_SECTION_KEY = "home-section"
+private const val TASK_SESSIONS_SECTION_KEY = "task-sessions-section"
+
+/** FAB가 마지막 카드나 안내를 가리지 않도록 목록 아래에 두는 여백. */
+private val FAB_CLEARANCE = 88.dp
+
+/** 카드가 안쪽에 두는 여백. 카드 바깥의 글자를 카드 안 글자와 맞출 때 같은 값을 쓴다. */
+private val CARD_CONTENT_PADDING = 16.dp
+
+/**
+ * 카드 안 두 줄 사이.
+ *
+ * 안쪽 여백의 절반이다. 이름과 그에 딸린 값이 한 덩어리로 읽히려면 둘을 가르는 간격이 덩어리를
+ * 감싸는 여백보다 뚜렷하게 작아야 한다. 전에는 줄상자의 남는 여백까지 더해져 실제 13dp였고, 카드
+ * 여백 18~20dp와 맞먹어 두 줄이 따로 떴다.
+ */
+private val CARD_LINE_GAP = 8.dp
