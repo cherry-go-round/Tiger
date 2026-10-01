@@ -49,7 +49,7 @@
 
 ### 조회 — 상태 보유자만
 
-Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태 기계가 없으므로 intent와 reducer를 두지 않는다. 전송·삭제 두 동작과 그 결과 문구를 드는 얇은 보유자면 된다.
+Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태 기계가 없으므로 intent와 reducer를 두지 않는다. 전송·삭제 두 동작과 그 결과를 드는 얇은 보유자(`feature/session/SessionOperations`)면 된다.
 
 ### `ViewModel`을 쓰지 않는다
 
@@ -102,7 +102,7 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 
 ### 드라이버가 평범한 클래스가 아닌 이유
 
-`rememberCaptureDriver`는 Composable이다. 권한 `rememberLauncherForActivityResult`는 composition에서만 만들 수 있고, tracking 폴링과 `ON_STOP`·`ON_START` 처리도 composition의 effect다. 그 밖의 로직은 plain class state holder(`CaptureSessionActions`)로 뺀다. 이 holder는 `remember`로 한 번 만들고 작업 공간 상태는 조작을 부를 때 인자로 받는다. 한 번 만든 객체가 생성자로 상태를 받으면 첫 값에 갇히기 때문이다. 돌려주는 `CaptureDriver`는 매 composition 새로 만든다.
+`rememberCaptureDriver`는 Composable이다. 권한 `rememberLauncherForActivityResult`는 composition에서만 만들 수 있고, tracking 폴링과 `ON_STOP` 처리도 composition의 effect다. 유휴 프리뷰를 되살리는 `ON_START`는 `rememberIdlePreview`가 든다. 그 밖의 로직은 plain class state holder(`CaptureSessionActions`)로 뺀다. 이 holder는 `remember`로 한 번 만들고 작업 공간 상태는 조작을 부를 때 인자로 받는다. 한 번 만든 객체가 생성자로 상태를 받으면 첫 값에 갇히기 때문이다. 돌려주는 `CaptureDriver`는 매 composition 새로 만든다.
 
 프리뷰 Surface와 SurfaceTexture가 `IdlePreview`에 있는 것은 Camera2 session을 여는 쪽이 거기이기 때문이다. 화면은 Surface가 생기고 사라졌다는 사실만 알린다.
 
@@ -110,13 +110,13 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 
 수집 파이프라인의 상당 부분은 실제로 composition과 Activity에 묶여 있다. 함께 올리면 수명주기를 직접 관리해야 하므로 오히려 위험해진다.
 
-- `previewSurface`·`previewTexture`는 `AndroidView` 안 `TextureView`의 리스너에서 만들어져 수명이 View에 묶인다. ViewModel이 들고 있으면 backing View가 사라진 뒤의 null·release를 직접 처리해야 한다.
+- 프리뷰 `Surface`·`SurfaceTexture`는 `AndroidView` 안 `TextureView`의 리스너에서 만들어져 수명이 View에 묶인다. ViewModel이 들고 있으면 backing View가 사라진 뒤의 null·release를 직접 처리해야 한다.
 - 카메라 권한·프리뷰 권한의 `rememberLauncherForActivityResult`는 composition에서만 만들 수 있다.
 - ARCore `requestInstall`과 수집 화면의 방향 고정은 Activity를 필요로 한다.
 
 ### 데이터·업로드 계층은 올렸다 (해결)
 
-Room 데이터베이스와 `SessionRepository`, `SessionUploadService`는 `TigerApplication`이 소유한다. `TigerApp`이 받아 쓰고, 세션 저장에 필요한 `repository`만 `CaptureWorkspace`에 넘긴다.
+Room 데이터베이스와 `SessionRepository`, `SessionUploadService`는 `TigerApplication`이 소유한다. `TigerApp`이 받아 쓰고, 수집에 필요한 `repository`와 녹화 해상도 기억(`RecordingResolutionStore`)만 `CaptureWorkspace`에 넘긴다.
 
 2026-09-17에는 "현재 동작에 결함이 없으므로 미룬다"고 두었으나 그 전제가 사실이 아니었다. `configChanges`에 `uiMode`·`locale`·`fontScale`·`density`가 없어, 다크 모드 전환만으로 Activity가 재생성되고 `remember`가 다시 돌아 인스턴스가 하나씩 더 생겼다. 닫는 경로는 없었다.
 

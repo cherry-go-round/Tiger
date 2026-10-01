@@ -63,25 +63,25 @@ app/
 │   ├── MainActivity.kt                 # Activity 선언만
 │   ├── TigerApplication.kt             # 프로세스 수명 객체(Room·OkHttp·repository)
 │   ├── TigerApp.kt                     # 앱 루트. NavHost·조회 운용·수집 상태 소유
-│   ├── capture/                        # 카메라 프리뷰와 AR/IMU 녹화 수명주기
-│   ├── data/local/                     # Room 데이터베이스와 DAO
-│   ├── episode/                        # Session·Episode·bundle·repository 모델
-│   ├── ui/capture/                     # 수집 작업 공간·드라이버·상태·프리뷰 Surface·카메라 설정 시트
-│   ├── ui/session/                     # 세션 목록·상세·운용(전송·삭제)
-│   ├── ui/video/                       # 전체화면 재생과 공유 ExoPlayer
-│   ├── ui/upload/                      # 전송 상태 문구와 백그라운드 취소 판정
-│   ├── ui/theme/                       # 글자 역할·판·타입 스케일·글꼴·색
-│   ├── ui/common/                      # 공통 표시 요소와 방향 고정
-│   └── upload/                         # multipart 업로드와 취소 가능한 작업
+│   ├── core/
+│   │   ├── android/                    # Activity 찾기와 화면 방향 고정
+│   │   ├── capture/                    # 카메라 프리뷰와 AR/IMU 녹화 수명주기
+│   │   ├── common/                     # 화면 계층이 아닌 범용 도우미(시각 형식)
+│   │   ├── database/                   # Room 데이터베이스와 DAO
+│   │   ├── designsystem/               # 테마(글자 역할·판·여백·타입 스케일·글꼴·색)와 공용 컴포넌트
+│   │   ├── model/                      # capture·session·upload 모델
+│   │   ├── session/                    # 번들 저장·검사·마감, repository, 번들 영상 읽기
+│   │   └── upload/                     # multipart 업로드와 전송 서비스
+│   └── feature/
+│       ├── capture/                    # 수집 작업 공간. state·driver·preview·settings·overlay·dialog
+│       └── session/                    # 세션 목록(list)·상세(detail)·재생(video)·운용(전송·삭제)
 ├── src/main/res/values/strings.xml     # 사용자 문구·접근성 라벨
-└── src/test/java/com/ssafy/s15p21a206/tiger/
-    ├── capture/
-    ├── episode/
-    ├── upload/
-    └── ui/
+└── src/test/java/com/ssafy/s15p21a206/tiger/   # main과 같은 패키지 배치
+    ├── core/
+    └── feature/
 ```
 
-2026-09-22에 presentation 계층을 정리하며 갱신했다(S15P21A206-46). 이전에는 `MainActivity.kt` 한 파일이 루트 UI 상태와 화면 구성을 전부 들고 있었다. 2026-09-29에 내보내기 제거와 `ui/theme`·`ui/upload`·카메라 설정 시트를 반영했다.
+2026-09-22에 presentation 계층을 정리하며 갱신했다(S15P21A206-46). 이전에는 `MainActivity.kt` 한 파일이 루트 UI 상태와 화면 구성을 전부 들고 있었다. 2026-09-29에 내보내기 제거와 `ui/theme`·`ui/upload`·카메라 설정 시트를 반영했다. 2026-10-01에 패키지를 `core`·`feature`로 나눈 구조를 반영했다. 각 패키지에 무엇을 두는지는 [`app/AGENTS.md`](../../app/AGENTS.md)에 있다.
 
 **구조 결정**: 기존 단일 Android 앱 모듈을 유지한다. 조회 흐름(목록·Task Session 목록·상세·전체 화면 동영상)은 `androidx.navigation:navigation-compose`의 `NavHost`와 type-safe route로 전환하고, 이탈은 `popBackStack()`으로 통일한다. 수집 작업 공간은 목적지가 아니라 `NavHost` 위에 얹는 모달이며 boolean 상태로 관리한다. 2026-09-17에 S15P21A206-40으로 갱신했다. 이전 결정과 뒤집는 이유는 `research.md`에 있다.
 
@@ -91,7 +91,7 @@ app/
 
 `CaptureControlPolicy`의 네 상태·준비 여부·작업 잠금을 단위 테스트하고, `CaptureScreen`의 production 콜백과 제어 UI가 같은 정책을 사용한다. 종료 확인·BackHandler·툴팁은 `CaptureWorkspaceScreen.kt`에서 렌더링하고 부모가 확인 상태와 비동기 작업을 소유한다. Compose 검증은 기존 환경에 맞게 `src/androidTest/.../ui/CaptureControlStateScreenTest.kt`에 두고, T025는 제어 상태와 UI semantics·툴팁 자동 검사로 완료 판정한다. 개발용 앱이라는 사용자 결정(2026-09-11)에 따라 TalkBack 실사용 검증은 필수 범위에서 제외한다.
 
-이후 바뀐 것: 정책의 상태는 003에서 다섯(`Idle`·`Initializing`·`Ready`·`EpisodeActive`·`Finalizing`)이 됐고, `CaptureScreen`은 2026-09-22에 `CaptureWorkspace`(그리기)와 `rememberCaptureDriver`(콜백)로 갈렸다. 상태와 확인 여부는 `TigerApp`이 소유하는 `CaptureUiState`가 든다.
+이후 바뀐 것: 정책의 상태는 003에서 다섯(`Idle`·`Initializing`·`Ready`·`EpisodeActive`·`Finalizing`)이 됐고, `CaptureScreen`은 2026-09-22에 `CaptureWorkspace`(그리기)와 `rememberCaptureDriver`(콜백)로 갈렸다. 상태와 확인 여부는 `TigerApp`이 소유하는 `CaptureUiState`가 든다. 2026-10-01부터 `CaptureWorkspace`는 수명만 맡고 그리기는 `CaptureWorkspaceContent`가 하며, 제어 UI는 `feature/capture/overlay/CaptureControls.kt`, 종료 확인은 `feature/capture/dialog/CaptureStopConfirmation.kt`, 그 Compose 검증은 `src/androidTest/.../feature/capture/overlay/CaptureControlStateScreenTest.kt`에 있다.
 
 [research.md](research.md)의 모든 결정이 해결됐으며 추가 확인 항목은 없다.
 

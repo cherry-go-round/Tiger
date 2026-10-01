@@ -87,7 +87,7 @@ app/
 
 **구조 결정**: 기존 단일 Android 앱 모듈과 패키지 구성을 유지한다. 새 파일은 `CameraMetadataReader.kt` 하나이며, 나머지는 기존 파일의 수정이다. `CaptureSessionCoordinator`를 옮기거나 재작성하지 않고, 마감 사건 전파용 콜백만 추가해 수집 화면에 연결한다.
 
-위 트리는 이 기능이 손댄 파일이다. 이후 구조가 바뀌었다. `MainActivity`는 `TigerApp`만 띄우고, 상태 계산은 `ui/capture/CaptureState.kt`, ticker와 Episode 마감 저장은 `ui/capture/CaptureDriver.kt`로 옮겼다(2026-09-22, S15P21A206-46). `AndroidCaptureRuntime`의 일은 `ArSharedCameraSession`(카메라)·`ArPoseCollector`(tracking 노출·Intrinsic 확보)·기록 클래스로 갈랐다(2026-09-23). frame index는 구현 때부터 `FrameTimestampWriter`가 센다. 지금의 배치는 [`app/AGENTS.md`](../../app/AGENTS.md)에 있다.
+위 트리는 이 기능이 손댄 파일이다. 이후 구조가 바뀌었다. `MainActivity`는 `TigerApp`만 띄우고, 상태 계산은 `ui/capture/CaptureState.kt`, ticker와 Episode 마감 저장은 `ui/capture/CaptureDriver.kt`로 옮겼다(2026-09-22, S15P21A206-46). `AndroidCaptureRuntime`의 일은 `ArSharedCameraSession`(카메라)·`ArPoseCollector`(tracking 노출·Intrinsic 확보)·기록 클래스로 갈랐다(2026-09-23). frame index는 구현 때부터 `FrameTimestampWriter`가 센다. 이후 패키지를 `core`·`feature`로 나눠, 상태 계산은 `feature/capture/state/`(`CaptureUiState`·`CaptureReducer`), ticker는 `feature/capture/driver/CaptureDriver.kt`, Episode 마감 저장은 `feature/capture/driver/CaptureSessionActions.kt`에 있다(2026-10-01). 지금의 배치는 [`app/AGENTS.md`](../../app/AGENTS.md)에 있다.
 
 ## 조사 결정
 
