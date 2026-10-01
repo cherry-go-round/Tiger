@@ -60,6 +60,12 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureStart
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import kotlin.math.roundToInt
 
+/**
+ * 재생·일시 정지·정지 제어. 단계에 따라 둘 또는 하나를 보인다.
+ *
+ * 거치대 집게가 폰의 가운데를 물어 하단 중앙은 가려지므로 우측 가장자리에 세로로 쌓는다. 끝 여백
+ * 16dp는 56dp 아이콘의 중심을 상단 닫기(48dp, 끝 여백 20dp)와 같은 세로축에 둔다.
+ */
 @Composable
 @Suppress("FunctionName")
 internal fun CaptureWorkspaceControls(
@@ -69,135 +75,55 @@ internal fun CaptureWorkspaceControls(
     onStop: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // 거치대 집게가 폰의 가운데를 물어 하단 중앙은 가려진다. 우측 가장자리에 세로로 쌓는다.
-    // 끝 여백 16dp는 56dp 아이콘의 중심을 상단 X 닫기(48dp, 끝 여백 20dp)와 같은 세로축에 둔다.
     Column(
         modifier = modifier.safeDrawingPadding().padding(end = 16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         when (policy.state) {
-            CaptureWorkspaceControlState.Idle ->
-                CaptureControlIcon(
-                    iconRes = R.drawable.ic_capture_play,
-                    contentDescriptionRes = R.string.capture_control_start,
-                    onClick = onPlay,
-                    enabled = policy.canPlay,
-                    tint = CaptureStart,
-                )
+            CaptureWorkspaceControlState.Idle -> PlayControl(R.string.capture_control_start, policy.canPlay, onPlay)
             CaptureWorkspaceControlState.EpisodeActive -> {
-                CaptureControlIcon(
-                    iconRes = R.drawable.ic_capture_pause,
-                    contentDescriptionRes = R.string.capture_control_pause,
-                    onClick = onPause,
-                    enabled = policy.canPause,
-                )
-                CaptureControlIcon(
-                    iconRes = R.drawable.ic_capture_stop,
-                    contentDescriptionRes = R.string.capture_control_stop,
-                    onClick = onStop,
-                    enabled = policy.canStop,
-                    tint = CaptureDestructive,
-                )
+                PauseControl(policy.canPause, onPause)
+                StopControl(policy.canStop, onStop)
             }
             CaptureWorkspaceControlState.Initializing,
             CaptureWorkspaceControlState.Ready,
             CaptureWorkspaceControlState.Finalizing,
             -> {
-                CaptureControlIcon(
-                    iconRes = R.drawable.ic_capture_play,
-                    contentDescriptionRes = R.string.capture_control_resume,
-                    onClick = onPlay,
-                    enabled = policy.canPlay,
-                    tint = CaptureStart,
-                )
-                CaptureControlIcon(
-                    iconRes = R.drawable.ic_capture_stop,
-                    contentDescriptionRes = R.string.capture_control_stop,
-                    onClick = onStop,
-                    enabled = policy.canStop,
-                    tint = CaptureDestructive,
-                )
+                PlayControl(R.string.capture_control_resume, policy.canPlay, onPlay)
+                StopControl(policy.canStop, onStop)
             }
         }
     }
 }
 
-/**
- * 마감과 그 실패를 알리는 판이다.
- *
- * 마감 중에는 어떤 제어도 받지 않는다([CaptureControlPolicy]가 `canPlay`·`canStop`을 모두 막고
- * 이탈도 무시한다). 그런데 진행 표시를 제어 아이콘과 같은 줄, 같은 크기로 두면 누를 수 있는 것처럼
- * 보인다. 화면을 덮어 아무것도 받지 않는 상태임을 그대로 드러낸다.
- *
- * 진행률은 쓰지 않는다. 오래 걸리는 구간이 둘인데 `MediaRecorder.stop()`은 진행을 알려 주지 않아,
- * 막대를 쓰면 한참 0%에 멈춰 있다가 뛴다. 멈춘 막대는 "잴 수 없다"가 아니라 "멈췄다"로 읽힌다.
- *
- * [failure]가 있으면 실패를 알리고 [onDismissFailure]까지 남는다. 마감에 실패하면 저장된 세션이
- * 없으므로 넘어갈 곳이 없다. 작업 공간에 머물러야 프리뷰가 살아 있는 채로 다시 찍을 수 있다.
- */
+/** Session 전에는 Session을, 그 뒤에는 Episode를 시작한다. 이름([description])만 다르다. */
 @Composable
 @Suppress("FunctionName")
-internal fun CaptureFinalizingOverlay(
-    failure: String?,
-    onDismissFailure: () -> Unit,
-    modifier: Modifier = Modifier,
+private fun PlayControl(
+    @StringRes description: Int,
+    enabled: Boolean,
+    onClick: () -> Unit,
 ) {
-    val finalizing = stringResource(R.string.capture_finalizing)
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(CaptureFullScreenScrim)
-                // 덮은 아래의 제어가 눌리지 않게 입력을 여기서 삼킨다.
-                .clickable(enabled = false, onClick = {})
-                .safeDrawingPadding()
-                .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-    ) {
-        if (failure == null) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp).semantics { contentDescription = finalizing },
-                color = Color.White,
-            )
-            Text(text = finalizing, style = TigerText.overlayTitle)
-            Text(
-                text = stringResource(R.string.capture_finalizing_warning),
-                style = TigerText.overlaySupporting,
-            )
-        } else {
-            Text(text = failure, style = TigerText.overlayTitle)
-            Button(onClick = onDismissFailure) { Text(stringResource(R.string.action_confirm)) }
-        }
-    }
+    CaptureControlIcon(R.drawable.ic_capture_play, description, onClick, enabled, tint = CaptureStart)
 }
 
-/** 현재 수집 상태를 프리뷰 위에 표시한다. Tracking 안정화 여부를 사용자가 바로 알 수 있어야 한다. */
 @Composable
 @Suppress("FunctionName")
-internal fun CaptureWorkspaceStatus(
-    state: CaptureWorkspaceControlState,
-    modifier: Modifier = Modifier,
+private fun PauseControl(
+    enabled: Boolean,
+    onClick: () -> Unit,
 ) {
-    val labelRes =
-        when (state) {
-            CaptureWorkspaceControlState.Idle -> R.string.capture_status_idle
-            CaptureWorkspaceControlState.Initializing -> R.string.capture_status_initializing
-            CaptureWorkspaceControlState.Ready -> R.string.capture_status_ready
-            CaptureWorkspaceControlState.EpisodeActive -> R.string.capture_status_episode_active
-            CaptureWorkspaceControlState.Finalizing -> R.string.capture_status_finalizing
-        }
-    val label = stringResource(labelRes)
-    Text(
-        text = label,
-        style = TigerText.overlayBadge,
-        modifier =
-            modifier
-                .background(CaptureOverlayScrim, CircleShape)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .semantics { contentDescription = label },
-    )
+    CaptureControlIcon(R.drawable.ic_capture_pause, R.string.capture_control_pause, onClick, enabled)
+}
+
+@Composable
+@Suppress("FunctionName")
+private fun StopControl(
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    CaptureControlIcon(R.drawable.ic_capture_stop, R.string.capture_control_stop, onClick, enabled, tint = CaptureDestructive)
 }
 
 @Composable
@@ -225,22 +151,98 @@ private fun CaptureControlIcon(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * 마감과 그 실패를 알리는 판이다.
+ *
+ * 마감 중에는 어떤 제어도 받지 않는다([CaptureControlPolicy]가 `canPlay`·`canStop`을 모두 막고
+ * 이탈도 무시한다). 그런데 진행 표시를 제어 아이콘과 같은 줄, 같은 크기로 두면 누를 수 있는 것처럼
+ * 보인다. 화면을 덮어 아무것도 받지 않는 상태임을 그대로 드러낸다.
+ *
+ * 진행률은 쓰지 않는다. 오래 걸리는 구간이 둘인데 `MediaRecorder.stop()`은 진행을 알려 주지 않아,
+ * 막대를 쓰면 한참 0%에 멈춰 있다가 뛴다. 멈춘 막대는 "잴 수 없다"가 아니라 "멈췄다"로 읽힌다.
+ *
+ * [failure]가 있으면 실패를 알리고 [onDismissFailure]까지 남는다. 마감에 실패하면 저장된 세션이
+ * 없으므로 넘어갈 곳이 없다. 작업 공간에 머물러야 프리뷰가 살아 있는 채로 다시 찍을 수 있다.
+ */
 @Composable
 @Suppress("FunctionName")
-internal fun CaptureTooltip(
-    @StringRes label: Int,
+internal fun CaptureFinalizingOverlay(
+    failure: String?,
+    onDismissFailure: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
 ) {
-    TooltipBox(
-        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-        tooltip = { PlainTooltip { Text(stringResource(label)) } },
-        state = rememberTooltipState(),
-        modifier = modifier,
-        content = content,
+    Column(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(CaptureFullScreenScrim)
+                .blockTouchesBelow()
+                .safeDrawingPadding()
+                .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+    ) {
+        if (failure == null) FinalizingProgress() else FinalizeFailure(failure, onDismissFailure)
+    }
+}
+
+/** 덮은 아래의 제어가 눌리지 않게 입력을 여기서 삼킨다. */
+private fun Modifier.blockTouchesBelow(): Modifier = clickable(enabled = false, onClick = {})
+
+@Composable
+@Suppress("FunctionName")
+private fun FinalizingProgress() {
+    val finalizing = stringResource(R.string.capture_finalizing)
+    CircularProgressIndicator(
+        modifier = Modifier.size(48.dp).semantics { contentDescription = finalizing },
+        color = Color.White,
+    )
+    Text(text = finalizing, style = TigerText.overlayTitle)
+    Text(
+        text = stringResource(R.string.capture_finalizing_warning),
+        style = TigerText.overlaySupporting,
     )
 }
+
+@Composable
+@Suppress("FunctionName")
+private fun FinalizeFailure(
+    failure: String,
+    onDismiss: () -> Unit,
+) {
+    Text(text = failure, style = TigerText.overlayTitle)
+    Button(onClick = onDismiss) { Text(stringResource(R.string.action_confirm)) }
+}
+
+/** 현재 수집 상태를 프리뷰 위에 표시한다. Tracking 안정화 여부를 사용자가 바로 알 수 있어야 한다. */
+@Composable
+@Suppress("FunctionName")
+internal fun CaptureWorkspaceStatus(
+    state: CaptureWorkspaceControlState,
+    modifier: Modifier = Modifier,
+) {
+    val label = stringResource(state.statusLabelRes)
+    Text(
+        text = label,
+        style = TigerText.overlayBadge,
+        modifier =
+            modifier
+                .background(CaptureOverlayScrim, CircleShape)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .semantics { contentDescription = label },
+    )
+}
+
+@get:StringRes
+private val CaptureWorkspaceControlState.statusLabelRes: Int
+    get() =
+        when (this) {
+            CaptureWorkspaceControlState.Idle -> R.string.capture_status_idle
+            CaptureWorkspaceControlState.Initializing -> R.string.capture_status_initializing
+            CaptureWorkspaceControlState.Ready -> R.string.capture_status_ready
+            CaptureWorkspaceControlState.EpisodeActive -> R.string.capture_status_episode_active
+            CaptureWorkspaceControlState.Finalizing -> R.string.capture_status_finalizing
+        }
 
 @Composable
 @Suppress("FunctionName")
@@ -257,6 +259,11 @@ internal fun CaptureStopConfirmation(
     )
 }
 
+/**
+ * 작업 공간을 닫는 버튼과 시스템 뒤로 가기. 둘 다 [CaptureControlPolicy.exitAction]을 따른다.
+ *
+ * 배경 없는 글리프는 영상과 레터박스 경계에 걸쳐 떠 보이므로 다른 오버레이와 같은 판에 올린다.
+ */
 @Composable
 @Suppress("FunctionName")
 internal fun CaptureWorkspaceExitControls(
@@ -264,14 +271,13 @@ internal fun CaptureWorkspaceExitControls(
     onExit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BackHandler { if (policy.exitAction != CaptureExitAction.Ignore) onExit() }
-    val description = stringResource(R.string.capture_close_content_description)
     val enabled = policy.exitAction != CaptureExitAction.Ignore
+    BackHandler { if (enabled) onExit() }
+    val description = stringResource(R.string.capture_close_content_description)
     CaptureTooltip(R.string.capture_close_content_description, modifier) {
         IconButton(
             onClick = onExit,
             enabled = enabled,
-            // 배경 없는 글리프는 영상과 레터박스 경계에 걸쳐 떠 보인다. 다른 오버레이와 같은 판에 올린다.
             modifier =
                 Modifier
                     .size(48.dp)
@@ -285,6 +291,24 @@ internal fun CaptureWorkspaceExitControls(
             )
         }
     }
+}
+
+/** 길게 누르면 [label]을 보여 준다. 수집 화면의 글리프 버튼들이 이름을 드러내는 방법이다. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+@Suppress("FunctionName")
+internal fun CaptureTooltip(
+    @StringRes label: Int,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(stringResource(label)) } },
+        state = rememberTooltipState(),
+        modifier = modifier,
+        content = content,
+    )
 }
 
 /**
