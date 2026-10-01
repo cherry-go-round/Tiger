@@ -103,10 +103,21 @@ internal fun rememberCaptureDriver(
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val scope = rememberCoroutineScope()
-    val captureRuntime = remember { AndroidCaptureRuntime(context.applicationContext, SessionBundleStore(context.applicationContext)) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    // 화면 문구. 콜백이 composition 밖에서 불리므로 여기서 미리 읽어 둔다.
     val previewFailureMessage = stringResource(R.string.capture_preview_failed)
     val operationFailureMessage = stringResource(R.string.capture_operation_failed)
+    val whiteBalancePendingMessage = stringResource(R.string.capture_camera_white_balance_pending)
+    val episodeInvalidatedMessage = stringResource(R.string.capture_episode_invalid_tracking)
+    val recordingCameraUnavailable = stringResource(R.string.recording_camera_unavailable)
+    val activeEpisodeEndRequired = stringResource(R.string.active_episode_end_required)
+    val trackingNotReadyMessage = stringResource(R.string.capture_tracking_not_ready)
+    val captureFinalizeFailed = stringResource(R.string.capture_finalize_failed)
+    val arCoreUnavailable = stringResource(R.string.arcore_unavailable)
+    val arCoreInstallMessage = stringResource(R.string.arcore_install_requested)
+    val arCoreSessionStartFailed = stringResource(R.string.arcore_session_start_failed)
+
+    val captureRuntime = remember { AndroidCaptureRuntime(context.applicationContext, SessionBundleStore(context.applicationContext)) }
+    val snackbarHostState = remember { SnackbarHostState() }
     var previewSurface by remember { mutableStateOf<Surface?>(null) }
     // 수집 시작 시 ARCore가 고른 해상도로 버퍼를 다시 맞추려면 SurfaceTexture를 들고 있어야 한다.
     var previewTexture by remember { mutableStateOf<SurfaceTexture?>(null) }
@@ -122,7 +133,6 @@ internal fun rememberCaptureDriver(
         remember {
             ManualCameraProfile(context.applicationContext, context.getSystemService(CameraManager::class.java))
         }
-    val whiteBalancePendingMessage = stringResource(R.string.capture_camera_white_balance_pending)
 
     // 녹화에 쓰일 카메라의 능력은 한 번만 읽는다. ARCore에게 어느 카메라인지 물으려면 Session을
     // 잠깐 만들어야 해 수백 ms가 걸리므로 배경에서 한다. 읽지 못하면 패널이 사유를 보여 주고,
@@ -134,7 +144,6 @@ internal fun rememberCaptureDriver(
         onIntent(CaptureIntent.ManualCameraProfiled(capabilities, config))
         previewSession.apply(config)
     }
-    val episodeInvalidatedMessage = stringResource(R.string.capture_episode_invalid_tracking)
     val coordinator =
         remember {
             CaptureSessionCoordinator(
@@ -151,13 +160,6 @@ internal fun rememberCaptureDriver(
                 },
             )
         }
-    val recordingCameraUnavailable = stringResource(R.string.recording_camera_unavailable)
-    val activeEpisodeEndRequired = stringResource(R.string.active_episode_end_required)
-    val trackingNotReadyMessage = stringResource(R.string.capture_tracking_not_ready)
-    val captureFinalizeFailed = stringResource(R.string.capture_finalize_failed)
-    val arCoreUnavailable = stringResource(R.string.arcore_unavailable)
-    val arCoreInstallMessage = stringResource(R.string.arcore_install_requested)
-    val arCoreSessionStartFailed = stringResource(R.string.arcore_session_start_failed)
 
     // 유휴 Camera2 프리뷰를 (다시) 연다.
     // prepare()는 이미 열려 있으면 즉시 반환하므로 먼저 닫아야 실제로 다시 연다. Surface가 없으면 열 곳이 없다.
