@@ -38,9 +38,7 @@ internal data class ManualCameraUiState(
 /**
  * 수집 작업 공간의 상태 전부.
  *
- * 이전에는 `collecting`·`active`·`trackingReady`·`finalizing` 네 불리언이 16가지 조합을 만들고
- * 그중 다섯만 합법이었다. 나머지 열하나는 타입이 아니라 호출 순서로만 막혀 있었다. 여기서는
- * [phase] 하나가 그 다섯을 든다.
+ * 수집 단계는 [phase] 하나가 든다. 불리언 여럿으로 나누면 합법이 아닌 조합이 타입으로 막히지 않는다.
  *
  * 프리뷰 Surface와 SurfaceTexture에 해당하는 값은 여기 없다. 수명이 `TextureView`에 묶여 있어
  * 상태로 올리면 backing view가 사라진 뒤의 null·release를 직접 관리해야 한다. [IdlePreview]가
@@ -198,81 +196,22 @@ internal sealed interface CaptureIntent {
  */
 internal fun CaptureUiState.reduce(intent: CaptureIntent): CaptureUiState =
     when (intent) {
-        // 직전 Session이 남긴 값을 물려받지 않도록 새로 만든다.
-        is CaptureIntent.Open ->
-            CaptureUiState(
-                open = true,
-                task = intent.task,
-                resolution = intent.resolution,
-                idlePreviewSize = intent.resolution,
-                showMetadataDialog = true,
-            )
+        is CaptureIntent.Open -> openedWorkspace(intent.task, intent.resolution)
         CaptureIntent.Close -> CaptureUiState()
         is CaptureIntent.EditTask -> copy(task = intent.value)
         is CaptureIntent.EditObjectName -> copy(objectName = intent.value)
-        // 해상도도 초점·ISO와 같은 촬영 조건이다. Session이 시작되면 바뀌지 않는다. 시작 직전에
-        // ARCore가 실제로 고른 값으로 맞추는 갱신은 아직 Idle일 때 오므로 여기에 걸리지 않는다.
-        is CaptureIntent.SelectResolution ->
-            if (phase == CaptureWorkspaceControlState.Idle) copy(resolution = intent.value) else this
-        is CaptureIntent.ManualCameraProfiled ->
-            copy(
-                manualCamera =
-                    manualCamera.copy(
-                        capabilities = intent.capabilities,
-                        config = intent.capabilities.coerce(intent.config),
-                    ),
-            )
-        // Session이 시작된 뒤에는 값을 바꾸지 않는다. 화면에서도 막지만, 상태 전이로 한 번 더
-        // 막는 것은 이 값이 촬영 도중 흔들리지 않는 것이 기능의 전부이기 때문이다.
-        is CaptureIntent.EditManualCamera ->
-            when {
-                phase != CaptureWorkspaceControlState.Idle -> this
-                manualCamera.capabilities == null -> this
-                else -> copy(manualCamera = manualCamera.copy(config = manualCamera.capabilities.coerce(intent.value)))
-            }
-        // 촬영 중에는 설정을 열지 않는다. 시트는 모달이라 열려 있는 동안 정지를 누를 수 없고,
-        // 값도 잠겨 있어 열어 봐야 할 일이 없다. 닫는 요청은 언제나 받는다.
-        is CaptureIntent.ToggleManualCameraPanel ->
-            if (intent.open && phase != CaptureWorkspaceControlState.Idle) {
-                this
-            } else {
-                copy(manualCamera = manualCamera.copy(panelOpen = intent.open))
-            }
+        is CaptureIntent.SelectResolution -> withResolution(intent.value)
+        is CaptureIntent.ManualCameraProfiled -> withManualCameraProfile(intent.capabilities, intent.config)
+        is CaptureIntent.EditManualCamera -> withManualCameraConfig(intent.value)
+        is CaptureIntent.ToggleManualCameraPanel -> withCameraPanelOpen(intent.open)
         CaptureIntent.ConfirmMetadata -> copy(showMetadataDialog = false)
         is CaptureIntent.IdlePreviewResized -> copy(idlePreviewSize = intent.value)
         CaptureIntent.PreviewFrameArrived -> if (previewFailed) this else copy(previewReady = true)
         CaptureIntent.PreviewReleased -> copy(previewReady = false)
         is CaptureIntent.PreviewFailed -> copy(previewReady = false, previewFailed = true, notice = intent.notice)
         CaptureIntent.SessionRequested -> copy(busy = true, previewReady = false)
-        is CaptureIntent.SessionStarted ->
-            copy(
-                phase = CaptureWorkspaceControlState.Initializing,
-                // ARCore가 실제로 고른 크기다. 후보 config가 없어 기본값으로 물러났으면 고른 값과 다르다.
-                resolution = intent.resolution,
-                idlePreviewSize = intent.resolution,
-                activeBundle = intent.bundle,
-                recordingStartNs = intent.startedAtNs,
-                busy = false,
-                // 촬영이 시작되면 설정은 잠긴다. 열린 패널은 더 이상 아무것도 받지 않으므로 접는다.
-                manualCamera = manualCamera.copy(panelOpen = false),
-            )
-        is CaptureIntent.TrackingSampled ->
-            when (phase) {
-                CaptureWorkspaceControlState.Initializing,
-                CaptureWorkspaceControlState.Ready,
-                CaptureWorkspaceControlState.EpisodeActive,
-                ->
-                    copy(
-                        phase =
-                            when {
-                                intent.episodeActive -> CaptureWorkspaceControlState.EpisodeActive
-                                intent.ready -> CaptureWorkspaceControlState.Ready
-                                else -> CaptureWorkspaceControlState.Initializing
-                            },
-                    )
-                // Idle에는 아직 Session이 없고 Finalizing은 이미 닫는 중이다.
-                else -> this
-            }
+        is CaptureIntent.SessionStarted -> withSessionStarted(intent.bundle, intent.startedAtNs, intent.resolution)
+        is CaptureIntent.TrackingSampled -> withTrackingSample(intent.ready, intent.episodeActive)
         CaptureIntent.EpisodeStarted ->
             if (phase == CaptureWorkspaceControlState.Ready) copy(phase = CaptureWorkspaceControlState.EpisodeActive) else this
         CaptureIntent.EpisodeEnded ->
@@ -281,7 +220,6 @@ internal fun CaptureUiState.reduce(intent: CaptureIntent): CaptureUiState =
         CaptureIntent.StopDismissed -> copy(showStopConfirmation = false)
         CaptureIntent.FinalizeStarted -> copy(phase = CaptureWorkspaceControlState.Finalizing, showStopConfirmation = false)
         is CaptureIntent.FinalizeFailed -> copy(finalizeFailure = intent.notice)
-        // 실패를 확인받은 뒤에야 다시 찍을 수 있다. Session은 저장되지 않았으므로 Idle로 돌아간다.
         CaptureIntent.FinalizeFailureDismissed -> withoutSession().copy(finalizeFailure = null)
         CaptureIntent.Finalized -> withoutSession().copy(busy = false)
         CaptureIntent.Interrupted -> withoutSession().copy(busy = false)
@@ -290,8 +228,89 @@ internal fun CaptureUiState.reduce(intent: CaptureIntent): CaptureUiState =
         CaptureIntent.NoticeShown -> copy(notice = "")
     }
 
+/** 새로 연 작업 공간. 직전 Session이 남긴 값을 물려받지 않도록 처음부터 만든다. */
+private fun openedWorkspace(
+    task: String,
+    resolution: RecordingResolution,
+): CaptureUiState =
+    CaptureUiState(
+        open = true,
+        task = task,
+        resolution = resolution,
+        idlePreviewSize = resolution,
+        showMetadataDialog = true,
+    )
+
+/**
+ * 녹화 해상도를 고른다. 초점·ISO와 같은 촬영 조건이라 Session이 시작되면 바뀌지 않는다.
+ *
+ * Session 시작 직전에 ARCore가 실제로 고른 값으로 맞추는 갱신도 이 전이로 오지만, 그때는 아직 Idle이라
+ * 막히지 않는다.
+ */
+private fun CaptureUiState.withResolution(value: RecordingResolution): CaptureUiState =
+    if (phase == CaptureWorkspaceControlState.Idle) copy(resolution = value) else this
+
+private fun CaptureUiState.withManualCameraProfile(
+    capabilities: ManualCameraCapabilities,
+    config: ManualCameraConfig,
+): CaptureUiState = copy(manualCamera = manualCamera.copy(capabilities = capabilities, config = capabilities.coerce(config)))
+
+/**
+ * 수동 설정 값을 바꾼다. Session이 시작된 뒤에는 받지 않는다.
+ *
+ * 화면에서도 막지만 전이로 한 번 더 막는다. 이 값이 촬영 도중 흔들리지 않는 것이 이 기능의 전부다.
+ */
+private fun CaptureUiState.withManualCameraConfig(value: ManualCameraConfig): CaptureUiState {
+    val capabilities = manualCamera.capabilities
+    if (phase != CaptureWorkspaceControlState.Idle || capabilities == null) return this
+    return copy(manualCamera = manualCamera.copy(config = capabilities.coerce(value)))
+}
+
+/**
+ * 카메라 설정 시트를 열거나 닫는다. 촬영 중에는 열지 않고, 닫는 요청은 언제나 받는다.
+ *
+ * 시트는 모달이라 열려 있는 동안 정지를 누를 수 없고, 촬영 중에는 값도 잠겨 있어 열어 볼 일이 없다.
+ */
+private fun CaptureUiState.withCameraPanelOpen(open: Boolean): CaptureUiState =
+    if (open && phase != CaptureWorkspaceControlState.Idle) this else copy(manualCamera = manualCamera.copy(panelOpen = open))
+
+/**
+ * Session이 시작됐다. [resolution]은 ARCore가 실제로 고른 크기로, 후보 config가 없어 기본값으로
+ * 물러났으면 고른 값과 다르다. 촬영 조건은 이제 잠기므로 열린 설정 시트를 접는다.
+ */
+private fun CaptureUiState.withSessionStarted(
+    bundle: SessionBundle,
+    startedAtNs: Long,
+    resolution: RecordingResolution,
+): CaptureUiState =
+    copy(
+        phase = CaptureWorkspaceControlState.Initializing,
+        resolution = resolution,
+        idlePreviewSize = resolution,
+        activeBundle = bundle,
+        recordingStartNs = startedAtNs,
+        busy = false,
+        manualCamera = manualCamera.copy(panelOpen = false),
+    )
+
+/** tracking 표본으로 단계를 맞춘다. Session이 돌고 있을 때만 받는다. Idle에는 아직 Session이 없고 Finalizing은 닫는 중이다. */
+private fun CaptureUiState.withTrackingSample(
+    ready: Boolean,
+    episodeActive: Boolean,
+): CaptureUiState {
+    if (phase == CaptureWorkspaceControlState.Idle || phase == CaptureWorkspaceControlState.Finalizing) return this
+    val sampled =
+        when {
+            episodeActive -> CaptureWorkspaceControlState.EpisodeActive
+            ready -> CaptureWorkspaceControlState.Ready
+            else -> CaptureWorkspaceControlState.Initializing
+        }
+    return copy(phase = sampled)
+}
+
 /**
  * 진행 중이던 Session을 놓고 Idle로 돌아간다. 마감·중단·마감 실패 확인이 같은 자리로 돌아온다.
+ * 마감 실패는 확인을 받은 뒤에야 걷히고, Session이 저장되지 않았으므로 역시 여기로 온다.
  *
  * Task·Object·해상도·촬영 조건은 남긴다. 같은 작업 공간에서 이어 찍을 때 다시 입력하지 않는다.
  */
