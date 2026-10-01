@@ -374,6 +374,13 @@ internal fun rememberCaptureDriver(
         }
     }
 
+    // 촬영 조건을 바꾼다. 상태에 올리고, 곧바로 프리뷰에 걸고, 다음 실행을 위해 기억한다.
+    fun applyManualCamera(config: ManualCameraConfig) {
+        onIntent(CaptureIntent.EditManualCamera(config))
+        previewSession.apply(config)
+        manualCameraStore.save(config)
+    }
+
     // 매 composition 새로 만든다. 콜백이 remember에 갇히면 옛 state를 보게 된다.
     return CaptureDriver(
         snackbarHostState = snackbarHostState,
@@ -440,9 +447,7 @@ internal fun rememberCaptureDriver(
         // 기억까지 여기서 하는 것은, 다음에 앱을 켰을 때도 같은 조건으로 찍어야 하기 때문이다.
         editManualCamera = { requested ->
             val coerced = state.manualCamera.capabilities?.coerce(requested) ?: requested
-            onIntent(CaptureIntent.EditManualCamera(coerced))
-            previewSession.apply(coerced)
-            manualCameraStore.save(coerced)
+            applyManualCamera(coerced)
         },
         fixWhiteBalance = fix@{
             val current = state.manualCamera.config ?: return@fix
@@ -454,16 +459,12 @@ internal fun rememberCaptureDriver(
                     return@fix
                 }
             val fixed = current.copy(whiteBalance = converged)
-            onIntent(CaptureIntent.EditManualCamera(fixed))
-            previewSession.apply(fixed)
-            manualCameraStore.save(fixed)
+            applyManualCamera(fixed)
         },
         releaseWhiteBalance = release@{
             val current = state.manualCamera.config ?: return@release
             val released = current.copy(whiteBalance = null)
-            onIntent(CaptureIntent.EditManualCamera(released))
-            previewSession.apply(released)
-            manualCameraStore.save(released)
+            applyManualCamera(released)
         },
     )
 }
