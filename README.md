@@ -49,7 +49,7 @@
 
 ## 성과
 
-<table>
+<table align="center">
   <tr>
     <td align="center" width="33%"><h3>68개</h3>이 앱으로 수집한 시연</td>
     <td align="center" width="33%"><h3>94개</h3>학습에 쓸 수 있는 Episode</td>
@@ -57,7 +57,7 @@
   </tr>
 </table>
 
-<p align="right"><sub>시연 수는 이 앱의 수집 결과, Episode와 학습 샘플 수는 팀 데이터 파이프라인의 가공 결과</sub></p>
+<p align="center"><sub>시연 수는 이 앱의 수집 결과, Episode와 학습 샘플 수는 팀 데이터 파이프라인의 가공 결과</sub></p>
 
 <br>
 
@@ -167,11 +167,11 @@ flowchart LR
     review["서버 쪽<br/>데이터 검토"] -. "새 명세" .-> spec
 ```
 
-<table>
+<table align="center">
   <tr>
-    <td align="center" width="33%"><h3>기능 3개 · 작업 177개</h3>Spec Kit으로 명세 → 계획 → 작업</td>
-    <td align="center" width="33%"><h3>커밋의 약 80%</h3>AI 에이전트와 함께 작성</td>
-    <td align="center" width="33%"><h3>테스트 190개</h3>단위 148 · 계측 42</td>
+    <td align="center" width="33%"><h3>작업 177개</h3>기능 3개를 Spec Kit으로<br>명세 → 계획 → 작업으로 분해</td>
+    <td align="center" width="33%"><h3>약 80%</h3>전체 커밋 중<br>AI 에이전트와 함께 작성</td>
+    <td align="center" width="33%"><h3>테스트 190개</h3>단위 테스트 148개<br>계측 테스트 42개</td>
   </tr>
 </table>
 
