@@ -13,7 +13,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
-import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
 import kotlinx.coroutines.delay
@@ -21,20 +20,18 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * 수집 작업 공간이 사용자 조작에 대해 실제로 하는 일들.
+ * 수집 작업 공간이 부르는 조작 묶음. 화면은 무엇을 그릴지만 알고 조작은 여기로 넘긴다.
  *
- * 화면은 무엇을 그릴지만 알고, 카메라 세션을 열고 ARCore를 띄우고 Session을 마감하는 것은
- * 여기가 한다. [rememberCaptureDriver]가 만든다.
+ * 실제 일은 [IdlePreview], [ManualCameraControls], [CaptureSessionActions]가 한다. [rememberCaptureDriver]가
+ * 그 셋을 이어 만든다.
  */
 internal class CaptureDriver(
     /** 작업 공간의 알림을 띄우는 자리. 문구는 상태의 `notice`에서 온다. */
     val snackbarHostState: SnackbarHostState,
     val onSurfaceAvailable: (Surface, SurfaceTexture) -> Unit,
     val onSurfaceDestroyed: () -> Unit,
-    /** Idle이면 Session을, Ready면 Episode를 시작한다. */
     val play: () -> Unit,
     val pause: () -> Unit,
-    /** 상태에 따라 무시하거나, 확인을 묻거나, 그냥 닫는다. */
     val requestExit: () -> Unit,
     val confirmStop: () -> Unit,
     val confirmMetadata: () -> Unit,
@@ -42,11 +39,7 @@ internal class CaptureDriver(
     val selectResolution: (RecordingResolution) -> Unit,
     /** 작업 공간을 벗어날 때 유휴 프리뷰 Camera2 session을 놓는다. */
     val releaseIdlePreview: () -> Unit,
-    /** 초점·ISO·셔터를 바꾼다. 바뀐 값은 곧바로 프리뷰에 걸린다. */
-    val editManualCamera: (ManualCameraConfig) -> Unit,
-    /** 지금 프리뷰가 수렴시킨 화이트 밸런스를 붙잡는다. */
-    val fixWhiteBalance: () -> Unit,
-    val releaseWhiteBalance: () -> Unit,
+    val manualCamera: ManualCameraControls,
 )
 
 /**
@@ -123,11 +116,9 @@ internal fun rememberCaptureDriver(
         confirmMetadata = { onIntent(CaptureIntent.ConfirmMetadata) },
         selectResolution = ::selectResolution,
         releaseIdlePreview = preview::release,
-        editManualCamera = manualCamera.edit,
-        fixWhiteBalance = manualCamera.fixWhiteBalance,
-        releaseWhiteBalance = manualCamera.releaseWhiteBalance,
+        manualCamera = manualCamera,
     )
 }
 
-// Tracking 판정 주기. 안정화(1초)와 유실(0.5초) 임계값보다 충분히 촘촘해야 마감 시점이 제때 발화한다.
+/** Tracking 판정 주기. 안정화(1초)와 유실(0.5초) 임계값보다 충분히 촘촘해야 마감 시점이 제때 발화한다. */
 private val TRACKING_TICK = 100.milliseconds

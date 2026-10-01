@@ -82,10 +82,10 @@ internal fun CaptureWorkspace(
                     state = state.manualCamera,
                     resolution = state.resolution,
                     enabled = state.captureSettingsEditable,
-                    onChange = driver.editManualCamera,
+                    onChange = driver.manualCamera.edit,
                     onResolutionChange = driver.selectResolution,
-                    onFixWhiteBalance = driver.fixWhiteBalance,
-                    onClearWhiteBalance = driver.releaseWhiteBalance,
+                    onFixWhiteBalance = driver.manualCamera.fixWhiteBalance,
+                    onClearWhiteBalance = driver.manualCamera.releaseWhiteBalance,
                     onClose = closePanel,
                 )
             }
