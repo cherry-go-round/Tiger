@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.session
+package com.ssafy.s15p21a206.tiger.feature.session.detail
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertCountEquals
@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
+import com.ssafy.s15p21a206.tiger.feature.session.video.rememberSharedVideoPlayer
 import com.ssafy.s15p21a206.tiger.string
 import org.junit.Rule
 import org.junit.Test

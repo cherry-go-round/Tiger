@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.session
+package com.ssafy.s15p21a206.tiger.feature.session.video
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

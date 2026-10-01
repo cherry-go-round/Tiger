@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.session
+package com.ssafy.s15p21a206.tiger.feature.session.detail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,6 +39,16 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSurface
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
+import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
+import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteConfirmation
+import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
+import com.ssafy.s15p21a206.tiger.feature.session.labelRes
+import com.ssafy.s15p21a206.tiger.feature.session.video.SharedVideoPlayer
+import com.ssafy.s15p21a206.tiger.feature.session.video.VideoPlayer
+import com.ssafy.s15p21a206.tiger.feature.session.video.VideoResolutionState
+import com.ssafy.s15p21a206.tiger.feature.session.video.playableMainVideo
+import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoAspectRatio
+import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoResolution
 
 /**
  * 한 Session의 상세. 영상 아래에 이름(수집 일시)과 이름표를 단 묶음 카드를 쌓는다.

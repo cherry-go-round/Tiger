@@ -32,13 +32,13 @@ import com.ssafy.s15p21a206.tiger.feature.capture.CaptureIntent
 import com.ssafy.s15p21a206.tiger.feature.capture.CaptureUiState
 import com.ssafy.s15p21a206.tiger.feature.capture.CaptureWorkspace
 import com.ssafy.s15p21a206.tiger.feature.capture.reduce
-import com.ssafy.s15p21a206.tiger.feature.session.FullScreenVideoScreen
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteFailure
-import com.ssafy.s15p21a206.tiger.feature.session.SessionDetailScreen
-import com.ssafy.s15p21a206.tiger.feature.session.SessionListScreen
 import com.ssafy.s15p21a206.tiger.feature.session.SessionOperations
-import com.ssafy.s15p21a206.tiger.feature.session.TaskSessionListScreen
-import com.ssafy.s15p21a206.tiger.feature.session.rememberSharedVideoPlayer
+import com.ssafy.s15p21a206.tiger.feature.session.detail.SessionDetailScreen
+import com.ssafy.s15p21a206.tiger.feature.session.list.SessionListScreen
+import com.ssafy.s15p21a206.tiger.feature.session.list.TaskSessionListScreen
+import com.ssafy.s15p21a206.tiger.feature.session.video.FullScreenVideoScreen
+import com.ssafy.s15p21a206.tiger.feature.session.video.rememberSharedVideoPlayer
 import kotlinx.serialization.Serializable
 
 // 조회 흐름의 목적지다. 인자는 Navigation Compose의 type-safe route로 전달한다. Task 이름은

@@ -1,7 +1,8 @@
-package com.ssafy.s15p21a206.tiger.feature.session
+package com.ssafy.s15p21a206.tiger.feature.session.detail
 
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
+import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

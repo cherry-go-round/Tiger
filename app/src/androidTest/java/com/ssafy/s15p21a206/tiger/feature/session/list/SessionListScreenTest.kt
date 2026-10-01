@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.session
+package com.ssafy.s15p21a206.tiger.feature.session.list
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.getValue

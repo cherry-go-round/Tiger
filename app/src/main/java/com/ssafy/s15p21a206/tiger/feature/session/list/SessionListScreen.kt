@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.session
+package com.ssafy.s15p21a206.tiger.feature.session.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -50,6 +50,10 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerCard
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
+import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
+import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteConfirmation
+import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
+import com.ssafy.s15p21a206.tiger.feature.session.labelRes
 
 /**
  * 홈. 완료된 Session을 Task별로 묶어 보인다.
