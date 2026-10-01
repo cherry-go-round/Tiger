@@ -83,7 +83,7 @@ class CaptureWorkspaceScreenTest {
         composeRule.setContent {
             TigerTheme {
                 CaptureWorkspaceControls(
-                    state = state,
+                    policy = CaptureControlPolicy(state),
                     onPlay = { clicked = "play" },
                     onPause = { clicked = "pause" },
                     onStop = { clicked = "stop" },

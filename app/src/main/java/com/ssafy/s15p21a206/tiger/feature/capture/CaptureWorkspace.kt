@@ -133,9 +133,7 @@ internal fun CaptureWorkspace(
         SnackbarHost(driver.snackbarHostState, Modifier.align(Alignment.TopCenter).padding(top = 80.dp))
         if (!state.showMetadataDialog && state.chromeVisible) {
             CaptureWorkspaceControls(
-                state = state.phase,
-                ready = state.ready,
-                busy = state.busy,
+                policy = state.policy,
                 onPlay = driver.play,
                 onPause = driver.pause,
                 onStop = driver.requestExit,

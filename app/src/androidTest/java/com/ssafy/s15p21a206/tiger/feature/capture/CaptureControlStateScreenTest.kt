@@ -52,7 +52,12 @@ class CaptureControlStateScreenTest {
         var calls = 0
         composeRule.setContent {
             TigerTheme {
-                CaptureWorkspaceControls(CaptureWorkspaceControlState.Finalizing, { calls++ }, { calls++ }, { calls++ })
+                CaptureWorkspaceControls(
+                    CaptureControlPolicy(CaptureWorkspaceControlState.Finalizing),
+                    { calls++ },
+                    { calls++ },
+                    { calls++ },
+                )
                 CaptureFinalizingOverlay(failure = null, onDismissFailure = {})
             }
         }
@@ -66,7 +71,7 @@ class CaptureControlStateScreenTest {
     fun unprepared_preview_disables_start() {
         composeRule.setContent {
             TigerTheme {
-                CaptureWorkspaceControls(CaptureWorkspaceControlState.Idle, {}, {}, {}, ready = false)
+                CaptureWorkspaceControls(CaptureControlPolicy(CaptureWorkspaceControlState.Idle, ready = false), {}, {}, {})
             }
         }
         composeRule.onNodeWithContentDescription(string(R.string.capture_control_start)).assertIsNotEnabled()
@@ -78,7 +83,12 @@ class CaptureControlStateScreenTest {
         var calls = 0
         composeRule.setContent {
             TigerTheme {
-                CaptureWorkspaceControls(CaptureWorkspaceControlState.Initializing, { calls++ }, { calls++ }, { calls++ })
+                CaptureWorkspaceControls(
+                    CaptureControlPolicy(CaptureWorkspaceControlState.Initializing),
+                    { calls++ },
+                    { calls++ },
+                    { calls++ },
+                )
                 CaptureWorkspaceStatus(CaptureWorkspaceControlState.Initializing)
             }
         }
@@ -96,7 +106,7 @@ class CaptureControlStateScreenTest {
         var plays = 0
         composeRule.setContent {
             TigerTheme {
-                CaptureWorkspaceControls(CaptureWorkspaceControlState.Ready, { plays++ }, {}, {})
+                CaptureWorkspaceControls(CaptureControlPolicy(CaptureWorkspaceControlState.Ready), { plays++ }, {}, {})
                 CaptureWorkspaceStatus(CaptureWorkspaceControlState.Ready)
             }
         }
@@ -109,7 +119,7 @@ class CaptureControlStateScreenTest {
     fun long_press_shows_accessible_control_tooltip() {
         composeRule.setContent {
             TigerTheme {
-                CaptureWorkspaceControls(CaptureWorkspaceControlState.Idle, {}, {}, {})
+                CaptureWorkspaceControls(CaptureControlPolicy(CaptureWorkspaceControlState.Idle), {}, {}, {})
             }
         }
         composeRule.onNodeWithContentDescription(string(R.string.capture_control_start)).performTouchInput { longClick() }

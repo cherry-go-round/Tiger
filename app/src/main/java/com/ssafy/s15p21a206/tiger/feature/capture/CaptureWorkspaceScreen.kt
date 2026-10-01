@@ -63,15 +63,12 @@ import kotlin.math.roundToInt
 @Composable
 @Suppress("FunctionName")
 fun CaptureWorkspaceControls(
-    state: CaptureWorkspaceControlState,
+    policy: CaptureControlPolicy,
     onPlay: () -> Unit,
     onPause: () -> Unit,
     onStop: () -> Unit,
     modifier: Modifier = Modifier,
-    ready: Boolean = true,
-    busy: Boolean = false,
 ) {
-    val policy = CaptureControlPolicy(state, ready, busy)
     // 거치대 집게가 폰의 가운데를 물어 하단 중앙은 가려진다. 우측 가장자리에 세로로 쌓는다.
     // 끝 여백 16dp는 56dp 아이콘의 중심을 상단 X 닫기(48dp, 끝 여백 20dp)와 같은 세로축에 둔다.
     Column(
@@ -79,7 +76,7 @@ fun CaptureWorkspaceControls(
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        when (state) {
+        when (policy.state) {
             CaptureWorkspaceControlState.Idle ->
                 CaptureControlIcon(
                     iconRes = R.drawable.ic_capture_play,
