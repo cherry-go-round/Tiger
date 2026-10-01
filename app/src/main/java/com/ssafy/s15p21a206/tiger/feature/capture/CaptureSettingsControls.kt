@@ -30,6 +30,10 @@ internal class CaptureSettingsControls(
 
 /**
  * 촬영 조건을 세운다. 녹화 카메라의 능력을 읽고, 바꾼 값을 유휴 프리뷰에 걸고 기억한다.
+ *
+ * 능력은 작업 공간을 열 때 아직 읽지 못했으면 읽고, 읽은 뒤에는 다시 읽지 않는다. ARCore에게 어느 카메라인지 물으려면 Session을 잠깐
+ * 만들어야 해 수백 ms가 걸리므로 배경에서 한다. 읽지 못하면 패널이 사유를 보여 주고, 수집은 기존 자동
+ * 동작 그대로 돈다.
  */
 @Composable
 internal fun rememberCaptureSettings(
@@ -46,9 +50,6 @@ internal fun rememberCaptureSettings(
             ManualCameraProfile(context.applicationContext, context.getSystemService(CameraManager::class.java))
         }
 
-    // 녹화에 쓰일 카메라의 능력은 한 번만 읽는다. ARCore에게 어느 카메라인지 물으려면 Session을
-    // 잠깐 만들어야 해 수백 ms가 걸리므로 배경에서 한다. 읽지 못하면 패널이 사유를 보여 주고,
-    // 수집은 기존 자동 동작 그대로 돈다.
     LaunchedEffect(state.open) {
         if (!state.open || state.manualCamera.capabilities != null) return@LaunchedEffect
         val capabilities = withContext(Dispatchers.IO) { profile.read() } ?: return@LaunchedEffect

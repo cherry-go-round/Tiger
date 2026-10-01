@@ -38,7 +38,7 @@ internal class IdlePreview(
     var surface by mutableStateOf<Surface?>(null)
         private set
 
-    // 수집 시작 시 ARCore가 고른 해상도로 버퍼를 다시 맞추려면 SurfaceTexture를 들고 있어야 한다.
+    /** 수집 시작 때 ARCore가 고른 해상도로 버퍼를 다시 맞추려면 들고 있어야 한다. */
     private var texture by mutableStateOf<SurfaceTexture?>(null)
 
     fun attach(
