@@ -85,7 +85,7 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 | `CaptureSessionActions` | Session의 시작·진행·마감. ARCore 확인, 시작, Episode, tracking 반영, 중단, 마감 |
 | `preview/IdlePreview` | Session 전 유휴 Camera2 프리뷰. Surface, 프리뷰 권한, 되살리기 |
 | `settings/CaptureSettingsControls` | 촬영 조건. 녹화 해상도와 수동 설정을 바꾸고 프리뷰에 걸어 기억한다. 녹화 카메라 능력 읽기 |
-| `CaptureState` | `CaptureUiState`·`CaptureIntent`·`reduce` |
+| `CaptureUiState`·`CaptureIntent`·`CaptureReducer` | 상태, 상태를 바꾸는 입구, 전이(`reduce`) |
 | `preview/CapturePreviewSurface` | `TextureView`와 `SurfaceTexture`의 수명 |
 | `CaptureMetadataDialog` | Task·Object 입력 |
 | `settings/CaptureCameraPanel` | 카메라 설정 사이드 시트. 해상도·초점·ISO·셔터·화이트 밸런스 |
