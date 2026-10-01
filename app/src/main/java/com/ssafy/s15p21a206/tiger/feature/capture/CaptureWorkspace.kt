@@ -18,6 +18,7 @@ import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
 import com.ssafy.s15p21a206.tiger.feature.capture.preview.CapturePreviewSurface
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraPanel
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraSheet
+import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureSettingsControls
 
 /**
  * 수집 작업 공간. 조회 흐름 위에 모달로 얹힌다.
@@ -25,8 +26,8 @@ import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraSheet
  * 목적지가 아닌 이유는 진입 경로가 하나뿐이고, 뒤로 가기가 "이전 화면으로"가 아니라 "종료할까요?"이며,
  * 안에 또 모달을 품기 때문이다. NavHost 바깥에 있어 수집 상태가 백스택 조작과 무관하게 남는다.
  *
- * **여기는 그리기만 한다.** 카메라 세션·ARCore·마감은 [rememberCaptureDriver]가 맡고, 어디로 갈지는
- * [onCompleted]로 부모가 정한다. 이 화면은 목적지도 카메라도 모른다.
+ * **여기는 수명만 맡는다.** 카메라 세션·ARCore·마감은 [rememberCaptureDriver]가 맡고, 그리는 것은
+ * [CaptureWorkspaceContent]가 맡는다. 어디로 갈지는 [onCompleted]로 부모가 정한다.
  *
  * [state]는 부모가 소유한다. 부모가 [CaptureIntent.Open]으로 작업 공간을 열기 때문이다.
  */
@@ -55,6 +56,22 @@ internal fun CaptureWorkspace(
     }
     // 카메라 센서가 90도 눕혀 장착돼 있어 세로 화면에서는 프리뷰가 옆으로 누운 채 비율까지 어긋난다.
     LockLandscapeWhileVisible()
+    CaptureWorkspaceContent(state, onIntent, driver)
+}
+
+/**
+ * 작업 공간이 그리는 것. 상태와 조작([driver])만 받고 카메라도 저장소도 모르므로 기기 없이 그릴 수 있다.
+ *
+ * 프리뷰 위에 상단 줄, 설정 시트, 알림, 우측 제어를 얹고, 그 위를 덮는 판(수집 정보 입력, 마감, 정지
+ * 확인)을 띄운다.
+ */
+@Suppress("FunctionName")
+@Composable
+internal fun CaptureWorkspaceContent(
+    state: CaptureUiState,
+    onIntent: (CaptureIntent) -> Unit,
+    driver: CaptureDriver,
+) {
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         CapturePreviewSurface(
             bufferSize = state.idlePreviewSize,
@@ -75,19 +92,11 @@ internal fun CaptureWorkspace(
             )
         }
         if (state.manualCamera.panelOpen && state.chromeVisible) {
-            val closePanel = { onIntent(CaptureIntent.ToggleManualCameraPanel(false)) }
-            CaptureCameraSheet(onDismiss = closePanel) {
-                CaptureCameraPanel(
-                    state = state.manualCamera,
-                    resolution = state.resolution,
-                    enabled = state.captureSettingsEditable,
-                    onChange = driver.captureSettings.editManualCamera,
-                    onResolutionChange = driver.captureSettings.selectResolution,
-                    onFixWhiteBalance = driver.captureSettings.fixWhiteBalance,
-                    onClearWhiteBalance = driver.captureSettings.releaseWhiteBalance,
-                    onClose = closePanel,
-                )
-            }
+            CaptureSettingsSheet(
+                state = state,
+                controls = driver.captureSettings,
+                onClose = { onIntent(CaptureIntent.ToggleManualCameraPanel(false)) },
+            )
         }
         SnackbarHost(driver.snackbarHostState, Modifier.align(Alignment.TopCenter).padding(top = 80.dp))
         if (!state.showMetadataDialog && state.chromeVisible) {
@@ -100,6 +109,38 @@ internal fun CaptureWorkspace(
             )
         }
     }
+    CaptureWorkspaceModals(state, onIntent, driver)
+}
+
+@Suppress("FunctionName")
+@Composable
+private fun CaptureSettingsSheet(
+    state: CaptureUiState,
+    controls: CaptureSettingsControls,
+    onClose: () -> Unit,
+) {
+    CaptureCameraSheet(onDismiss = onClose) {
+        CaptureCameraPanel(
+            state = state.manualCamera,
+            resolution = state.resolution,
+            enabled = state.captureSettingsEditable,
+            onChange = controls.editManualCamera,
+            onResolutionChange = controls.selectResolution,
+            onFixWhiteBalance = controls.fixWhiteBalance,
+            onClearWhiteBalance = controls.releaseWhiteBalance,
+            onClose = onClose,
+        )
+    }
+}
+
+/** 작업 공간을 덮는 판. 수집 정보 입력, 마감 중·실패, 정지 확인이다. */
+@Suppress("FunctionName")
+@Composable
+private fun CaptureWorkspaceModals(
+    state: CaptureUiState,
+    onIntent: (CaptureIntent) -> Unit,
+    driver: CaptureDriver,
+) {
     if (state.showMetadataDialog) {
         CaptureMetadataDialog(
             task = state.task,

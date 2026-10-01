@@ -80,7 +80,7 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 
 | | 맡는 것 |
 |---|---|
-| `CaptureWorkspace` | 그리기만 한다. 카메라도 목적지도 모른다 |
+| `CaptureWorkspace` | 수명만 맡는다. 드라이버를 만들고 가로 고정·프리뷰 놓기를 건다. 그리는 것은 `CaptureWorkspaceContent`가 상태와 조작만 받아 한다 |
 | `CaptureDriver` | composition에 묶인 연결. 카메라 권한 launcher, tracking 폴링·알림·`ON_STOP` effect, 셋을 이은 조작 묶음 |
 | `CaptureSessionActions` | Session의 시작·진행·마감. ARCore 확인, 시작, Episode, tracking 반영, 중단, 마감 |
 | `preview/IdlePreview` | Session 전 유휴 Camera2 프리뷰. Surface, 프리뷰 권한, 되살리기 |

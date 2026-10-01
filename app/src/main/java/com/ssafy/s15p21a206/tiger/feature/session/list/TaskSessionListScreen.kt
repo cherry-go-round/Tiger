@@ -102,28 +102,17 @@ private fun SessionSummaryItem(
     onOpenSession: (String) -> Unit,
     onDeleteSession: (String) -> Unit,
 ) {
-    val captureTime = formatCaptureTime(summary.recordedAtEpochMs)
-    val sessionLabel = stringResource(R.string.session_list_item_content_description, captureTime)
     val deleteAction = SessionDeleteAction.from(summary.uploadState)
     var menuExpanded by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<SessionDeleteAction?>(null) }
     var pressPosition by remember { mutableStateOf(IntOffset.Zero) }
     Box {
-        TigerCard(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .semantics { contentDescription = sessionLabel }
-                    .recordPressPosition { pressPosition = it }
-                    .combinedClickable(
-                        role = Role.Button,
-                        onLongClickLabel = stringResource(R.string.session_delete),
-                        onLongClick = { menuExpanded = true },
-                        onClick = { onOpenSession(summary.sessionId) },
-                    ),
-        ) {
-            SessionSummaryCardContent(summary, captureTime)
-        }
+        SessionSummaryCard(
+            summary = summary,
+            onOpen = { onOpenSession(summary.sessionId) },
+            onLongPress = { menuExpanded = true },
+            onPress = { pressPosition = it },
+        )
         SessionCardMenu(
             expanded = menuExpanded,
             anchor = pressPosition,
@@ -144,6 +133,34 @@ private fun SessionSummaryItem(
             },
             onDismiss = { pendingDelete = null },
         )
+    }
+}
+
+/** 탭하면 열고 길게 누르면 메뉴를 부르는 카드. 누른 자리를 [onPress]로 알려 메뉴가 그 자리에서 열리게 한다. */
+@Composable
+@Suppress("FunctionName")
+private fun SessionSummaryCard(
+    summary: SessionSummary,
+    onOpen: () -> Unit,
+    onLongPress: () -> Unit,
+    onPress: (IntOffset) -> Unit,
+) {
+    val captureTime = formatCaptureTime(summary.recordedAtEpochMs)
+    val sessionLabel = stringResource(R.string.session_list_item_content_description, captureTime)
+    TigerCard(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = sessionLabel }
+                .recordPressPosition(onPress)
+                .combinedClickable(
+                    role = Role.Button,
+                    onLongClickLabel = stringResource(R.string.session_delete),
+                    onLongClick = onLongPress,
+                    onClick = onOpen,
+                ),
+    ) {
+        SessionSummaryCardContent(summary, captureTime)
     }
 }
 
