@@ -43,6 +43,7 @@ import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 /**
  * 한 Session의 상세. 영상 아래에 이름(수집 일시)과 이름표를 단 묶음 카드를 쌓는다.
  *
+ * - 어느 세션인지는 본문의 이름표가 말하므로 헤더에는 뒤로 가기와 메뉴만 남긴다.
  * - Task와 Object를 본문에 둔다. 수집을 마감하면 목록을 지나지 않고 이 화면으로 바로 오므로, 방금
  *   찍은 것이 맞는지 확인할 자리가 여기뿐이다. 목록 카드와 달리 Task도 적는다. 이 화면은 Task 이름을
  *   단 화면 안에 있지 않아 스스로 말하지 않으면 알 길이 없다.
@@ -50,6 +51,7 @@ import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
  * - 묶음마다 이름표를 단다. 이 수집이 무엇인지 말하는 값(Task·Object·ID)과 지금 어떤지 말하는
  *   줄(전송 상태)은 성격이 다르다. 이름표는 읽을 대상이 아니라 표지라 묶음 안 글보다 작고 옅다.
  * - 이름과 각 묶음은 같은 간격([DETAIL_GROUP_GAP])으로 띄운다. 가르는 일은 카드가 한다.
+ * - 재생 영역 높이와 전송 상태에 따라 내용이 화면을 넘으므로 굴린다.
  */
 @Suppress("FunctionName")
 @Composable
@@ -66,18 +68,13 @@ internal fun SessionDetailScreen(
     var showSessionInfo by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<SessionDeleteAction?>(null) }
     val presentation = summary?.let(SessionDetailPresentation::from)
-    // 재생 영역 높이와 전송 상태에 따라 내용이 화면을 넘는다. 스크롤이 없으면 잘린다.
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
     ) {
-        NavigationHeader(
-            // 어느 세션인지는 본문의 이름표가 말한다. 헤더에는 뒤로 가기와 메뉴만 남긴다.
-            title = "",
-            onBack = onBack,
-        ) {
+        NavigationHeader(title = "", onBack = onBack) {
             if (summary != null) {
                 SessionDetailMenu(
                     deleteAction = presentation?.deleteAction,
@@ -93,63 +90,8 @@ internal fun SessionDetailScreen(
                 modifier = Modifier.padding(horizontal = DETAIL_CONTENT_PADDING),
             )
         } else {
-            // 영상은 좌우 여백 없이 화면 폭을 다 쓴다. 16:9 안에 컨트롤이 오버레이로 놓이므로
-            // 여백을 주면 재생 영역만 줄고 얻는 것이 없다.
             SessionVideoPreview(summary.bundlePath, sharedPlayer, onOpenFullscreenVideo)
-            Column(
-                modifier =
-                    Modifier.padding(
-                        start = DETAIL_CONTENT_PADDING,
-                        end = DETAIL_CONTENT_PADDING,
-                        top = DETAIL_VIDEO_GAP,
-                        bottom = DETAIL_CONTENT_PADDING,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(DETAIL_GROUP_GAP),
-            ) {
-                Text(
-                    text = formatCaptureTime(summary.recordedAtEpochMs),
-                    style = TigerText.itemTitle,
-                )
-                LabelledGroup(stringResource(R.string.session_group_info)) {
-                    // 세 줄이 모두 이름표와 값이라 같은 짜임을 쓴다. 이름표 기둥이 고정폭이라 값이
-                    // 한 기둥에 정렬되고, 훑는 눈이 값만 따라 내려갈 수 있다.
-                    if (summary.taskName.isNotBlank()) {
-                        LabelledValue(stringResource(R.string.session_label_task), summary.taskName)
-                    }
-                    if (summary.objectName.isNotBlank()) {
-                        LabelledValue(stringResource(R.string.session_label_object), summary.objectName)
-                    }
-                    LabelledValue(stringResource(R.string.session_label_id), summary.sessionId.take(8))
-                }
-                // 아직 올리지 않았다는 것은 업로드 버튼이 이미 말한다. 그 상태에서만 나오는
-                // 버튼이므로 같은 말을 한 줄 더 적지 않고, 이름표도 함께 뺀다.
-                if (summary.uploadState != UploadState.LOCAL_ONLY) {
-                    LabelledGroup(stringResource(R.string.session_group_upload)) {
-                        Text(
-                            text = stringResource(summary.uploadState.labelRes),
-                            style = TigerText.value,
-                        )
-                        // 무엇이 막았는지 알아야 다시 걸어 볼지 판단할 수 있다. 상태와 같은 카드에
-                        // 둔다. 그 상태를 설명하는 줄이지 따로 선 값이 아니다. 앱을 다시 켜면 남지
-                        // 않는다. 전송 실패는 기록하는 컬럼이 없다.
-                        if (summary.uploadState == UploadState.FAILED && uploadFailureReason != null) {
-                            Text(text = uploadFailureReason, style = TigerText.supporting)
-                        }
-                    }
-                }
-                // 지우지 못했으면 화면이 그대로 남는다. 아무 말이 없으면 눌리지 않은 것처럼 보인다.
-                if (deleteFailureReason != null) {
-                    Text(text = deleteFailureReason, style = TigerText.supporting)
-                }
-                presentation.uploadAction?.let { action ->
-                    val label =
-                        when (action) {
-                            SessionDetailPresentation.UploadAction.Upload -> R.string.upload_session
-                            SessionDetailPresentation.UploadAction.Retry -> R.string.upload_retry
-                        }
-                    Button(onClick = onUpload) { Text(stringResource(label)) }
-                }
-            }
+            SessionDetailBody(summary, presentation, deleteFailureReason, uploadFailureReason, onUpload)
         }
     }
     if (showSessionInfo && presentation != null && summary != null) {
@@ -159,14 +101,7 @@ internal fun SessionDetailScreen(
             onDismiss = { showSessionInfo = false },
         )
     }
-    // 삭제를 묻는 동안은 영상을 멈춘다. 되돌릴 수 없는 확인을 받는데 뒤에서 소리가 계속 나면
-    // 무엇을 묻고 있는지 흐려진다.
-    //
-    // 확인을 누르면 재생기가 연 그 파일이 곧 사라진다. unlink 자체는 열린 파일에도 안전하지만,
-    // 멈춰 두면 재생기가 파일을 다시 열 일이 없어 사라진 뒤에 읽으려 드는 경우가 생기지 않는다.
-    LaunchedEffect(pendingDelete) {
-        if (pendingDelete != null) sharedPlayer.pause()
-    }
+    PausePlaybackWhileConfirmingDelete(pendingDelete, sharedPlayer)
     pendingDelete?.let { action ->
         SessionDeleteConfirmation(
             action = action,
@@ -184,7 +119,8 @@ internal fun SessionDetailScreen(
  *
  * 둘 다 이 화면의 주 동작이 아니다. 본문의 전송 버튼이 주 동작을 맡고 있고, 이쪽은 확인하거나
  * 정리하러 들어왔을 때만 찾는다. 제목이 없는 헤더에 흐린 글리프를 나란히 세우면 둘 다 무엇인지
- * 추측해야 하는 표가 된다. 메뉴로 접으면 글자로 이름이 붙고 헤더에는 뒤로 가기만 남는다.
+ * 추측해야 하는 표가 된다. 메뉴로 접으면 글자로 이름이 붙고 헤더에는 뒤로 가기만 남는다. 메뉴
+ * 글리프는 뒤로 가기와 같은 급으로 보이지 않도록 작고 옅게 둔다.
  *
  * 삭제는 되돌릴 수 없으므로 메뉴를 여는 한 단계가 더 있는 편이 낫다. 업로드가 번들을 읽고 있는
  * 동안은 누를 수 없으며, 흐린 아이콘과 달리 흐린 글자는 무엇이 막혔는지를 스스로 말한다.
@@ -202,7 +138,6 @@ private fun SessionDetailMenu(
             Icon(
                 painter = painterResource(R.drawable.ic_more_actions),
                 contentDescription = stringResource(R.string.session_detail_more_actions),
-                // 뒤로 가기와 같은 급으로 보이지 않도록 글리프를 작게, 색은 옅게 둔다.
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(HEADER_MENU_ICON_SIZE),
             )
@@ -231,77 +166,9 @@ private fun SessionDetailMenu(
 }
 
 /**
- * 세션을 특정해 주지 않는 값들을 담는 시트다.
- *
- * Episode 수·길이·해상도·전체 ID는 세션을 고를 때가 아니라 확인하러 들어왔을 때만 필요하다.
- * 사진 앱이 ⓘ 뒤에 두는 것과 같은 성격이라 상세 본문에서 빼고 여기로 옮겼다.
+ * 영상. 좌우 여백 없이 화면 폭을 다 쓴다. 16:9 안에 컨트롤이 오버레이로 놓이므로 여백을 주면 재생
+ * 영역만 줄고 얻는 것이 없다. 영상이 없으면 그렇다고 알리는 문구는 본문이라 본문 여백을 둔다.
  */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-@Suppress("FunctionName")
-private fun SessionInfoSheet(
-    summary: SessionSummary,
-    durationSeconds: Long,
-    onDismiss: () -> Unit,
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = TigerSurface.content) {
-        // 행 사이는 12dp다. 값이 한 단계 작아졌으니 사이도 좁혀야 라벨-값 2dp와의 대비가 유지된다.
-        // 16dp로 두면 행이 작아진 만큼 빈 자리만 늘어 사다리가 더 늘어져 보인다.
-        Column(
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.session_info_title),
-                style = TigerText.itemName,
-            )
-            SessionInfoRow(stringResource(R.string.session_info_id), summary.sessionId)
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_captured_at),
-                value =
-                    formatCaptureTime(summary.recordedAtEpochMs),
-            )
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_episodes),
-                value = stringResource(R.string.session_info_episode_count, summary.completedEpisodeCount),
-            )
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_duration),
-                value = stringResource(R.string.session_detail_duration, durationSeconds),
-            )
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_resolution),
-                value =
-                    when (val resolution = rememberVideoResolution(summary.bundlePath)) {
-                        is VideoResolutionState.Available ->
-                            stringResource(R.string.session_detail_resolution, resolution.width, resolution.height)
-                        VideoResolutionState.Loading -> stringResource(R.string.session_detail_resolution_loading)
-                        VideoResolutionState.Unavailable -> stringResource(R.string.session_detail_resolution_unavailable)
-                    },
-            )
-        }
-    }
-}
-
-@Composable
-@Suppress("FunctionName")
-private fun SessionInfoRow(
-    label: String,
-    value: String,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(text = label, style = TigerText.supporting)
-        // 값은 시트 제목보다 작아야 한다. 전에는 값이 `bodyLarge`라 제목과 같은 16sp였고, 그래서
-        // 제목이 목록의 첫 항목처럼 읽히며 큰 글자 다섯 개가 사다리처럼 쌓였다. 한 단계 내리면
-        // 제목이 이 시트의 유일한 최상위가 된다. 라벨과는 크기가 같고 잉크로만 갈려 두 줄이
-        // 한 묶음으로 붙는다. 36자 식별자도 한 줄에 들어가 행 높이가 고르게 된다.
-        Text(
-            text = value,
-            style = TigerText.value,
-        )
-    }
-}
-
 @Composable
 @Suppress("FunctionName")
 private fun SessionVideoPreview(
@@ -312,7 +179,6 @@ private fun SessionVideoPreview(
     val videoFile = playableMainVideo(bundlePath)
     val videoDescription = stringResource(R.string.session_detail_video_content_description)
     if (videoFile == null) {
-        // 영상은 화면 폭을 다 쓰지만 이 문구는 본문이다. 여백 없이 두면 화면 왼쪽 끝에 붙는다.
         Text(
             text = stringResource(R.string.session_detail_video_unavailable),
             style = TigerText.bodyMuted,
@@ -331,6 +197,179 @@ private fun SessionVideoPreview(
                 .aspectRatio(rememberVideoAspectRatio(player))
                 .semantics { contentDescription = videoDescription },
     )
+}
+
+/** 영상 아래 본문. 이름, 세션 정보, 전송 상태, 삭제 실패 사유, 전송 버튼 순이다. */
+@Composable
+@Suppress("FunctionName")
+private fun SessionDetailBody(
+    summary: SessionSummary,
+    presentation: SessionDetailPresentation,
+    deleteFailureReason: String?,
+    uploadFailureReason: String?,
+    onUpload: () -> Unit,
+) {
+    Column(
+        modifier =
+            Modifier.padding(
+                start = DETAIL_CONTENT_PADDING,
+                end = DETAIL_CONTENT_PADDING,
+                top = DETAIL_VIDEO_GAP,
+                bottom = DETAIL_CONTENT_PADDING,
+            ),
+        verticalArrangement = Arrangement.spacedBy(DETAIL_GROUP_GAP),
+    ) {
+        Text(
+            text = formatCaptureTime(summary.recordedAtEpochMs),
+            style = TigerText.itemTitle,
+        )
+        SessionInfoGroup(summary)
+        UploadStatusGroup(summary.uploadState, uploadFailureReason)
+        // 지우지 못했으면 화면이 그대로 남는다. 아무 말이 없으면 눌리지 않은 것처럼 보인다.
+        if (deleteFailureReason != null) {
+            Text(text = deleteFailureReason, style = TigerText.supporting)
+        }
+        presentation.uploadAction?.let { UploadButton(it, onUpload) }
+    }
+}
+
+@Composable
+@Suppress("FunctionName")
+private fun SessionInfoGroup(summary: SessionSummary) {
+    LabelledGroup(stringResource(R.string.session_group_info)) {
+        if (summary.taskName.isNotBlank()) {
+            LabelledValue(stringResource(R.string.session_label_task), summary.taskName)
+        }
+        if (summary.objectName.isNotBlank()) {
+            LabelledValue(stringResource(R.string.session_label_object), summary.objectName)
+        }
+        LabelledValue(stringResource(R.string.session_label_id), summary.sessionId.take(8))
+    }
+}
+
+/**
+ * 전송 상태 묶음. 아직 올리지 않았으면(`LOCAL_ONLY`) 그 상태에서만 나오는 업로드 버튼이 이미 같은 말을
+ * 하므로 묶음째 뺀다.
+ *
+ * 실패했으면 그 사유를 같은 카드에 둔다. 무엇이 막았는지 알아야 다시 걸어 볼지 판단할 수 있고, 따로 선
+ * 값이 아니라 상태를 설명하는 줄이다. 사유는 앱을 다시 켜면 남지 않는다. 기록하는 컬럼이 없다.
+ */
+@Composable
+@Suppress("FunctionName")
+private fun UploadStatusGroup(
+    uploadState: UploadState,
+    failureReason: String?,
+) {
+    if (uploadState == UploadState.LOCAL_ONLY) return
+    LabelledGroup(stringResource(R.string.session_group_upload)) {
+        Text(text = stringResource(uploadState.labelRes), style = TigerText.value)
+        if (uploadState == UploadState.FAILED && failureReason != null) {
+            Text(text = failureReason, style = TigerText.supporting)
+        }
+    }
+}
+
+@Composable
+@Suppress("FunctionName")
+private fun UploadButton(
+    action: SessionDetailPresentation.UploadAction,
+    onUpload: () -> Unit,
+) {
+    val label =
+        when (action) {
+            SessionDetailPresentation.UploadAction.Upload -> R.string.upload_session
+            SessionDetailPresentation.UploadAction.Retry -> R.string.upload_retry
+        }
+    Button(onClick = onUpload) { Text(stringResource(label)) }
+}
+
+/**
+ * 세션을 특정해 주지 않는 값들을 담는 시트다.
+ *
+ * Episode 수·길이·해상도·전체 ID는 세션을 고를 때가 아니라 확인하러 들어왔을 때만 필요하다.
+ * 사진 앱이 ⓘ 뒤에 두는 것과 같은 성격이라 상세 본문에서 빼고 여기로 옮겼다.
+ *
+ * 행 사이는 12dp다. 값이 제목보다 한 단계 작아 사이도 좁혀야 이름표-값 간격과의 대비가 유지된다.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+@Suppress("FunctionName")
+private fun SessionInfoSheet(
+    summary: SessionSummary,
+    durationSeconds: Long,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = TigerSurface.content) {
+        Column(
+            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.session_info_title),
+                style = TigerText.itemName,
+            )
+            SessionInfoRow(stringResource(R.string.session_info_id), summary.sessionId)
+            SessionInfoRow(stringResource(R.string.session_info_captured_at), formatCaptureTime(summary.recordedAtEpochMs))
+            SessionInfoRow(
+                label = stringResource(R.string.session_info_episodes),
+                value = stringResource(R.string.session_info_episode_count, summary.completedEpisodeCount),
+            )
+            SessionInfoRow(
+                label = stringResource(R.string.session_info_duration),
+                value = stringResource(R.string.session_detail_duration, durationSeconds),
+            )
+            SessionInfoRow(
+                label = stringResource(R.string.session_info_resolution),
+                value = resolutionText(rememberVideoResolution(summary.bundlePath)),
+            )
+        }
+    }
+}
+
+@Composable
+private fun resolutionText(resolution: VideoResolutionState): String =
+    when (resolution) {
+        is VideoResolutionState.Available ->
+            stringResource(R.string.session_detail_resolution, resolution.width, resolution.height)
+        VideoResolutionState.Loading -> stringResource(R.string.session_detail_resolution_loading)
+        VideoResolutionState.Unavailable -> stringResource(R.string.session_detail_resolution_unavailable)
+    }
+
+/**
+ * 시트의 한 행. 이름표 아래 값을 둔다.
+ *
+ * 값은 시트 제목보다 한 단계 작다. 그래야 제목이 이 시트의 유일한 최상위가 되고, 큰 글자가 사다리처럼
+ * 쌓이지 않는다. 이름표와는 크기가 같고 잉크로만 갈려 두 줄이 한 묶음으로 붙는다. 36자 식별자도 한 줄에
+ * 들어가 행 높이가 고르게 된다.
+ */
+@Composable
+@Suppress("FunctionName")
+private fun SessionInfoRow(
+    label: String,
+    value: String,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(text = label, style = TigerText.supporting)
+        Text(text = value, style = TigerText.value)
+    }
+}
+
+/**
+ * 삭제를 묻는 동안은 영상을 멈춘다. 되돌릴 수 없는 확인을 받는데 뒤에서 소리가 계속 나면 무엇을 묻고
+ * 있는지 흐려진다.
+ *
+ * 확인을 누르면 재생기가 연 그 파일이 곧 사라진다. unlink 자체는 열린 파일에도 안전하지만, 멈춰 두면
+ * 재생기가 파일을 다시 열 일이 없어 사라진 뒤에 읽으려 드는 경우가 생기지 않는다.
+ */
+@Composable
+@Suppress("FunctionName")
+private fun PausePlaybackWhileConfirmingDelete(
+    pendingDelete: SessionDeleteAction?,
+    sharedPlayer: SharedVideoPlayer,
+) {
+    LaunchedEffect(pendingDelete) {
+        if (pendingDelete != null) sharedPlayer.pause()
+    }
 }
 
 /** 세션 상세 본문의 여백. 영상은 화면 폭을 다 쓰므로 이 여백은 그 아래 내용에만 적용된다. */
