@@ -45,14 +45,13 @@ internal fun FullScreenVideoScreen(
     sharedPlayer: SharedVideoPlayer,
     onBack: () -> Unit,
 ) {
-    val videoFile = bundlePath?.let { File(it, SessionBundle.MAIN_VIDEO_FILE) }
-    val playable = videoFile?.isFile == true && videoFile.length() > 0L
+    val videoFile = bundlePath?.let(::playableMainVideo)
     var landscapeLocked by remember { mutableStateOf(false) }
     // 재생할 영상이 없으면 컨트롤이 뜨지 않으므로, 뒤로 가기가 사라지지 않게 처음부터 보이게 둔다.
     var controlsVisible by remember { mutableStateOf(true) }
     LockLandscapeWhilePlaying(landscapeLocked)
     Box(Modifier.fillMaxSize().background(Color.Black)) {
-        if (playable) {
+        if (videoFile != null) {
             VideoPlayer(
                 player = sharedPlayer.playerFor(videoFile),
                 fullscreen = true,
@@ -80,7 +79,7 @@ internal fun FullScreenVideoScreen(
                     tint = Color.White,
                 )
             }
-            if (playable) {
+            if (videoFile != null) {
                 LandscapeLockButton(
                     landscapeLocked = landscapeLocked,
                     onToggle = { landscapeLocked = !landscapeLocked },
@@ -184,9 +183,6 @@ internal fun rememberVideoAspectRatio(player: ExoPlayer): Float {
     return aspectRatio
 }
 
-/** 영상 크기를 아직 모를 때 쓰는 비율. 크기를 알게 되면 즉시 교체된다. */
-private const val DEFAULT_VIDEO_ASPECT_RATIO = 16f / 9f
-
 /**
  * 상세 화면과 전체화면이 같은 ExoPlayer를 쓰게 한다.
  *
@@ -235,3 +231,15 @@ internal fun rememberSharedVideoPlayer(): SharedVideoPlayer {
     DisposableEffect(sharedPlayer) { onDispose(sharedPlayer::release) }
     return sharedPlayer
 }
+
+/**
+ * 재생할 수 있는 수집 영상. 파일이 없거나 비어 있으면 null이다.
+ *
+ * 상세의 재생 영역, 전체화면, 해상도 읽기가 같은 기준으로 판단해야 한쪽은 재생하고 다른 쪽은
+ * 없다고 말하는 일이 생기지 않는다.
+ */
+internal fun playableMainVideo(bundlePath: String): File? =
+    File(bundlePath, SessionBundle.MAIN_VIDEO_FILE).takeIf { it.isFile && it.length() > 0L }
+
+/** 영상 크기를 아직 모를 때 쓰는 비율. 크기를 알게 되면 즉시 교체된다. */
+private const val DEFAULT_VIDEO_ASPECT_RATIO = 16f / 9f

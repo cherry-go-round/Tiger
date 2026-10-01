@@ -37,10 +37,8 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSurface
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
-import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
-import java.io.File
 
 @Suppress("FunctionName")
 @Composable
@@ -330,9 +328,9 @@ private fun SessionVideoPreview(
     sharedPlayer: SharedVideoPlayer,
     onOpenFullscreenVideo: () -> Unit,
 ) {
-    val videoFile = remember(bundlePath) { File(bundlePath, SessionBundle.MAIN_VIDEO_FILE) }
+    val videoFile = playableMainVideo(bundlePath)
     val videoDescription = stringResource(R.string.session_detail_video_content_description)
-    if (!videoFile.isFile || videoFile.length() == 0L) {
+    if (videoFile == null) {
         // 영상은 화면 폭을 다 쓰지만 이 문구는 본문이다. 여백 없이 두면 화면 왼쪽 끝에 붙는다.
         Text(
             text = stringResource(R.string.session_detail_video_unavailable),

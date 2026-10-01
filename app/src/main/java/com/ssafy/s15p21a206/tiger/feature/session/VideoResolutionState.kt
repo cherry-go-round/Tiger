@@ -7,10 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /** 수집 영상의 해상도를 읽는 과정과 결과다. 읽기가 실패해도 상세 화면의 나머지는 그대로 보여야 한다. */
 internal sealed interface VideoResolutionState {
@@ -35,13 +33,13 @@ internal sealed interface VideoResolutionState {
 internal fun rememberVideoResolution(bundlePath: String): VideoResolutionState {
     var state by remember(bundlePath) { mutableStateOf<VideoResolutionState>(VideoResolutionState.Loading) }
     LaunchedEffect(bundlePath) {
-        state = withContext(Dispatchers.IO) { readVideoResolution(File(bundlePath, SessionBundle.MAIN_VIDEO_FILE)) }
+        state = withContext(Dispatchers.IO) { readVideoResolution(bundlePath) }
     }
     return state
 }
 
-private fun readVideoResolution(videoFile: File): VideoResolutionState {
-    if (!videoFile.isFile || videoFile.length() == 0L) return VideoResolutionState.Unavailable
+private fun readVideoResolution(bundlePath: String): VideoResolutionState {
+    val videoFile = playableMainVideo(bundlePath) ?: return VideoResolutionState.Unavailable
     val retriever = MediaMetadataRetriever()
     return try {
         retriever.setDataSource(videoFile.absolutePath)
