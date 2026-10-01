@@ -34,6 +34,7 @@ import com.ssafy.s15p21a206.tiger.core.common.formatDateTime
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.PortraitScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.SectionedList
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerCard
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
@@ -70,7 +71,6 @@ internal fun TaskSessionListScreen(
                 count = stringResource(R.string.session_list_count, sessions.size),
                 emptyMessage = stringResource(R.string.task_session_list_empty),
                 sectionKey = TASK_SESSIONS_SECTION_KEY,
-                topPadding = LIST_CONTENT_TOP_PADDING,
                 isEmpty = sessions.isEmpty(),
             ) {
                 items(sessions, key = SessionSummary::sessionId) { summary ->
@@ -211,7 +211,7 @@ private fun SessionSummaryCardContent(
     summary: SessionSummary,
     captureTime: String,
 ) {
-    Column(modifier = Modifier.padding(TigerSpacing.cardPadding), verticalArrangement = Arrangement.spacedBy(CARD_LINE_GAP)) {
+    Column(modifier = Modifier.padding(TigerSpacing.cardPadding), verticalArrangement = Arrangement.spacedBy(TigerSpacing.cardLineGap)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

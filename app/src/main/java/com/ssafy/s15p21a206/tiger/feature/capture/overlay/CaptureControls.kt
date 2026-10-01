@@ -1,4 +1,5 @@
 package com.ssafy.s15p21a206.tiger.feature.capture.overlay
+
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerTooltip
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureDestructive
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlayScrim
@@ -95,7 +97,7 @@ private fun CaptureControlIcon(
     enabled: Boolean,
     tint: Color = Color.White,
 ) {
-    CaptureTooltip(contentDescriptionRes) {
+    TigerTooltip(contentDescriptionRes) {
         IconButton(
             onClick = onClick,
             enabled = enabled,

@@ -1,4 +1,5 @@
 package com.ssafy.s15p21a206.tiger.feature.capture.overlay
+
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -20,6 +21,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerTooltip
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlayScrim
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
@@ -117,7 +119,7 @@ internal fun CaptureWorkspaceExitControls(
     val enabled = policy.exitAction != CaptureExitAction.Ignore
     BackHandler { if (enabled) onExit() }
     val description = stringResource(R.string.capture_close_content_description)
-    CaptureTooltip(R.string.capture_close_content_description, modifier) {
+    TigerTooltip(R.string.capture_close_content_description, modifier) {
         IconButton(
             onClick = onExit,
             enabled = enabled,

@@ -20,6 +20,7 @@ import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeaderHeight
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.PortraitScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.SectionedList
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerCard
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
@@ -47,7 +48,7 @@ internal fun SessionListScreen(
             count = stringResource(R.string.task_list_count, taskGroups.size),
             emptyMessage = stringResource(R.string.session_list_empty),
             sectionKey = HOME_SECTION_KEY,
-            topPadding = NavigationHeaderHeight + LIST_CONTENT_TOP_PADDING,
+            reservedTop = NavigationHeaderHeight,
             isEmpty = taskGroups.isEmpty(),
         ) {
             items(taskGroups.entries.toList(), key = { it.key }) { (taskName, taskSessions) ->
@@ -76,7 +77,10 @@ private fun TaskSummaryItem(
                 .semantics { contentDescription = taskName }
                 .clickable(role = Role.Button, onClick = onOpenTask),
     ) {
-        Column(modifier = Modifier.padding(TigerSpacing.cardPadding), verticalArrangement = Arrangement.spacedBy(CARD_LINE_GAP)) {
+        Column(
+            modifier = Modifier.padding(TigerSpacing.cardPadding),
+            verticalArrangement = Arrangement.spacedBy(TigerSpacing.cardLineGap),
+        ) {
             Text(text = taskName, style = TigerText.itemName)
             Text(text = stringResource(R.string.task_list_session_count, sessionCount), style = TigerText.supporting)
         }

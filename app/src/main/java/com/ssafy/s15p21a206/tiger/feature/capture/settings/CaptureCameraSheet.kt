@@ -18,10 +18,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerTooltip
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlayScrim
 import com.ssafy.s15p21a206.tiger.feature.capture.overlay.CaptureOverlayDimens
-import com.ssafy.s15p21a206.tiger.feature.capture.overlay.CaptureTooltip
 
 /**
  * 카메라 설정 시트를 여는 단추. Session이 도는 동안은 받지 않는다.
@@ -34,7 +34,7 @@ internal fun CaptureCameraSettingsButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    CaptureTooltip(R.string.capture_camera_title, modifier) {
+    TigerTooltip(R.string.capture_camera_title, modifier) {
         IconButton(
             onClick = onClick,
             enabled = enabled,

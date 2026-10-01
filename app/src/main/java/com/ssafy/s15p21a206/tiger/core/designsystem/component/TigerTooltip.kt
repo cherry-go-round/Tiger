@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture.overlay
+package com.ssafy.s15p21a206.tiger.core.designsystem.component
 
 import androidx.annotation.StringRes
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,10 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 
-/** 길게 누르면 [label]을 보여 준다. 수집 화면의 글리프 버튼들이 이름을 드러내는 방법이다. */
+/** 길게 누르면 [label]을 보여 준다. 글자 없이 글리프만 있는 버튼이 제 이름을 드러내는 방법이다. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun CaptureTooltip(
+internal fun TigerTooltip(
     @StringRes label: Int,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
