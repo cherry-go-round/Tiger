@@ -10,6 +10,7 @@ import kotlinx.coroutines.yield
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -80,6 +81,36 @@ class SessionUploaderTest {
 
             assertTrue(uploader().upload(bundle) is UploadResult.Failed)
             assertTrue(uploader().upload(bundle) is UploadResult.Failed)
+        }
+
+    @Test
+    fun `JSON receipt that cannot be decoded is failed`() =
+        runBlocking {
+            withTimeout(5_000) {
+                val bundle = createBundle()
+                server.enqueue(
+                    MockResponse()
+                        .setResponseCode(201)
+                        .addHeader("Content-Type", "application/json")
+                        .setBody("""{"result":"created"}"""),
+                )
+
+                assertTrue(uploader().upload(bundle) is UploadResult.Failed)
+            }
+        }
+
+    @Test
+    fun `receipt cut off while reading is failed`() =
+        runBlocking {
+            withTimeout(5_000) {
+                val bundle = createBundle()
+                server.enqueue(
+                    jsonResponse(201, bundle.sessionId, "created")
+                        .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY),
+                )
+
+                assertTrue(uploader().upload(bundle) is UploadResult.Failed)
+            }
         }
 
     @Test
