@@ -44,4 +44,4 @@ metadata JSON은 `session_id`, `camera_streams`, raw file manifest `files`를 �
 
 유효한 신규 수신은 `201`과 `{ "session_id": "…", "result": "created" }`, 동일 bundle 재수신은 `200`과 `result: "duplicate"`를 반환한다. 앱은 status가 `200` 또는 `201`이고 응답이 JSON이며, receipt의 `session_id`가 보낸 값과 같고 `result`가 `created` 또는 `duplicate`일 때만 `UPLOADED`로 표시한다. status와 `result`의 짝은 따지지 않는다.
 
-`400 MALFORMED_MULTIPART`, `409 IDEMPOTENCY_CONFLICT`, `409 IDEMPOTENCY_IN_PROGRESS`, `413 PAYLOAD_TOO_LARGE`, `415 UNSUPPORTED_MEDIA_TYPE`, `422 BUNDLE_INVALID`, `429 RATE_LIMITED`, TLS/연결 오류, redirect, 그 밖의 성공 조건 불일치는 `FAILED`다. 실패한 completed Session은 수동으로 재전송할 수 있다.
+`400 MALFORMED_MULTIPART`, `409 IDEMPOTENCY_CONFLICT`, `409 IDEMPOTENCY_IN_PROGRESS`, `413 PAYLOAD_TOO_LARGE`, `415 UNSUPPORTED_MEDIA_TYPE`, `422 BUNDLE_INVALID`, `429 RATE_LIMITED`, TLS/연결 오류, redirect, 그 밖의 성공 조건 불일치는 `FAILED`다. 응답이 JSON이라고 밝혔으나 receipt로 해석할 수 없거나, receipt를 읽는 도중 연결이 끊긴 경우도 `FAILED`다. 어느 경우든 전송은 끝나야 하며, 앱이 멈추거나 결과 없이 기다리지 않는다. 실패한 completed Session은 수동으로 재전송할 수 있다.
