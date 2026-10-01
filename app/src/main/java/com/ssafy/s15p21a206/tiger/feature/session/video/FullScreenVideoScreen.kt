@@ -24,6 +24,7 @@ import com.ssafy.s15p21a206.tiger.core.android.LockLandscapeWhilePlaying
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.PortraitScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
+import com.ssafy.s15p21a206.tiger.core.session.playableMainVideo
 
 /**
  * 전체화면 재생. 상세 화면과 같은 재생기([sharedPlayer])를 써서 재생 위치가 이어진다.

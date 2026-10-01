@@ -16,8 +16,6 @@ import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
-import java.io.File
 
 /**
  * 영상 재생기 화면. 전체화면 버튼과 그 콜백만 Media3가 주고, 화면 전환은 앱이 한다.
@@ -97,15 +95,6 @@ internal fun rememberVideoAspectRatio(player: ExoPlayer): Float {
     }
     return aspectRatio
 }
-
-/**
- * 재생할 수 있는 수집 영상. 파일이 없거나 비어 있으면 null이다.
- *
- * 상세의 재생 영역, 전체화면, 해상도 읽기가 같은 기준으로 판단해야 한쪽은 재생하고 다른 쪽은
- * 없다고 말하는 일이 생기지 않는다.
- */
-internal fun playableMainVideo(bundlePath: String): File? =
-    File(bundlePath, SessionBundle.MAIN_VIDEO_FILE).takeIf { it.isFile && it.length() > 0L }
 
 /** 영상 크기를 아직 모를 때 쓰는 비율. 크기를 알게 되면 즉시 교체된다. */
 private const val DEFAULT_VIDEO_ASPECT_RATIO = 16f / 9f

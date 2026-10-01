@@ -40,6 +40,7 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
+import com.ssafy.s15p21a206.tiger.core.session.playableMainVideo
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteConfirmation
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteMenuItem
@@ -47,7 +48,6 @@ import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
 import com.ssafy.s15p21a206.tiger.feature.session.labelRes
 import com.ssafy.s15p21a206.tiger.feature.session.video.SharedVideoPlayer
 import com.ssafy.s15p21a206.tiger.feature.session.video.VideoPlayer
-import com.ssafy.s15p21a206.tiger.feature.session.video.playableMainVideo
 import com.ssafy.s15p21a206.tiger.feature.session.video.rememberSharedVideoPlayer
 import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoAspectRatio
 
