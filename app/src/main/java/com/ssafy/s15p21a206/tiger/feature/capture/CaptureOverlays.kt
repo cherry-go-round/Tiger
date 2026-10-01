@@ -62,7 +62,7 @@ import kotlin.math.roundToInt
 
 @Composable
 @Suppress("FunctionName")
-fun CaptureWorkspaceControls(
+internal fun CaptureWorkspaceControls(
     policy: CaptureControlPolicy,
     onPlay: () -> Unit,
     onPause: () -> Unit,
@@ -138,7 +138,7 @@ fun CaptureWorkspaceControls(
  */
 @Composable
 @Suppress("FunctionName")
-fun CaptureFinalizingOverlay(
+internal fun CaptureFinalizingOverlay(
     failure: String?,
     onDismissFailure: () -> Unit,
     modifier: Modifier = Modifier,
@@ -176,7 +176,7 @@ fun CaptureFinalizingOverlay(
 /** 현재 수집 상태를 프리뷰 위에 표시한다. Tracking 안정화 여부를 사용자가 바로 알 수 있어야 한다. */
 @Composable
 @Suppress("FunctionName")
-fun CaptureWorkspaceStatus(
+internal fun CaptureWorkspaceStatus(
     state: CaptureWorkspaceControlState,
     modifier: Modifier = Modifier,
 ) {
@@ -228,7 +228,7 @@ private fun CaptureControlIcon(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("FunctionName")
-fun CaptureTooltip(
+internal fun CaptureTooltip(
     @StringRes label: Int,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -244,7 +244,7 @@ fun CaptureTooltip(
 
 @Composable
 @Suppress("FunctionName")
-fun CaptureStopConfirmation(
+internal fun CaptureStopConfirmation(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -259,7 +259,7 @@ fun CaptureStopConfirmation(
 
 @Composable
 @Suppress("FunctionName")
-fun CaptureWorkspaceExitControls(
+internal fun CaptureWorkspaceExitControls(
     policy: CaptureControlPolicy,
     onExit: () -> Unit,
     modifier: Modifier = Modifier,
@@ -299,7 +299,7 @@ fun CaptureWorkspaceExitControls(
  */
 @Composable
 @Suppress("FunctionName")
-fun CaptureCenterGuide(modifier: Modifier = Modifier) {
+internal fun CaptureCenterGuide(modifier: Modifier = Modifier) {
     val view = LocalView.current
     var shift by remember { mutableIntStateOf(0) }
     Box(
@@ -335,4 +335,4 @@ private fun View.displayWidth(): Int =
     }
 
 /** 기준선은 글자도 라벨도 없어 테스트가 찾을 이름이 따로 필요하다. */
-const val CAPTURE_CENTER_GUIDE_TAG = "capture_center_guide"
+internal const val CAPTURE_CENTER_GUIDE_TAG = "capture_center_guide"

@@ -53,7 +53,7 @@ import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 
 @Suppress("FunctionName")
 @Composable
-fun SessionListScreen(
+internal fun SessionListScreen(
     sessions: List<SessionSummary>,
     onStartCapture: () -> Unit,
     onOpenTask: (String) -> Unit,
@@ -140,7 +140,7 @@ private fun NewSessionFab(
 
 @Composable
 @Suppress("FunctionName")
-fun TaskSessionListScreen(
+internal fun TaskSessionListScreen(
     taskName: String,
     sessions: List<SessionSummary>,
     onBack: () -> Unit,

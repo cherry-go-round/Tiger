@@ -6,7 +6,7 @@ package com.ssafy.s15p21a206.tiger.feature.capture
  * 이름은 명세 및 수신 측 어휘를 따른다. [Ready]는 Session이 이미 수집 중이고 ARCore Tracking이
  * 안정화되어 Episode를 시작할 수 있는 상태를 뜻한다. Session을 아직 시작하지 않은 상태는 [Idle]이다.
  */
-enum class CaptureWorkspaceControlState {
+internal enum class CaptureWorkspaceControlState {
     Idle,
     Initializing,
     Ready,
@@ -14,13 +14,13 @@ enum class CaptureWorkspaceControlState {
     Finalizing,
 }
 
-enum class CaptureExitAction {
+internal enum class CaptureExitAction {
     Leave,
     Confirm,
     Ignore,
 }
 
-data class CaptureControlPolicy(
+internal data class CaptureControlPolicy(
     val state: CaptureWorkspaceControlState,
     val ready: Boolean = true,
     val busy: Boolean = false,
