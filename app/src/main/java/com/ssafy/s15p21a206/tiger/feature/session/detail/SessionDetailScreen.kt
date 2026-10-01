@@ -33,6 +33,7 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.component.LabelledGroup
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.LabelledValue
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
@@ -92,7 +93,7 @@ internal fun SessionDetailScreen(
             Text(
                 text = stringResource(R.string.session_detail_unavailable),
                 style = TigerText.bodyMuted,
-                modifier = Modifier.padding(horizontal = DETAIL_CONTENT_PADDING),
+                modifier = Modifier.padding(horizontal = TigerSpacing.screenEdge),
             )
         } else {
             SessionVideoPreview(summary.bundlePath, sharedPlayer, onOpenFullscreenVideo)
@@ -187,7 +188,7 @@ private fun SessionVideoPreview(
         Text(
             text = stringResource(R.string.session_detail_video_unavailable),
             style = TigerText.bodyMuted,
-            modifier = Modifier.padding(horizontal = DETAIL_CONTENT_PADDING),
+            modifier = Modifier.padding(horizontal = TigerSpacing.screenEdge),
         )
         return
     }
@@ -217,10 +218,10 @@ private fun SessionDetailBody(
     Column(
         modifier =
             Modifier.padding(
-                start = DETAIL_CONTENT_PADDING,
-                end = DETAIL_CONTENT_PADDING,
+                start = TigerSpacing.screenEdge,
+                end = TigerSpacing.screenEdge,
                 top = DETAIL_VIDEO_GAP,
-                bottom = DETAIL_CONTENT_PADDING,
+                bottom = TigerSpacing.screenEdge,
             ),
         verticalArrangement = Arrangement.spacedBy(DETAIL_GROUP_GAP),
     ) {
@@ -305,9 +306,6 @@ private fun PausePlaybackWhileConfirmingDelete(
         if (pendingDelete != null) sharedPlayer.pause()
     }
 }
-
-/** 세션 상세 본문의 여백. 영상은 화면 폭을 다 쓰므로 이 여백은 그 아래 내용에만 적용된다. */
-private val DETAIL_CONTENT_PADDING = 16.dp
 
 /** 영상과 본문 사이 간격. 좌우 여백보다 넓어야 영상이 끝나고 설명이 시작되는 것으로 읽힌다. */
 private val DETAIL_VIDEO_GAP = 24.dp

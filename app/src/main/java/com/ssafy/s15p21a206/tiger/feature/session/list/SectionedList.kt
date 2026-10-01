@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.ListSectionHeader
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
@@ -51,7 +52,7 @@ internal fun SectionedList(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, top = topPadding, bottom = FAB_CLEARANCE),
+                    .padding(start = TigerSpacing.screenEdge, end = TigerSpacing.screenEdge, top = topPadding, bottom = FAB_CLEARANCE),
         ) {
             ListSectionHeader(
                 modifier = Modifier.padding(bottom = SECTION_HEADER_BOTTOM_PADDING),
@@ -63,7 +64,13 @@ internal fun SectionedList(
     } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = topPadding, bottom = FAB_CLEARANCE),
+            contentPadding =
+                PaddingValues(
+                    start = TigerSpacing.screenEdge,
+                    end = TigerSpacing.screenEdge,
+                    top = topPadding,
+                    bottom = FAB_CLEARANCE,
+                ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item(key = sectionKey) {
@@ -111,9 +118,6 @@ internal val LIST_CONTENT_TOP_PADDING = 8.dp
 
 /** FAB가 마지막 카드나 안내를 가리지 않도록 목록 아래에 두는 여백. */
 private val FAB_CLEARANCE = 88.dp
-
-/** 카드가 안쪽에 두는 여백. 카드 바깥의 글자를 카드 안 글자와 맞출 때 같은 값을 쓴다. */
-internal val CARD_CONTENT_PADDING = 16.dp
 
 /**
  * 카드 안 두 줄 사이.

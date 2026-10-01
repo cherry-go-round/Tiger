@@ -34,6 +34,7 @@ import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerCard
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
@@ -212,7 +213,7 @@ private fun SessionSummaryCardContent(
     summary: SessionSummary,
     captureTime: String,
 ) {
-    Column(modifier = Modifier.padding(CARD_CONTENT_PADDING), verticalArrangement = Arrangement.spacedBy(CARD_LINE_GAP)) {
+    Column(modifier = Modifier.padding(TigerSpacing.cardPadding), verticalArrangement = Arrangement.spacedBy(CARD_LINE_GAP)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

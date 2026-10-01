@@ -31,8 +31,8 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureStart
 /**
  * 재생·일시 정지·정지 제어. 단계에 따라 둘 또는 하나를 보인다.
  *
- * 거치대 집게가 폰의 가운데를 물어 하단 중앙은 가려지므로 우측 가장자리에 세로로 쌓는다. 끝 여백
- * 16dp는 56dp 아이콘의 중심을 상단 닫기(48dp, 끝 여백 20dp)와 같은 세로축에 둔다.
+ * 거치대 집게가 폰의 가운데를 물어 하단 중앙은 가려지므로 우측 가장자리에 세로로 쌓는다. 끝 여백은
+ * [CaptureOverlayDimens.controlEndInset]이다.
  */
 @Composable
 @Suppress("FunctionName")
@@ -44,7 +44,7 @@ internal fun CaptureWorkspaceControls(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.safeDrawingPadding().padding(end = 16.dp),
+        modifier = modifier.safeDrawingPadding().padding(end = CaptureOverlayDimens.controlEndInset),
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -107,7 +107,7 @@ private fun CaptureControlIcon(
         IconButton(
             onClick = onClick,
             enabled = enabled,
-            modifier = Modifier.size(56.dp).background(CaptureOverlayScrim, CircleShape),
+            modifier = Modifier.size(CaptureOverlayDimens.controlButtonSize).background(CaptureOverlayScrim, CircleShape),
         ) {
             Icon(
                 painter = painterResource(iconRes),

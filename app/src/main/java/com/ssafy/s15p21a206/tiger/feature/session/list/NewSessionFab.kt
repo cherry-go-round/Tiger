@@ -18,6 +18,7 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 
 /**
  * 새 세션을 시작하는 FAB다.
@@ -27,7 +28,7 @@ import com.ssafy.s15p21a206.tiger.R
  * 세션 시작인지 헷갈리지 않게 한다.
  *
  * 기본값인 primaryContainer는 연한 판이라 목록 위에서 흐릿하게 떠, 짙은 primary로 주 동작임을
- * 보인다. 그림자도 기본 6dp는 과해서 떠 있는 정도만 남긴다. 오른쪽 끝은 카드와 같은 16dp에 맞춘다.
+ * 보인다. 그림자도 기본 6dp는 과해서 떠 있는 정도만 남긴다. 오른쪽 끝은 카드와 같은 [TigerSpacing.screenEdge]에 맞춘다.
  */
 @Composable
 @Suppress("FunctionName")
@@ -54,7 +55,7 @@ internal fun NewSessionFab(
                 focusedElevation = 3.dp,
                 hoveredElevation = 3.dp,
             ),
-        modifier = modifier.padding(16.dp).extendedFabName(label),
+        modifier = modifier.padding(TigerSpacing.screenEdge).extendedFabName(label),
     )
 }
 

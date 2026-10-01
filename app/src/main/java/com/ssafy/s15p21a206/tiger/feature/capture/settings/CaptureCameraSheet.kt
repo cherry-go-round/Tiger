@@ -17,11 +17,11 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.unit.dp
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlayScrim
+import com.ssafy.s15p21a206.tiger.feature.capture.CaptureOverlayDimens
 import com.ssafy.s15p21a206.tiger.feature.capture.CaptureTooltip
 
 /**
@@ -40,7 +40,7 @@ internal fun CaptureCameraSettingsButton(
         IconButton(
             onClick = onClick,
             enabled = enabled,
-            modifier = Modifier.size(48.dp).background(CaptureOverlayScrim, CircleShape),
+            modifier = Modifier.size(CaptureOverlayDimens.glyphButtonSize).background(CaptureOverlayScrim, CircleShape),
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_capture_settings),

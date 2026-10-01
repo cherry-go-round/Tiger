@@ -51,7 +51,11 @@ internal fun CaptureTopBar(
             modifier
                 .fillMaxWidth()
                 .safeDrawingPadding()
-                .padding(top = 20.dp, start = 20.dp, end = 20.dp),
+                .padding(
+                    top = CaptureOverlayDimens.edgeInset,
+                    start = CaptureOverlayDimens.edgeInset,
+                    end = CaptureOverlayDimens.edgeInset,
+                ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top,
     ) {
@@ -121,7 +125,7 @@ internal fun CaptureWorkspaceExitControls(
             enabled = enabled,
             modifier =
                 Modifier
-                    .size(48.dp)
+                    .size(CaptureOverlayDimens.glyphButtonSize)
                     .background(CaptureOverlayScrim, CircleShape)
                     .semantics { contentDescription = description },
         ) {

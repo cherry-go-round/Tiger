@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
 /**
@@ -55,7 +56,7 @@ fun LabelledGroup(
         Text(text = label, style = TigerText.groupLabel)
         TigerCard(modifier = Modifier.fillMaxWidth()) {
             Column(
-                modifier = Modifier.padding(CARD_PADDING),
+                modifier = Modifier.padding(TigerSpacing.cardPadding),
                 verticalArrangement = Arrangement.spacedBy(CONTENT_LINE_GAP),
                 content = content,
             )
@@ -111,9 +112,6 @@ private val LABEL_GAP = 4.dp
 
 /** 묶음 안 줄 사이. */
 private val CONTENT_LINE_GAP = 6.dp
-
-/** 카드가 안쪽에 두는 여백. 목록 카드와 같은 값이다. */
-private val CARD_PADDING = 16.dp
 
 /**
  * 이름표 기둥의 폭.

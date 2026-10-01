@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.text
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeaderHeight
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerCard
+import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSpacing
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 
@@ -77,7 +78,7 @@ private fun TaskSummaryItem(
                 .semantics { contentDescription = taskName }
                 .clickable(role = Role.Button, onClick = onOpenTask),
     ) {
-        Column(modifier = Modifier.padding(CARD_CONTENT_PADDING), verticalArrangement = Arrangement.spacedBy(CARD_LINE_GAP)) {
+        Column(modifier = Modifier.padding(TigerSpacing.cardPadding), verticalArrangement = Arrangement.spacedBy(CARD_LINE_GAP)) {
             Text(text = taskName, style = TigerText.itemName)
             Text(text = stringResource(R.string.task_list_session_count, sessionCount), style = TigerText.supporting)
         }
