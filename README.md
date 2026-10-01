@@ -1,5 +1,8 @@
 # TIGER MASK
 
+***T**arget-**I**nteraction **G**rounded **E**pisode **R**ecorder*\
+***M**anual **A**cquisition **S**etting **K**eeper*
+
 수집기에 단 휴대폰으로 카메라 영상, IMU, ARCore pose를 수집해 서버로 보내는 Android **데이터 수집 앱**입니다.
 
 <table align="center">
