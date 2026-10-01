@@ -3,6 +3,7 @@ package com.ssafy.s15p21a206.tiger.core.session
 import com.ssafy.s15p21a206.tiger.core.model.session.BundleValidationResult
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
@@ -24,57 +25,49 @@ object SessionBundleValidator {
             SessionBundle.EPISODES_FILE to SessionBundle.EPISODES_HEADER,
         )
 
+    /**
+     * 번들이 온전한지 본다. 처음 걸린 문제 하나를 사유로 돌려준다.
+     *
+     * [requireMetadata]가 `false`면 `metadata.json`을 쓰기 전(마감 중)이라 기록 파일만 보고, 초광각을 함께
+     * 찍었는지는 [includesUltraWide]로 받는다. `true`면 그것을 `metadata.json`의 선언에서 읽으므로
+     * [includesUltraWide]는 보지 않는다.
+     */
     fun validate(
         directory: File,
         includesUltraWide: Boolean = false,
         requireMetadata: Boolean = true,
     ): BundleValidationResult {
-        if (!directory.isDirectory) return BundleValidationResult.Invalid("bundle directory is missing")
-        if (!File(directory, SessionBundle.MAIN_VIDEO_FILE).hasContent()) return BundleValidationResult.Invalid("main video is missing")
-        for ((fileName, header) in requiredCsvHeaders) {
-            if (!File(
-                    directory,
-                    fileName,
-                ).hasHeader(header)
-            ) {
-                return BundleValidationResult.Invalid("invalid $fileName")
-            }
-        }
-        if (!requireMetadata) {
-            if (includesUltraWide && !hasValidUltraWideFiles(directory)) return BundleValidationResult.Invalid("invalid ultra-wide stream")
-            return BundleValidationResult.Valid
-        }
+        val problem =
+            recordingProblem(directory)
+                ?: if (requireMetadata) metadataProblem(directory) else ultraWideProblem(directory, includesUltraWide)
+        return problem?.let(BundleValidationResult::Invalid) ?: BundleValidationResult.Valid
+    }
 
-        val metadata =
-            parseMetadata(File(directory, SessionBundle.METADATA_FILE))
-                ?: return BundleValidationResult.Invalid("metadata commit marker is missing")
-        val includesDeclaredUltraWide =
-            metadata.cameraStreams["ultrawide"]?.jsonPrimitive?.booleanOrNull
-                ?: return BundleValidationResult.Invalid("metadata ultra-wide declaration is missing")
-        if (metadata.cameraStreams["main"]?.jsonPrimitive?.booleanOrNull !=
-            true
-        ) {
-            return BundleValidationResult.Invalid("main stream declaration is invalid")
+    /** 수집이 남기는 기록 파일(주 영상과 CSV들)의 문제. */
+    private fun recordingProblem(directory: File): String? {
+        if (!directory.isDirectory) return "bundle directory is missing"
+        if (!File(directory, SessionBundle.MAIN_VIDEO_FILE).hasContent()) return "main video is missing"
+        val invalidCsv = requiredCsvHeaders.entries.firstOrNull { (fileName, header) -> !File(directory, fileName).hasHeader(header) }
+        return invalidCsv?.let { "invalid ${it.key}" }
+    }
+
+    private fun ultraWideProblem(
+        directory: File,
+        includesUltraWide: Boolean,
+    ): String? = "invalid ultra-wide stream".takeIf { includesUltraWide && !hasValidUltraWideFiles(directory) }
+
+    /** `metadata.json`이 번들과 맞는지. 선언(세션 ID, 카메라 스트림)과 파일 manifest를 본다. */
+    private fun metadataProblem(directory: File): String? {
+        val metadata = parseMetadata(File(directory, SessionBundle.METADATA_FILE)) ?: return "metadata commit marker is missing"
+        val declaresUltraWide = metadata.declaresStream("ultrawide") ?: return "metadata ultra-wide declaration is missing"
+        return when {
+            metadata.declaresStream("main") != true -> "main stream declaration is invalid"
+            metadata.sessionId.isBlank() -> "metadata session id is missing"
+            declaresUltraWide != hasUltraWideDocuments(directory) -> "ultra-wide document set does not match metadata"
+            declaresUltraWide && !hasValidUltraWideFiles(directory) -> "invalid ultra-wide stream"
+            metadata.manifest == null || !hasExactManifest(directory, metadata.manifest) -> "metadata manifest does not match bundle"
+            else -> null
         }
-        if (metadata.sessionId.isBlank()) return BundleValidationResult.Invalid("metadata session id is missing")
-        if (includesDeclaredUltraWide !=
-            hasUltraWideDocuments(directory)
-        ) {
-            return BundleValidationResult.Invalid("ultra-wide document set does not match metadata")
-        }
-        if (includesDeclaredUltraWide &&
-            !hasValidUltraWideFiles(directory)
-        ) {
-            return BundleValidationResult.Invalid("invalid ultra-wide stream")
-        }
-        if (!hasExactManifest(
-                directory,
-                metadata.manifest,
-            )
-        ) {
-            return BundleValidationResult.Invalid("metadata manifest does not match bundle")
-        }
-        return BundleValidationResult.Valid
     }
 
     private fun hasValidUltraWideFiles(directory: File): Boolean =
@@ -89,41 +82,43 @@ object SessionBundleValidator {
         runCatching {
             if (!metadataFile.hasContent()) return null
             val root = Json.parseToJsonElement(metadataFile.readText()).jsonObject
+            val entries = root["files"]?.jsonArray?.map(::parseManifestEntry) ?: return null
             BundleMetadata(
                 sessionId = root["session_id"]?.jsonPrimitive?.contentOrNull ?: return null,
                 cameraStreams = root["camera_streams"]?.jsonObject ?: return null,
-                manifest = root["files"]?.jsonArray?.map(::parseManifestEntry) ?: return null,
+                manifest = entries.takeIf { null !in it }?.filterNotNull(),
             )
         }.getOrNull()
 
-    private fun parseManifestEntry(element: kotlinx.serialization.json.JsonElement): ManifestEntry? {
+    /** manifest의 한 항목. 필드가 빠졌거나 SHA-256이 소문자 16진 64자가 아니면 null이다. */
+    private fun parseManifestEntry(element: JsonElement): ManifestEntry? {
         val entry = element as? JsonObject ?: return null
         return ManifestEntry(
             path = entry["path"]?.jsonPrimitive?.contentOrNull ?: return null,
             sizeBytes = entry["sizeBytes"]?.jsonPrimitive?.longOrNull ?: return null,
-            sha256 = entry["sha256"]?.jsonPrimitive?.contentOrNull ?: return null,
+            sha256 = entry["sha256"]?.jsonPrimitive?.contentOrNull?.takeIf { it.matches(SHA_256) } ?: return null,
         )
     }
 
+    /**
+     * manifest가 번들의 raw 파일을 빠짐없이, 겹치지 않게 설명하는지.
+     *
+     * 디렉터리에는 파일만 있어야 하고, `metadata.json`을 뺀 파일 이름의 집합이 manifest 경로의 집합과
+     * 같아야 한다. 그 위에서 항목마다 크기와 SHA-256이 실제 파일과 같아야 한다.
+     */
     private fun hasExactManifest(
         directory: File,
-        manifest: List<ManifestEntry?>,
+        manifest: List<ManifestEntry>,
     ): Boolean {
-        if (manifest.any { it == null }) return false
-        val entries = manifest.filterNotNull()
-        if (entries.map(ManifestEntry::path).toSet().size != entries.size) return false
         val documents = directory.listFiles()?.toList().orEmpty()
         if (documents.any { !it.isFile }) return false
         val rawDocuments = documents.filter { it.name != SessionBundle.METADATA_FILE }.associateBy(File::getName)
-        if (entries.map(ManifestEntry::path).toSet() != rawDocuments.keys) return false
-        return entries.all { entry ->
-            val document = rawDocuments[entry.path] ?: return@all false
-            entry.path == document.name &&
-                entry.sizeBytes == document.length() &&
-                entry.sha256.matches(SHA_256) &&
-                entry.sha256 == sha256(document)
-        }
+        val paths = manifest.map(ManifestEntry::path)
+        if (paths.distinct().size != paths.size || paths.toSet() != rawDocuments.keys) return false
+        return manifest.all { it.describes(rawDocuments.getValue(it.path)) }
     }
+
+    private fun ManifestEntry.describes(document: File): Boolean = sizeBytes == document.length() && sha256 == sha256(document)
 
     private fun File.hasContent() = isFile && length() > 0L
 
@@ -145,8 +140,12 @@ object SessionBundleValidator {
     private data class BundleMetadata(
         val sessionId: String,
         val cameraStreams: JsonObject,
-        val manifest: List<ManifestEntry?>,
-    )
+        /** 파일 manifest. 항목 중 하나라도 형식이 틀리면 null이다. */
+        val manifest: List<ManifestEntry>?,
+    ) {
+        /** `camera_streams`에서 [name] 스트림을 담았다고 선언했는지. 선언이 없거나 불리언이 아니면 null이다. */
+        fun declaresStream(name: String): Boolean? = cameraStreams[name]?.jsonPrimitive?.booleanOrNull
+    }
 
     private data class ManifestEntry(
         val path: String,
