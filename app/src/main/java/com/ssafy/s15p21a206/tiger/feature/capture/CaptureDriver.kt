@@ -209,7 +209,7 @@ internal fun rememberCaptureDriver(
                     )
                     onIntent(CaptureIntent.SessionStarted(bundle, startedAtNs, state.resolution))
                     repository.save(
-                        sessionRow(bundle, state.task, state.objectName, RecordingState.INITIALIZING, startNs = startedAtNs),
+                        state.sessionRow(bundle, RecordingState.INITIALIZING, startNs = startedAtNs),
                     )
                 }.onFailure { error ->
                     // ARCore가 카메라를 잡지 못했으므로 유휴 프리뷰를 되살린다.
@@ -302,20 +302,17 @@ internal fun rememberCaptureDriver(
         onIntent(CaptureIntent.FinalizeStarted)
         scope.launch {
             try {
-                when (
-                    val result =
-                        runCatching { withContext(Dispatchers.IO) { captureRuntime.stop() } }
-                            .getOrElse { FinalizeResult.Failed(it.message.orEmpty()) }
-                ) {
+                val result =
+                    runCatching { withContext(Dispatchers.IO) { captureRuntime.stop() } }
+                        .getOrElse { FinalizeResult.Failed(it.message.orEmpty()) }
+                when (result) {
                     is FinalizeResult.Completed -> {
                         bundle?.let {
                             // 백그라운드에서 마감됐으면 전송을 걸지 않고 실패로 남긴다.
                             val startUpload = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
                             repository.save(
-                                sessionRow(
+                                state.sessionRow(
                                     bundle,
-                                    state.task,
-                                    state.objectName,
                                     RecordingState.COMPLETED,
                                     startNs = startedAtNs,
                                     endNs = SystemClock.elapsedRealtimeNanos(),
@@ -371,10 +368,8 @@ internal fun rememberCaptureDriver(
         captureRuntime.interrupt()
         scope.launch {
             repository.save(
-                sessionRow(
+                state.sessionRow(
                     interruptedBundle,
-                    state.task,
-                    state.objectName,
                     RecordingState.INTERRUPTED,
                     startNs = startedAtNs,
                     endNs = SystemClock.elapsedRealtimeNanos(),
@@ -417,16 +412,15 @@ private fun Context.openArCoreStore() {
  * 이 수집의 Session 행. 저장할 때마다 이 함수로 만들어 행 전체를 덮어쓴다.
  *
  * 시작 때 먼저 저장해 두는 것은 수집 도중 프로세스가 죽어도 다음 실행이 이 행으로 staging 번들을 찾아
- * 복구하게 하기 위해서다. Task·Object와 표시 번호는 번들에 없고 이 행에만 있다.
+ * 복구하게 하기 위해서다. Task·Object와 표시 번호는 번들에 없고 이 행에만 있다. Task·Object는 작업 공간
+ * 상태에서 채운다.
  *
  * [recordedAtEpochMs]는 영상이 만들어진 벽시계 시각이라 녹화가 멈춘 저장(마감·중단)에서만 넘긴다.
  * 시작 행은 아직 영상이 없어 0으로 두며, 끝에서 저장하지 못하고 복구된 Session은 복구가 영상 파일의
  * 수정 시각으로 채운다. 수집 길이는 [startNs]와 [endNs](부팅 이후 경과 시간)로 따로 잰다.
  */
-private fun sessionRow(
+private fun CaptureUiState.sessionRow(
     bundle: SessionBundle,
-    task: String,
-    objectName: String,
     recordingState: RecordingState,
     startNs: Long,
     endNs: Long? = null,
