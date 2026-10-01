@@ -36,6 +36,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * 수집 Session의 시작·진행·마감.
@@ -225,65 +226,87 @@ internal class CaptureSessionActions(
 
     fun confirmStop(state: CaptureUiState) {
         onIntent(CaptureIntent.StopDismissed)
-        finalizeCapture(state)
+        finalize(state)
     }
 
-    private fun finalizeCapture(state: CaptureUiState) {
-        if (!state.policy.canStop) return
-        // 진행 중인 Episode가 있으면 Session을 마감하지 않고 먼저 종료하도록 안내한다.
+    private fun finalize(state: CaptureUiState) {
+        if (!canFinalize(state)) return
+        onIntent(CaptureIntent.FinalizeStarted)
+        scope.launch { closeSession(state) }
+    }
+
+    /** 정지할 수 있는 상태여야 하고 진행 중인 Episode가 없어야 한다. Episode가 남았으면 먼저 끝내라고 알린다. */
+    private fun canFinalize(state: CaptureUiState): Boolean {
+        if (!state.policy.canStop) return false
         if (coordinator.activeEpisode != null) {
             notify(R.string.active_episode_end_required)
-            return
+            return false
         }
-        val bundle = state.activeBundle
-        val startedAtNs = state.recordingStartNs
-        onIntent(CaptureIntent.FinalizeStarted)
-        scope.launch {
-            try {
-                val result =
-                    runCatching { withContext(Dispatchers.IO) { runtime.stop() } }
-                        .getOrElse { FinalizeResult.Failed(it.message.orEmpty()) }
-                when (result) {
-                    is FinalizeResult.Completed -> {
-                        bundle?.let {
-                            // 백그라운드에서 마감됐으면 전송을 걸지 않고 실패로 남긴다.
-                            val startUpload = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
-                            repository.save(
-                                state.sessionRow(
-                                    bundle,
-                                    RecordingState.COMPLETED,
-                                    startNs = startedAtNs,
-                                    endNs = SystemClock.elapsedRealtimeNanos(),
-                                    recordedAtEpochMs = System.currentTimeMillis(),
-                                    bundlePath = result.directory.absolutePath,
-                                    uploadState = if (startUpload) UploadState.LOCAL_ONLY else UploadState.FAILED,
-                                ),
-                            )
-                            // 어디로 갈지는 부모가 정한다. 수집은 목적지를 모른다.
-                            onCompleted(bundle.sessionId, startUpload)
-                        }
-                    }
-                    // 마감 실패는 지나가는 알림이 아니다. 저장된 세션이 없으므로 넘어갈 곳도 없다.
-                    // 작업 공간을 덮은 판에 세워 두고, 확인을 받은 뒤에야 다시 찍을 수 있게 한다.
-                    is FinalizeResult.Failed ->
-                        onIntent(CaptureIntent.FinalizeFailed("${message(R.string.capture_finalize_failed)}: ${result.reason}"))
-                }
-                // 다음 Session을 시작할 수 있도록 Coordinator의 Session·Tracking 상태를 닫는다.
-                coordinator.release()
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                onIntent(CaptureIntent.FinalizeFailed(message(R.string.capture_finalize_failed)))
-            } finally {
-                // 예외로 빠져나가도 Finalizing에 머무르지 않게 여기서 닫는다.
-                onIntent(CaptureIntent.Finalized)
-                // 작업 공간에 남는 경로(마감 실패, 업로드 서버 주소 없음)를 위해 유휴 프리뷰를 다시 연다.
-                // 의도는 그 경로에서만 여는 것이지만 `state`는 마감을 시작한 시점의 값이라 늘 open이다.
-                // 상세로 넘어가는 경로에서도 Surface가 아직 남아 있어 잠깐 열렸다가, 작업 공간을 벗어날 때
-                // 닫힌다.
-                if (state.open) preview.restore()
+        return true
+    }
+
+    private suspend fun closeSession(state: CaptureUiState) {
+        try {
+            when (val result = stopRecording()) {
+                is FinalizeResult.Completed -> state.activeBundle?.let { saveCompletedSession(state, it, result.directory) }
+                is FinalizeResult.Failed -> reportFinalizeFailure(result.reason)
             }
+            coordinator.release()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            reportFinalizeFailure(reason = null)
+        } finally {
+            leaveFinalizing(state)
         }
+    }
+
+    /** 녹화를 멈추고 번들을 마감한다. 멈추다 난 예외도 실패로 돌려준다. */
+    private suspend fun stopRecording(): FinalizeResult =
+        runCatching { withContext(Dispatchers.IO) { runtime.stop() } }
+            .getOrElse { FinalizeResult.Failed(it.message.orEmpty()) }
+
+    /**
+     * 마감된 Session을 저장하고 부모에게 알린다.
+     *
+     * 백그라운드에서 마감됐으면 전송을 걸지 않는다. 대신 `FAILED`로 남겨 상세에서 다시 걸 수 있게 한다.
+     */
+    private suspend fun saveCompletedSession(
+        state: CaptureUiState,
+        bundle: SessionBundle,
+        directory: File,
+    ) {
+        val inForeground = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+        repository.save(
+            state.sessionRow(
+                bundle,
+                RecordingState.COMPLETED,
+                startNs = state.recordingStartNs,
+                endNs = SystemClock.elapsedRealtimeNanos(),
+                recordedAtEpochMs = System.currentTimeMillis(),
+                bundlePath = directory.absolutePath,
+                uploadState = if (inForeground) UploadState.LOCAL_ONLY else UploadState.FAILED,
+            ),
+        )
+        onCompleted(bundle.sessionId, inForeground)
+    }
+
+    /** 마감 실패를 확인받을 판에 세운다. [reason]이 있으면 문구 뒤에 붙인다. */
+    private fun reportFinalizeFailure(reason: String?) {
+        val message = message(R.string.capture_finalize_failed)
+        onIntent(CaptureIntent.FinalizeFailed(if (reason == null) message else "$message: $reason"))
+    }
+
+    /**
+     * 마감을 끝내고 작업 공간으로 돌아온다. 예외로 빠져나가도 불린다.
+     *
+     * 작업 공간에 남는 경로(마감 실패, 업로드 서버 주소 없음)를 위해 유휴 프리뷰를 다시 연다. [state]는
+     * 마감을 시작한 시점의 값이라 늘 open이어서, 상세로 넘어가는 경로에서도 잠깐 열렸다가 작업 공간을
+     * 벗어날 때 닫힌다.
+     */
+    private fun leaveFinalizing(state: CaptureUiState) {
+        onIntent(CaptureIntent.Finalized)
+        if (state.open) preview.restore()
     }
 
     /** 앱이 밀려나면 진행 중인 Session을 `INTERRUPTED`로 남긴다. 다음 실행이 복구한다. */
