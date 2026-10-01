@@ -13,7 +13,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
-import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -22,7 +21,7 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * 수집 작업 공간이 부르는 조작 묶음. 화면은 무엇을 그릴지만 알고 조작은 여기로 넘긴다.
  *
- * 실제 일은 [IdlePreview], [ManualCameraControls], [CaptureSessionActions]가 한다. [rememberCaptureDriver]가
+ * 실제 일은 [IdlePreview], [CaptureSettingsControls], [CaptureSessionActions]가 한다. [rememberCaptureDriver]가
  * 그 셋을 이어 만든다.
  */
 internal class CaptureDriver(
@@ -35,11 +34,9 @@ internal class CaptureDriver(
     val requestExit: () -> Unit,
     val confirmStop: () -> Unit,
     val confirmMetadata: () -> Unit,
-    /** 녹화 해상도를 바꾼다. 유휴 프리뷰를 그 크기로 다시 연다. */
-    val selectResolution: (RecordingResolution) -> Unit,
     /** 작업 공간을 벗어날 때 유휴 프리뷰 Camera2 session을 놓는다. */
     val releaseIdlePreview: () -> Unit,
-    val manualCamera: ManualCameraControls,
+    val captureSettings: CaptureSettingsControls,
 )
 
 /**
@@ -47,7 +44,7 @@ internal class CaptureDriver(
  *
  * 여기에는 composition에 묶인 것만 둔다. 권한 `rememberLauncherForActivityResult`는 composition에서만
  * 만들 수 있고, tracking 폴링과 `ON_STOP` 처리도 composition의 effect다. 일은 셋이 나눠 맡는다.
- * 유휴 프리뷰는 [rememberIdlePreview], 수동 촬영 조건은 [rememberManualCamera], Session의 시작·진행·
+ * 유휴 프리뷰는 [rememberIdlePreview], 촬영 조건(해상도·수동 설정)은 [rememberCaptureSettings], Session의 시작·진행·
  * 마감은 [CaptureSessionActions]다. 돌려주는 [CaptureDriver]는 매 composition 새로 만들어 그때의
  * [state]를 조작에 넘긴다.
  */
@@ -62,7 +59,7 @@ internal fun rememberCaptureDriver(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val preview = rememberIdlePreview(state, onIntent)
-    val manualCamera = rememberManualCamera(state, onIntent, preview.camera)
+    val captureSettings = rememberCaptureSettings(state, onIntent, preview, resolutionStore)
     val session = rememberCaptureSessionActions(scope, repository, preview, onIntent, onCompleted)
     val cameraPermission =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -88,20 +85,6 @@ internal fun rememberCaptureDriver(
         session.interrupt(state)
     }
 
-    // 다른 촬영 조건처럼 고르는 즉시 기억하고 프리뷰에 건다. Session이 시작되면 상태 전이가 막는다.
-    fun selectResolution(chosen: RecordingResolution) {
-        if (state.phase != CaptureWorkspaceControlState.Idle || state.busy) return
-        onIntent(CaptureIntent.SelectResolution(chosen))
-        resolutionStore.save(chosen)
-        // 유휴 프리뷰도 고른 해상도로 다시 연다. Camera2는 session을 만들 때 stream 크기를
-        // 정하므로, 버퍼 크기만 바꾸면 이미 열린 session에는 반영되지 않는다.
-        if (state.idlePreviewSize != chosen) {
-            onIntent(CaptureIntent.IdlePreviewResized(chosen))
-            preview.resizeBuffer(chosen.width, chosen.height)
-            preview.restore()
-        }
-    }
-
     return CaptureDriver(
         snackbarHostState = snackbarHostState,
         onSurfaceAvailable = { surface, texture -> preview.attach(surface, texture) },
@@ -114,9 +97,8 @@ internal fun rememberCaptureDriver(
         requestExit = { session.requestExit(state) },
         confirmStop = { session.confirmStop(state) },
         confirmMetadata = { onIntent(CaptureIntent.ConfirmMetadata) },
-        selectResolution = ::selectResolution,
         releaseIdlePreview = preview::release,
-        manualCamera = manualCamera,
+        captureSettings = captureSettings,
     )
 }
 

@@ -18,6 +18,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.capture.camera.PreviewCameraSession
+import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 
 /**
  * Session을 시작하기 전의 유휴 프리뷰. 작업 공간이 열려 있는 동안 Camera2로 그린다.
@@ -66,6 +67,16 @@ internal class IdlePreview(
         height: Int,
     ) {
         texture?.setDefaultBufferSize(width, height)
+    }
+
+    /**
+     * 유휴 프리뷰를 [resolution] 크기로 다시 연다.
+     *
+     * Camera2는 session을 만들 때 stream 크기를 정하므로, 버퍼 크기만 바꾸면 이미 열린 session에는 반영되지 않는다.
+     */
+    fun reopenAt(resolution: RecordingResolution) {
+        resizeBuffer(resolution.width, resolution.height)
+        restore()
     }
 
     fun release() {
