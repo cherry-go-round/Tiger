@@ -278,13 +278,18 @@ internal fun CaptureUiState.reduce(intent: CaptureIntent): CaptureUiState =
         CaptureIntent.FinalizeStarted -> copy(phase = CaptureWorkspaceControlState.Finalizing, showStopConfirmation = false)
         is CaptureIntent.FinalizeFailed -> copy(finalizeFailure = intent.notice)
         // 실패를 확인받은 뒤에야 다시 찍을 수 있다. Session은 저장되지 않았으므로 Idle로 돌아간다.
-        CaptureIntent.FinalizeFailureDismissed ->
-            copy(finalizeFailure = null, phase = CaptureWorkspaceControlState.Idle, activeBundle = null, recordingStartNs = 0L)
-        CaptureIntent.Finalized ->
-            copy(phase = CaptureWorkspaceControlState.Idle, activeBundle = null, recordingStartNs = 0L, busy = false)
-        CaptureIntent.Interrupted ->
-            copy(phase = CaptureWorkspaceControlState.Idle, activeBundle = null, recordingStartNs = 0L, busy = false)
+        CaptureIntent.FinalizeFailureDismissed -> withoutSession().copy(finalizeFailure = null)
+        CaptureIntent.Finalized -> withoutSession().copy(busy = false)
+        CaptureIntent.Interrupted -> withoutSession().copy(busy = false)
         CaptureIntent.BusyReleased -> copy(busy = false)
         is CaptureIntent.Notify -> copy(notice = intent.notice)
         CaptureIntent.NoticeShown -> copy(notice = "")
     }
+
+/**
+ * 진행 중이던 Session을 놓고 Idle로 돌아간다. 마감·중단·마감 실패 확인이 같은 자리로 돌아온다.
+ *
+ * Task·Object·해상도·촬영 조건은 남긴다. 같은 작업 공간에서 이어 찍을 때 다시 입력하지 않는다.
+ */
+private fun CaptureUiState.withoutSession(): CaptureUiState =
+    copy(phase = CaptureWorkspaceControlState.Idle, activeBundle = null, recordingStartNs = 0L)
