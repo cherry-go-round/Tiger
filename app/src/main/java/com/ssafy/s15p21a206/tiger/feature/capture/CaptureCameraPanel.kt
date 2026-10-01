@@ -58,7 +58,8 @@ import com.ssafy.s15p21a206.tiger.core.model.capture.ShutterPreset
  * 돌고 있다는 뜻이고, 그때는 어떤 값도 받지 않는다.
  *
  * 기기가 지원하지 않는 항목은 감추지 않고 끈 채로 둔다. 자리가 사라지면 왜 못 쓰는지 물을 데가
- * 없어진다.
+ * 없어진다. 해상도는 카메라가 수동 제어를 지원하지 않아도 고를 수 있어 사유 문구보다 위에 둔다.
+ * 가로 화면에서 항목이 한 번에 들어가지 않는 기기가 있어 잘라내는 대신 굴린다.
  */
 @Suppress("FunctionName")
 @Composable
@@ -73,53 +74,83 @@ internal fun CaptureCameraPanel(
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val capabilities = state.capabilities
-    val config = state.config
-    val closeDescription = stringResource(R.string.capture_camera_close)
     Column(
         modifier =
             modifier
                 .fillMaxWidth()
-                // 가로 화면에서 항목 다섯이 한 번에 들어가지 않는 기기가 있다. 잘라내는 대신 굴린다.
                 .verticalScroll(rememberScrollState())
                 .safeDrawingPadding()
                 .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = stringResource(R.string.capture_camera_title), style = TigerText.overlayBadge)
-            // 값은 바꾸는 즉시 걸리므로 확정할 것이 없다. "적용"이라 부르면 누르기 전에는 안 걸린 것처럼 읽힌다.
-            IconButton(onClick = onClose, modifier = Modifier.semantics { contentDescription = closeDescription }) {
-                Text(text = stringResource(R.string.control_close), style = TigerText.overlayGlyph, color = Color.White)
-            }
-        }
-        // 해상도는 카메라가 수동 제어를 지원하지 않아도 고를 수 있다. 사유 문구보다 위에 둔다.
+        PanelHeader(onClose)
         ResolutionRow(resolution, enabled, onResolutionChange)
+        val capabilities = state.capabilities
+        val config = state.config
         val reason = state.unsupportedReason
         if (capabilities == null || config == null || reason != null) {
-            Text(
-                text = stringResource(reason?.labelRes ?: R.string.capture_camera_reading),
-                style = TigerText.overlaySupporting,
-                color = CaptureOverlaySupporting,
-            )
-            return@Column
+            PanelNote(stringResource(reason?.labelRes ?: R.string.capture_camera_reading))
+        } else {
+            FocusRow(capabilities, config, enabled, onChange)
+            IsoRow(capabilities, config, enabled, onChange)
+            ShutterRow(capabilities, config, enabled, onChange)
+            PanelNote(stringResource(R.string.capture_camera_fps_fixed, RecordingFormat.TARGET_FPS))
+            WhiteBalanceRow(state, enabled, onFixWhiteBalance, onClearWhiteBalance)
         }
-        FocusRow(capabilities, config, enabled, onChange)
-        IsoRow(capabilities, config, enabled, onChange)
-        ShutterRow(capabilities, config, enabled, onChange)
-        Text(
-            text = stringResource(R.string.capture_camera_fps_fixed, RecordingFormat.TARGET_FPS),
-            style = TigerText.overlaySupporting,
-            color = CaptureOverlaySupporting,
-        )
-        WhiteBalanceRow(state, enabled, onFixWhiteBalance, onClearWhiteBalance)
     }
 }
 
+/**
+ * 패널 제목과 닫기. 값은 바꾸는 즉시 걸리므로 확정할 것이 없다. "적용"이라 부르면 누르기 전에는 안
+ * 걸린 것처럼 읽혀서 닫기만 둔다.
+ */
+@Suppress("FunctionName")
+@Composable
+private fun PanelHeader(onClose: () -> Unit) {
+    val closeDescription = stringResource(R.string.capture_camera_close)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = stringResource(R.string.capture_camera_title), style = TigerText.overlayBadge)
+        IconButton(onClick = onClose, modifier = Modifier.semantics { contentDescription = closeDescription }) {
+            Text(text = stringResource(R.string.control_close), style = TigerText.overlayGlyph, color = Color.White)
+        }
+    }
+}
+
+/**
+ * 이번 Session으로 녹화할 해상도.
+ *
+ * 후보는 실기기에서 확인한 ARCore Camera config의 `textureSize`이며, 순서는
+ * [RecordingFormat.supportedResolutions]를 따른다.
+ */
+@Suppress("FunctionName")
+@Composable
+private fun ResolutionRow(
+    resolution: RecordingResolution,
+    enabled: Boolean,
+    onChange: (RecordingResolution) -> Unit,
+) {
+    PanelLabel(label = stringResource(R.string.capture_camera_resolution), value = resolutionLabel(resolution))
+    PanelChoices {
+        RecordingFormat.supportedResolutions.forEach { option ->
+            PanelChoice(
+                label = resolutionLabel(option),
+                selected = option == resolution,
+                enabled = enabled,
+                onClick = { onChange(option) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun resolutionLabel(resolution: RecordingResolution): String =
+    stringResource(R.string.capture_resolution_option, resolution.width, resolution.height)
+
+/** 초점 거리. 0 D가 무한대, 최대 diopter가 최단 거리라 슬라이더를 오른쪽으로 밀수록 가까워진다. */
 @Suppress("FunctionName")
 @Composable
 private fun FocusRow(
@@ -128,17 +159,12 @@ private fun FocusRow(
     enabled: Boolean,
     onChange: (ManualCameraConfig) -> Unit,
 ) {
-    // 0 D가 무한대, 최대 diopter가 최단 거리다. 슬라이더를 오른쪽으로 밀수록 가까워진다.
     PanelLabel(
         label = stringResource(R.string.capture_camera_focus),
         value = stringResource(R.string.capture_camera_focus_value, config.focusDistanceDiopter),
     )
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = stringResource(R.string.capture_camera_focus_far),
-            style = TigerText.overlaySupporting,
-            color = CaptureOverlaySupporting,
-        )
+        PanelNote(stringResource(R.string.capture_camera_focus_far))
         Slider(
             value = config.focusDistanceDiopter,
             onValueChange = { onChange(config.copy(focusDistanceDiopter = it)) },
@@ -146,11 +172,7 @@ private fun FocusRow(
             enabled = enabled && capabilities.focusSupported,
             modifier = Modifier.weight(1f),
         )
-        Text(
-            text = stringResource(R.string.capture_camera_focus_near),
-            style = TigerText.overlaySupporting,
-            color = CaptureOverlaySupporting,
-        )
+        PanelNote(stringResource(R.string.capture_camera_focus_near))
     }
     if (!capabilities.focusSupported) {
         Text(
@@ -182,7 +204,10 @@ private fun IsoRow(
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/**
+ * 셔터 preset. 기기가 못 내는 셔터와 30 fps 프레임 간격을 넘는 셔터는 끈다. 노출이 프레임 간격보다
+ * 길면 센서가 간격을 늘려 30 fps가 깨진다.
+ */
 @Suppress("FunctionName")
 @Composable
 private fun ShutterRow(
@@ -195,15 +220,8 @@ private fun ShutterRow(
         label = stringResource(R.string.capture_camera_shutter),
         value = stringResource(R.string.capture_camera_shutter_value, config.exposureTimeNs / NANOS_PER_MICROSECOND),
     )
-    // preset 다섯이 한 줄에 들어가지 않으면 다음 줄로 내린다. 글자를 줄여 넣으면 장갑 낀 손으로
-    // 누르기 어려워진다.
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
+    PanelChoices {
         ShutterPreset.entries.forEach { preset ->
-            // 기기가 못 내는 셔터와 30 fps 프레임 간격을 넘는 셔터는 끈다. 노출이 프레임 간격보다
-            // 길면 센서가 간격을 늘려 30 fps가 깨진다.
             PanelChoice(
                 label = preset.label,
                 selected = preset.exposureTimeNs == config.exposureTimeNs,
@@ -215,33 +233,72 @@ private fun ShutterRow(
 }
 
 /**
- * 이번 Session으로 녹화할 해상도.
+ * 화이트 밸런스는 AUTO로 수렴시킨 뒤 그 값을 붙잡는 것만 제공한다.
  *
- * 후보는 실기기에서 확인한 ARCore Camera config의 `textureSize`이며, 순서는
- * [RecordingFormat.supportedResolutions]를 따른다.
+ * Kelvin이나 RGB gain을 직접 고르는 화면은 만들지 않는다. 목적이 정확한 색을 지정하는 것이 아니라
+ * 촬영 내내, 그리고 calibration 촬영과 dataset 수집 사이에 색이 변하지 않게 하는 것이기 때문이다.
  */
+@Suppress("FunctionName")
+@Composable
+private fun WhiteBalanceRow(
+    state: ManualCameraUiState,
+    enabled: Boolean,
+    onFix: () -> Unit,
+    onClear: () -> Unit,
+) {
+    val fixed = state.whiteBalanceFixed
+    val actionable = enabled && state.capabilities?.whiteBalanceSupported == true
+    PanelLabel(
+        label = stringResource(R.string.capture_camera_white_balance),
+        value =
+            stringResource(
+                if (fixed) R.string.capture_camera_white_balance_fixed else R.string.capture_camera_white_balance_auto,
+            ),
+    )
+    OutlinedButton(onClick = if (fixed) onClear else onFix, enabled = actionable) {
+        Text(
+            text =
+                stringResource(
+                    if (fixed) R.string.capture_camera_white_balance_release else R.string.capture_camera_white_balance_hold,
+                ),
+            style = TigerText.overlayBadge,
+            color = if (actionable) CaptureOverlaySupporting else CaptureControlDisabled,
+        )
+    }
+}
+
+@Suppress("FunctionName")
+@Composable
+private fun PanelLabel(
+    label: String,
+    value: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        PanelNote(label)
+        Text(text = value, style = TigerText.overlayBadge)
+    }
+}
+
+/** 이름표와 안내처럼 판 위에서 한 단계 물러난 글자. */
+@Suppress("FunctionName")
+@Composable
+private fun PanelNote(text: String) {
+    Text(text = text, style = TigerText.overlaySupporting, color = CaptureOverlaySupporting)
+}
+
+/** 여럿 중 하나를 고르는 단추들. 한 줄에 들어가지 않으면 다음 줄로 내린다. 글자를 줄여 넣으면 장갑 낀 손으로 누르기 어려워진다. */
 @OptIn(ExperimentalLayoutApi::class)
 @Suppress("FunctionName")
 @Composable
-private fun ResolutionRow(
-    resolution: RecordingResolution,
-    enabled: Boolean,
-    onChange: (RecordingResolution) -> Unit,
-) {
-    val label = stringResource(R.string.capture_resolution_option, resolution.width, resolution.height)
-    PanelLabel(label = stringResource(R.string.capture_camera_resolution), value = label)
+private fun PanelChoices(content: @Composable () -> Unit) {
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        RecordingFormat.supportedResolutions.forEach { option ->
-            PanelChoice(
-                label = stringResource(R.string.capture_resolution_option, option.width, option.height),
-                selected = option == resolution,
-                enabled = enabled,
-                onClick = { onChange(option) },
-            )
-        }
+        content()
     }
 }
 
@@ -263,73 +320,19 @@ private fun PanelChoice(
         Button(
             onClick = onClick,
             enabled = enabled,
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+            contentPadding = CHOICE_PADDING,
             colors = ButtonDefaults.buttonColors(containerColor = CaptureChoiceSelected),
         ) {
             Text(text = label, style = TigerText.overlayBadge, color = CaptureChoiceSelectedInk)
         }
     } else {
-        OutlinedButton(
-            onClick = onClick,
-            enabled = enabled,
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-        ) {
+        OutlinedButton(onClick = onClick, enabled = enabled, contentPadding = CHOICE_PADDING) {
             Text(
                 text = label,
                 style = TigerText.overlayBadge,
                 color = if (enabled) CaptureOverlaySupporting else CaptureControlDisabled,
             )
         }
-    }
-}
-
-/**
- * 화이트 밸런스는 AUTO로 수렴시킨 뒤 그 값을 붙잡는 것만 제공한다.
- *
- * Kelvin이나 RGB gain을 직접 고르는 화면은 만들지 않는다. 목적이 정확한 색을 지정하는 것이 아니라
- * 촬영 내내, 그리고 calibration 촬영과 dataset 수집 사이에 색이 변하지 않게 하는 것이기 때문이다.
- */
-@Suppress("FunctionName")
-@Composable
-private fun WhiteBalanceRow(
-    state: ManualCameraUiState,
-    enabled: Boolean,
-    onFix: () -> Unit,
-    onClear: () -> Unit,
-) {
-    val fixed = state.whiteBalanceFixed
-    PanelLabel(
-        label = stringResource(R.string.capture_camera_white_balance),
-        value =
-            stringResource(
-                if (fixed) R.string.capture_camera_white_balance_fixed else R.string.capture_camera_white_balance_auto,
-            ),
-    )
-    val supported = state.capabilities?.whiteBalanceSupported == true
-    OutlinedButton(onClick = if (fixed) onClear else onFix, enabled = enabled && supported) {
-        Text(
-            text =
-                stringResource(
-                    if (fixed) R.string.capture_camera_white_balance_release else R.string.capture_camera_white_balance_hold,
-                ),
-            style = TigerText.overlayBadge,
-            color = if (enabled && supported) CaptureOverlaySupporting else CaptureControlDisabled,
-        )
-    }
-}
-
-@Suppress("FunctionName")
-@Composable
-private fun PanelLabel(
-    label: String,
-    value: String,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(text = label, style = TigerText.overlaySupporting, color = CaptureOverlaySupporting)
-        Text(text = value, style = TigerText.overlayBadge)
     }
 }
 
@@ -405,3 +408,6 @@ internal fun CaptureCameraSheet(
 private const val MIN_SLIDER_SPAN = 1f
 
 private const val NANOS_PER_MICROSECOND = 1_000L
+
+/** 고르는 단추의 안쪽 여백. 좌우만 10dp로 두고 위아래 여백은 없앤다. */
+private val CHOICE_PADDING = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
