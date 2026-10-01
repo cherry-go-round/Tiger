@@ -213,7 +213,13 @@ class ArSharedCameraSession(
     ) = object : CameraCaptureSession.StateCallback() {
         override fun onConfigured(configured: CameraCaptureSession) {
             session = configured
-            configured.setRepeatingRequest(repeating, frameCallback, handler)
+            // 요청 직전에 device가 닫히는 경합이 남아 있다. 여기서 난 예외는 카메라 스레드를 죽이므로
+            // 열기 실패로 넘긴다. 유휴 프리뷰(PreviewCameraSession)와 같은 처리다.
+            try {
+                configured.setRepeatingRequest(repeating, frameCallback, handler)
+            } catch (error: Exception) {
+                streaming.completeExceptionally(error)
+            }
         }
 
         override fun onActive(activeSession: CameraCaptureSession) {
