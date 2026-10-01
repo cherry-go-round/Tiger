@@ -168,80 +168,91 @@ internal fun rememberCaptureDriver(
         previewSession.release()
         previewSession.prepare(surface)
     }
+
+    // ARCore가 있는지 확인하고, 없으면 설치를 요청한다. 이번 요청으로 Session을 시작해도 되면 true다.
+    // 시작하지 않을 때는 사유를 알리고 제어 잠금을 푼다.
+    fun arCoreReady(): Boolean {
+        val activity = context.findActivity()
+        val installStatus =
+            runCatching {
+                requireNotNull(activity) { "Activity is required to install ARCore." }
+                ArCoreApk.getInstance().requestInstall(activity, !arCoreInstallRequested)
+            }.getOrElse {
+                onIntent(CaptureIntent.Notify(arCoreUnavailable))
+                onIntent(CaptureIntent.BusyReleased)
+                return false
+            }
+        if (installStatus == ArCoreApk.InstallStatus.INSTALL_REQUESTED) {
+            arCoreInstallRequested = true
+            onIntent(CaptureIntent.Notify(arCoreInstallMessage))
+            onIntent(CaptureIntent.BusyReleased)
+            return false
+        }
+        return true
+    }
+
+    // ARCore로 녹화를 시작하고 시작 행을 남긴다. 성공하든 실패하든 끝나면 제어 잠금을 푼다.
+    fun startSession() {
+        scope.launch {
+            try {
+                val displayNumber = repository.nextDisplayNumber()
+                runCatching {
+                    // ARCore가 고른 해상도로 버퍼를 맞춰 프리뷰 화각을 저장 영상과 일치시킨다.
+                    // 이 람다는 Main dispatcher에서 실행되므로 Compose 상태를 직접 갱신해도 된다.
+                    // 프리뷰용 Camera2 세션은 play에서 이미 닫혔으므로 버퍼 크기를 바꿔도 안전하다.
+                    captureRuntime.start(
+                        displayNumber = displayNumber,
+                        resolution = state.resolution,
+                        previewSurfaces = { width, height ->
+                            // ARCore가 실제로 고른 크기다. 후보 config가 없어 기본값으로 물러났으면
+                            // 고른 값과 다를 수 있으므로, 표시와 프리뷰를 여기에 맞춘다.
+                            val actual = RecordingResolution(width, height)
+                            onIntent(CaptureIntent.SelectResolution(actual))
+                            onIntent(CaptureIntent.IdlePreviewResized(actual))
+                            previewTexture?.setDefaultBufferSize(width, height)
+                            previewSurface
+                        },
+                        // 프리뷰에서 맞춘 값을 그대로 녹화에 건다. Session이 시작된 뒤에는 바뀌지 않는다.
+                        manual = state.manualCamera.appliedConfig,
+                    )
+                }.onSuccess { bundle ->
+                    val startedAtNs = SystemClock.elapsedRealtimeNanos()
+                    // Session 시작은 Episode를 만들지 않는다. Tracking 안정화 뒤 사용자가 따로 시작한다.
+                    coordinator.start(
+                        bundle.sessionId,
+                        bundle.displayNumber,
+                        bundle.directory.absolutePath,
+                        state.task,
+                        state.objectName,
+                    )
+                    onIntent(CaptureIntent.SessionStarted(bundle, startedAtNs, state.resolution))
+                    repository.save(
+                        sessionRow(bundle, state.task, state.objectName, RecordingState.INITIALIZING, startNs = startedAtNs),
+                    )
+                }.onFailure { error ->
+                    // ARCore가 카메라를 잡지 못했으므로 유휴 프리뷰를 되살린다.
+                    restoreIdlePreview()
+                    onIntent(CaptureIntent.Notify("$arCoreSessionStartFailed: ${error.message.orEmpty()}"))
+                    if (error is UnavailableArcoreNotInstalledException) {
+                        context.openArCoreStore()
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                onIntent(CaptureIntent.Notify(operationFailureMessage))
+            } finally {
+                onIntent(CaptureIntent.BusyReleased)
+            }
+        }
+    }
     val cameraPermission =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
-                val activity = context.findActivity()
-                val installStatus =
-                    runCatching {
-                        requireNotNull(activity) { "Activity is required to install ARCore." }
-                        ArCoreApk.getInstance().requestInstall(activity, !arCoreInstallRequested)
-                    }.getOrElse {
-                        onIntent(CaptureIntent.Notify(arCoreUnavailable))
-                        onIntent(CaptureIntent.BusyReleased)
-                        return@rememberLauncherForActivityResult
-                    }
-                if (installStatus == ArCoreApk.InstallStatus.INSTALL_REQUESTED) {
-                    arCoreInstallRequested = true
-                    onIntent(CaptureIntent.Notify(arCoreInstallMessage))
-                    onIntent(CaptureIntent.BusyReleased)
-                    return@rememberLauncherForActivityResult
-                }
-                scope.launch {
-                    try {
-                        val displayNumber = repository.nextDisplayNumber()
-                        runCatching {
-                            // ARCore가 고른 해상도로 버퍼를 맞춰 프리뷰 화각을 저장 영상과 일치시킨다.
-                            // 이 람다는 Main dispatcher에서 실행되므로 Compose 상태를 직접 갱신해도 된다.
-                            // 프리뷰용 Camera2 세션은 play에서 이미 닫혔으므로 버퍼 크기를 바꿔도 안전하다.
-                            captureRuntime.start(
-                                displayNumber = displayNumber,
-                                resolution = state.resolution,
-                                previewSurfaces = { width, height ->
-                                    // ARCore가 실제로 고른 크기다. 후보 config가 없어 기본값으로 물러났으면
-                                    // 고른 값과 다를 수 있으므로, 표시와 프리뷰를 여기에 맞춘다.
-                                    val actual = RecordingResolution(width, height)
-                                    onIntent(CaptureIntent.SelectResolution(actual))
-                                    onIntent(CaptureIntent.IdlePreviewResized(actual))
-                                    previewTexture?.setDefaultBufferSize(width, height)
-                                    previewSurface
-                                },
-                                // 프리뷰에서 맞춘 값을 그대로 녹화에 건다. Session이 시작된 뒤에는 바뀌지 않는다.
-                                manual = state.manualCamera.appliedConfig,
-                            )
-                        }.onSuccess { bundle ->
-                            val startedAtNs = SystemClock.elapsedRealtimeNanos()
-                            // Session 시작은 Episode를 만들지 않는다. Tracking 안정화 뒤 사용자가 따로 시작한다.
-                            coordinator.start(
-                                bundle.sessionId,
-                                bundle.displayNumber,
-                                bundle.directory.absolutePath,
-                                state.task,
-                                state.objectName,
-                            )
-                            onIntent(CaptureIntent.SessionStarted(bundle, startedAtNs, state.resolution))
-                            repository.save(
-                                sessionRow(bundle, state.task, state.objectName, RecordingState.INITIALIZING, startNs = startedAtNs),
-                            )
-                        }.onFailure { error ->
-                            // ARCore가 카메라를 잡지 못했으므로 유휴 프리뷰를 되살린다.
-                            restoreIdlePreview()
-                            onIntent(CaptureIntent.Notify("$arCoreSessionStartFailed: ${error.message.orEmpty()}"))
-                            if (error is UnavailableArcoreNotInstalledException) {
-                                context.openArCoreStore()
-                            }
-                        }
-                    } catch (cancelled: CancellationException) {
-                        throw cancelled
-                    } catch (_: Exception) {
-                        onIntent(CaptureIntent.Notify(operationFailureMessage))
-                    } finally {
-                        onIntent(CaptureIntent.BusyReleased)
-                    }
-                }
-            } else {
+            if (!granted) {
                 onIntent(CaptureIntent.Notify(recordingCameraUnavailable))
                 onIntent(CaptureIntent.BusyReleased)
+            } else if (arCoreReady()) {
+                startSession()
             }
         }
     val previewPermission =
