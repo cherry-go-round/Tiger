@@ -348,7 +348,7 @@ private fun PausePlaybackWhileConfirmingDelete(
 @Composable
 @Suppress("FunctionName")
 private fun LocalSessionDetailScreenPreview() {
-    SessionDetailScreenPreview(SessionPreviewSamples.withState(UploadState.LOCAL_ONLY))
+    SessionDetailSample(SessionPreviewSamples.withState(UploadState.LOCAL_ONLY))
 }
 
 /** 전송과 삭제가 모두 실패한 세션. 두 사유가 다 보인다. */
@@ -356,7 +356,7 @@ private fun LocalSessionDetailScreenPreview() {
 @Composable
 @Suppress("FunctionName")
 private fun FailedSessionDetailScreenPreview() {
-    SessionDetailScreenPreview(
+    SessionDetailSample(
         summary = SessionPreviewSamples.withState(UploadState.FAILED),
         deleteFailureReason = stringResource(R.string.session_delete_failed),
         uploadFailureReason = "Network upload failed",
@@ -368,12 +368,12 @@ private fun FailedSessionDetailScreenPreview() {
 @Composable
 @Suppress("FunctionName")
 private fun MissingSessionDetailScreenPreview() {
-    SessionDetailScreenPreview(summary = null)
+    SessionDetailSample(summary = null)
 }
 
 @Composable
 @Suppress("FunctionName")
-private fun SessionDetailScreenPreview(
+private fun SessionDetailSample(
     summary: SessionSummary?,
     deleteFailureReason: String? = null,
     uploadFailureReason: String? = null,

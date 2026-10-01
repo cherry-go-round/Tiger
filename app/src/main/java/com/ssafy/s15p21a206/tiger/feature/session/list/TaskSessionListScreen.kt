@@ -277,7 +277,7 @@ private fun SessionCardMenu(
 @Composable
 @Suppress("FunctionName")
 private fun TaskSessionListScreenPreview() {
-    TaskSessionListScreenPreview(SessionPreviewSamples.sessions)
+    TaskSessionListSample(SessionPreviewSamples.sessions)
 }
 
 /** 마지막 세션을 지운 Task. */
@@ -285,12 +285,12 @@ private fun TaskSessionListScreenPreview() {
 @Composable
 @Suppress("FunctionName")
 private fun EmptyTaskSessionListScreenPreview() {
-    TaskSessionListScreenPreview(emptyList())
+    TaskSessionListSample(emptyList())
 }
 
 @Composable
 @Suppress("FunctionName")
-private fun TaskSessionListScreenPreview(sessions: List<SessionSummary>) {
+private fun TaskSessionListSample(sessions: List<SessionSummary>) {
     ScreenPreview {
         TaskSessionListScreen(
             taskName = "컵 집기",

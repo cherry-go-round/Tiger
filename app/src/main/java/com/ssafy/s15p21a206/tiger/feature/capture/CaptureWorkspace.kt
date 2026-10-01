@@ -176,7 +176,7 @@ private fun CaptureWorkspaceModals(
 @Composable
 @Suppress("FunctionName")
 private fun IdleCaptureWorkspacePreview() {
-    CaptureWorkspaceContentPreview(sampleCaptureState(CaptureWorkspaceControlState.Idle))
+    CaptureWorkspaceSample(sampleCaptureState(CaptureWorkspaceControlState.Idle))
 }
 
 /** Episode를 찍는 중. 왼쪽 위가 상태 배지로 바뀌고 우측 제어가 일시 정지·정지가 된다. */
@@ -184,7 +184,7 @@ private fun IdleCaptureWorkspacePreview() {
 @Composable
 @Suppress("FunctionName")
 private fun EpisodeActiveCaptureWorkspacePreview() {
-    CaptureWorkspaceContentPreview(sampleCaptureState(CaptureWorkspaceControlState.EpisodeActive))
+    CaptureWorkspaceSample(sampleCaptureState(CaptureWorkspaceControlState.EpisodeActive))
 }
 
 /** 마감 중. 판이 작업 공간을 덮는다. */
@@ -192,14 +192,14 @@ private fun EpisodeActiveCaptureWorkspacePreview() {
 @Composable
 @Suppress("FunctionName")
 private fun FinalizingCaptureWorkspacePreview() {
-    CaptureWorkspaceContentPreview(sampleCaptureState(CaptureWorkspaceControlState.Finalizing))
+    CaptureWorkspaceSample(sampleCaptureState(CaptureWorkspaceControlState.Finalizing))
 }
 
 @LandscapeScreenPreview
 @Composable
 @Suppress("FunctionName")
 private fun FinalizeFailedCaptureWorkspacePreview() {
-    CaptureWorkspaceContentPreview(
+    CaptureWorkspaceSample(
         sampleCaptureState(CaptureWorkspaceControlState.Idle).copy(
             finalizeFailure = stringResource(R.string.capture_finalize_failed),
         ),
@@ -208,7 +208,7 @@ private fun FinalizeFailedCaptureWorkspacePreview() {
 
 @Composable
 @Suppress("FunctionName")
-private fun CaptureWorkspaceContentPreview(state: CaptureUiState) {
+private fun CaptureWorkspaceSample(state: CaptureUiState) {
     ScreenPreview(background = Color.Black) {
         CaptureWorkspaceContent(state = state, onIntent = {}, driver = remember { idleCaptureDriver() })
     }

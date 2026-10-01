@@ -257,7 +257,7 @@ private fun WhiteBalanceRow(
 @Suppress("FunctionName")
 private fun CaptureCameraPanelPreview() {
     val capabilities = sampleCapabilities(manualSensor = true)
-    CaptureCameraPanelPreview(ManualCameraUiState(capabilities, capabilities.defaultConfig(), panelOpen = true))
+    CaptureCameraPanelSample(ManualCameraUiState(capabilities, capabilities.defaultConfig(), panelOpen = true))
 }
 
 /** 수동 설정을 쓸 수 없는 기기. 조작 대신 사유가 서고 해상도만 고를 수 있다. */
@@ -265,7 +265,7 @@ private fun CaptureCameraPanelPreview() {
 @Composable
 @Suppress("FunctionName")
 private fun UnsupportedCaptureCameraPanelPreview() {
-    CaptureCameraPanelPreview(ManualCameraUiState(sampleCapabilities(manualSensor = false), panelOpen = true))
+    CaptureCameraPanelSample(ManualCameraUiState(sampleCapabilities(manualSensor = false), panelOpen = true))
 }
 
 /** 기기 능력을 아직 읽는 중. */
@@ -273,12 +273,12 @@ private fun UnsupportedCaptureCameraPanelPreview() {
 @Composable
 @Suppress("FunctionName")
 private fun ReadingCaptureCameraPanelPreview() {
-    CaptureCameraPanelPreview(ManualCameraUiState(panelOpen = true))
+    CaptureCameraPanelSample(ManualCameraUiState(panelOpen = true))
 }
 
 @Composable
 @Suppress("FunctionName")
-private fun CaptureCameraPanelPreview(state: ManualCameraUiState) {
+private fun CaptureCameraPanelSample(state: ManualCameraUiState) {
     ScreenPreview(background = colorResource(R.color.capture_camera_sheet)) {
         CaptureCameraPanel(
             state = state,
