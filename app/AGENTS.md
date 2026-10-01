@@ -42,7 +42,7 @@
 
 **일회성 동작에 effect 채널을 두지 않는다.** 둘뿐이고 각자 갈 곳이 이미 있다.
 
-- 화면 이동: 수집은 목적지를 모른다. 마감된 세션을 `onCompleted(sessionId, uploadable)`로 올려 보내고 `TigerApp`이 정한다.
+- 화면 이동: 수집은 목적지를 모른다. 마감된 세션을 `onCompleted(sessionId, uploadable)`로 올려 보내고 `TigerAppState`가 정한다.
 - Snackbar: 문구를 `CaptureUiState.notice`에 담고, `LaunchedEffect`가 한 번 보여 준 뒤 `CaptureIntent.NoticeShown`으로 비운다.
 
 셋째가 생기면 그때 채널을 만든다. 지금 만들면 두 줄짜리 배선에 틀만 씌우는 것이 된다.
@@ -98,7 +98,7 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 | `overlay/CaptureCenterGuide` | 거치 기준선 |
 | `state/CaptureControlPolicy` | 상태에서 파생되는 허용 동작 |
 
-상태는 `TigerApp`이 소유하고 화면은 값과 `onIntent`만 받는다. 작업 공간을 여는 것이 조회 화면의 동작이기 때문이다.
+상태는 `TigerAppState`가 소유하고 화면은 값과 `onIntent`만 받는다. 작업 공간을 여는 것이 조회 화면의 동작이기 때문이다.
 
 ### 드라이버가 평범한 클래스가 아닌 이유
 
@@ -116,7 +116,7 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 
 ### 데이터·업로드 계층은 올렸다 (해결)
 
-Room 데이터베이스와 `SessionRepository`, `SessionUploadService`는 `TigerApplication`이 소유한다. `TigerApp`이 받아 쓰고, 수집에 필요한 `repository`와 녹화 해상도 기억(`RecordingResolutionStore`)만 `CaptureWorkspace`에 넘긴다.
+Room 데이터베이스와 `SessionRepository`, `SessionUploadService`는 `TigerApplication`이 소유한다. `TigerAppState`가 받아 쓰고, 수집에 필요한 `repository`와 녹화 해상도 기억(`RecordingResolutionStore`)만 `CaptureWorkspace`에 넘긴다.
 
 2026-09-17에는 "현재 동작에 결함이 없으므로 미룬다"고 두었으나 그 전제가 사실이 아니었다. `configChanges`에 `uiMode`·`locale`·`fontScale`·`density`가 없어, 다크 모드 전환만으로 Activity가 재생성되고 `remember`가 다시 돌아 인스턴스가 하나씩 더 생겼다. 닫는 경로는 없었다.
 
@@ -124,7 +124,7 @@ Room 데이터베이스와 `SessionRepository`, `SessionUploadService`는 `Tiger
 
 ### 화면은 갈랐다 (해결)
 
-`TigerApp`이 앱 루트다. `NavHost`와 조회 흐름의 운용(전송·삭제), 그리고 수집 상태를 소유한다. `CaptureWorkspace`는 수집 파이프라인만 가져간다.
+`TigerApp`이 앱 루트다. 셋을 잇기만 한다. 수집 상태와 조회 흐름의 운용(전송·삭제), 화면 이동이 얽힌 동작(수집 시작, 전송, 삭제, 마감 뒤 이동)은 `TigerAppState`가, route와 목적지는 `navigation/`의 `TigerNavHost`가, 수집 파이프라인은 `CaptureWorkspace`가 맡는다.
 
 이전에는 한 함수가 둘을 다 들고 있었고, 수집 마감이 `navController`를 직접 밀었다. 지금은 `onCompleted(sessionId, uploadable)` 하나가 경계다. **수집 쪽에서 `NavController`나 route 타입을 참조하지 않는다.**
 

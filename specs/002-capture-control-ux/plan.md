@@ -62,7 +62,9 @@ app/
 ├── src/main/java/com/ssafy/s15p21a206/tiger/
 │   ├── MainActivity.kt                 # Activity 선언만
 │   ├── TigerApplication.kt             # 프로세스 수명 객체(Room·OkHttp·repository)
-│   ├── TigerApp.kt                     # 앱 루트. NavHost·조회 운용·수집 상태 소유
+│   ├── TigerApp.kt                     # 앱 루트. 상태·NavHost·수집 작업 공간을 잇는다
+│   ├── TigerAppState.kt                # 수집 상태·조회 운용과 화면 이동이 얽힌 동작
+│   ├── navigation/                     # 조회 흐름의 route와 NavHost
 │   ├── core/
 │   │   ├── android/                    # Activity 찾기와 화면 방향 고정
 │   │   ├── capture/                    # 카메라 프리뷰와 AR/IMU 녹화 수명주기

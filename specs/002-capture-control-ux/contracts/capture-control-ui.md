@@ -11,13 +11,13 @@
 조회 흐름은 백스택을 가진다. 전환은 `NavHost`가 소유하고, 각 화면의 이탈은 목적지를 지정하지 않고
 직전 화면으로 pop한다. 좌측 상단 뒤로가기 아이콘과 시스템 뒤로 가기는 같은 동작을 한다.
 ```text
-TigerApp (앱 루트)                NavHost·수집 상태·업로드 Job(SessionOperations) 보유
-  NavHost                         조회 흐름
+TigerApp (앱 루트)                TigerAppState(수집 상태·운용 SessionOperations)와 NavHost를 잇는다
+  TigerNavHost                    조회 흐름
     Task 홈
     Task Session 목록
     Session Detail
     전체 화면 동영상
-  작업 공간이 열려 있으면 수집 작업 공간   모달 오버레이, NavHost 바깥. ARCore 런타임·previewSurface는 CaptureDriver가 보유
+  작업 공간이 열려 있으면 수집 작업 공간   모달 오버레이, NavHost 바깥. ARCore 런타임은 CaptureSessionActions, 프리뷰 Surface는 IdlePreview가 보유
 ```
 - 화면 인자(Task 이름, Session 식별자)는 type-safe route로 전달한다. Task 이름은 사용자 자유
   입력이므로 route 문자열을 직접 조립하지 않는다.

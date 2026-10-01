@@ -45,6 +45,20 @@ class SessionRepository(
             ?.takeIf { bundleStore.isManagedCompletedDirectory(it.bundlePath) }
             ?.toCaptureSession()
 
+    /**
+     * 앱이 뜰 때 지난 실행이 남긴 것을 정리한다. 중단된 수집을 구제하고, 끊긴 전송을 실패로 돌리고,
+     * 표시 번호를 다시 매기고, 색인에 없는 번들을 회수한다.
+     *
+     * 회수는 구제가 끝난 뒤에 한다. 구제가 staging에서 옮겨 온 번들은 색인에 행이 있으므로 고아가
+     * 아니지만, 순서를 뒤집으면 옮겨지기 전 상태를 보고 판단하게 된다.
+     */
+    suspend fun recoverOnLaunch() {
+        recoverInterruptedStaging()
+        failInterruptedUploads()
+        normalizeDisplayNumbers()
+        purgeOrphanBundles()
+    }
+
     suspend fun failInterruptedUploads() = sessionDao.failInterruptedUploads()
 
     /**

@@ -84,3 +84,12 @@ internal fun SessionDeleteMenuItem(
         onClick = onClick,
     )
 }
+
+/** 삭제가 막힌 이유를 화면 문구로 옮긴다. 막히지 않았으면 null이다. */
+@Composable
+internal fun deleteFailureMessage(failure: SessionDeleteFailure?): String? =
+    when (failure) {
+        SessionDeleteFailure.UploadInProgress -> stringResource(R.string.session_delete_upload_in_progress)
+        SessionDeleteFailure.Unavailable -> stringResource(R.string.session_delete_failed)
+        null -> null
+    }
