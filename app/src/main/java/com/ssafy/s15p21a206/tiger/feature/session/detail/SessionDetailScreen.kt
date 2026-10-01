@@ -12,11 +12,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +33,6 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.component.LabelledGroup
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.LabelledValue
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.TigerMenuItem
-import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSurface
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
@@ -45,10 +42,8 @@ import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
 import com.ssafy.s15p21a206.tiger.feature.session.labelRes
 import com.ssafy.s15p21a206.tiger.feature.session.video.SharedVideoPlayer
 import com.ssafy.s15p21a206.tiger.feature.session.video.VideoPlayer
-import com.ssafy.s15p21a206.tiger.feature.session.video.VideoResolutionState
 import com.ssafy.s15p21a206.tiger.feature.session.video.playableMainVideo
 import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoAspectRatio
-import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoResolution
 
 /**
  * 한 Session의 상세. 영상 아래에 이름(수집 일시)과 이름표를 단 묶음 카드를 쌓는다.
@@ -291,77 +286,6 @@ private fun UploadButton(
             SessionDetailPresentation.UploadAction.Retry -> R.string.upload_retry
         }
     Button(onClick = onUpload) { Text(stringResource(label)) }
-}
-
-/**
- * 세션을 특정해 주지 않는 값들을 담는 시트다.
- *
- * Episode 수·길이·해상도·전체 ID는 세션을 고를 때가 아니라 확인하러 들어왔을 때만 필요하다.
- * 사진 앱이 ⓘ 뒤에 두는 것과 같은 성격이라 상세 본문에서 빼고 여기로 옮겼다.
- *
- * 행 사이는 12dp다. 값이 제목보다 한 단계 작아 사이도 좁혀야 이름표-값 간격과의 대비가 유지된다.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-@Suppress("FunctionName")
-private fun SessionInfoSheet(
-    summary: SessionSummary,
-    durationSeconds: Long,
-    onDismiss: () -> Unit,
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = TigerSurface.content) {
-        Column(
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.session_info_title),
-                style = TigerText.itemName,
-            )
-            SessionInfoRow(stringResource(R.string.session_info_id), summary.sessionId)
-            SessionInfoRow(stringResource(R.string.session_info_captured_at), formatCaptureTime(summary.recordedAtEpochMs))
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_episodes),
-                value = stringResource(R.string.session_info_episode_count, summary.completedEpisodeCount),
-            )
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_duration),
-                value = stringResource(R.string.session_detail_duration, durationSeconds),
-            )
-            SessionInfoRow(
-                label = stringResource(R.string.session_info_resolution),
-                value = resolutionText(rememberVideoResolution(summary.bundlePath)),
-            )
-        }
-    }
-}
-
-@Composable
-private fun resolutionText(resolution: VideoResolutionState): String =
-    when (resolution) {
-        is VideoResolutionState.Available ->
-            stringResource(R.string.session_detail_resolution, resolution.width, resolution.height)
-        VideoResolutionState.Loading -> stringResource(R.string.session_detail_resolution_loading)
-        VideoResolutionState.Unavailable -> stringResource(R.string.session_detail_resolution_unavailable)
-    }
-
-/**
- * 시트의 한 행. 이름표 아래 값을 둔다.
- *
- * 값은 시트 제목보다 한 단계 작다. 그래야 제목이 이 시트의 유일한 최상위가 되고, 큰 글자가 사다리처럼
- * 쌓이지 않는다. 이름표와는 크기가 같고 잉크로만 갈려 두 줄이 한 묶음으로 붙는다. 36자 식별자도 한 줄에
- * 들어가 행 높이가 고르게 된다.
- */
-@Composable
-@Suppress("FunctionName")
-private fun SessionInfoRow(
-    label: String,
-    value: String,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(text = label, style = TigerText.supporting)
-        Text(text = value, style = TigerText.value)
-    }
 }
 
 /**
