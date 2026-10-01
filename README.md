@@ -15,6 +15,9 @@
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?logo=kotlin&logoColor=white)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white)
 ![ARCore](https://img.shields.io/badge/ARCore-1.56-4285F4?logo=google&logoColor=white)
+<br>
+![Spec-Driven Development](https://img.shields.io/badge/Spec--Driven_Development-Spec_Kit-181717?logo=github&logoColor=white)
+![AI Agent](https://img.shields.io/badge/AI_Agent-Claude_Code_+_Codex-D97757?logo=claude&logoColor=white)
 
 </div>
 
@@ -34,6 +37,7 @@
 <p align="center">
   <a href="#프로젝트-소개">소개</a> ·
   <a href="#주요-기능">주요 기능</a> ·
+  <a href="#ai-활용과-명세-주도-개발">AI · SDD</a> ·
   <a href="#기술-스택">기술 스택</a> ·
   <a href="#아키텍처">아키텍처</a> ·
   <a href="#기술적-도전과-해결">기술적 도전</a> ·
@@ -75,8 +79,9 @@ flowchart LR
 ```
 
 - **프로젝트 기간**: 2026.08.24 ~ 2026.09.30 (Android 앱은 9월 1일부터)
-- **맡은 일**: Android 앱 1인 개발. 팀원이 정한 수집 요구사항을 Spec Kit으로 명세 · 계획 · 작업
-  ([`specs/`](specs/))으로 구체화하고, 앱 구조와 데이터 구조를 설계해 구현하고 테스트했습니다.
+- **맡은 일**: Android 앱 1인 개발. 팀원이 정한 수집 요구사항을 Spec Kit 기반 명세 주도 개발(SDD)로 명세 · 계획 ·
+  작업([`specs/`](specs/))으로 구체화하고, AI 코딩 에이전트(Claude Code · Codex)와 함께 앱 구조와 데이터 구조를 설계해
+  구현하고 테스트했습니다.
 
 ### 왜 만들었나
 
@@ -157,6 +162,44 @@ Session을 마치면 앱이 결과 파일을 검사해 **번들** 하나로 묶�
 
 <br>
 
+## AI 활용과 명세 주도 개발
+
+이 앱은 **AI 코딩 에이전트를 적극 활용해** 한 달 동안 혼자 만들었습니다. 바이브 코딩(vibe coding)의 속도는 살리되,
+결과를 믿을 수 있도록 **명세 주도 개발(SDD, Spec-Driven Development)** 과 자동 검증으로 에이전트를 통제했습니다.
+
+```mermaid
+flowchart LR
+    req["팀원의<br/>요구사항"] --> spec["Spec Kit<br/>명세 · 계획 · 작업"]
+    spec --> agent["AI 에이전트 구현<br/>Claude Code · Codex"]
+    agent --> gate{"검증<br/>hook · 테스트 · 실기기"}
+    gate -- "통과" --> done["커밋"]
+    gate -- "실패" --> agent
+    review["서버 쪽<br/>데이터 검토"] -. "새 명세" .-> spec
+```
+
+<table>
+  <tr>
+    <td align="center" width="33%"><h3>기능 3개 · 작업 177개</h3>Spec Kit으로 명세 → 계획 → 작업</td>
+    <td align="center" width="33%"><h3>커밋 337 / 429</h3>AI 에이전트와 함께 작성</td>
+    <td align="center" width="33%"><h3>테스트 190개</h3>단위 148 · 계측 42</td>
+  </tr>
+</table>
+
+- **명세가 먼저**: Spec Kit의 specify → clarify → plan → tasks → implement 순서로 진행하고, 요구사항이 바뀌면 코드보다
+  명세를 먼저 고쳤습니다. 서버 쪽 데이터 검토에서 나온 결함도 새 명세([`specs/003`](specs/003-session-episode-tracking-gate/))로
+  정리한 뒤 구현했습니다. 데이터 형식과 상태 전이는 계약 문서 5개로 고정해, 어느 에이전트가 구현하든 같은 기준을 따릅니다.
+- **완료는 실제 호출 경로로 판정**: AI가 만든 코드는 클래스와 테스트까지 갖춰도 실제 앱에서 불리지 않을 수 있습니다.
+  이 프로젝트에서도 Tracking 판정과 프레임 시각 기록 코드가 테스트에서만 쓰이던 일이 있었습니다. 작업 규칙
+  ([`specs/AGENTS.md`](specs/AGENTS.md))은 실제 앱의 호출 경로가 확인되지 않은 작업을 완료로 보지 않고, 구현을 마치면
+  `speckit-converge`로 명세와 코드를 대조해 남은 차이를 다시 작업으로 돌립니다.
+- **사람이 확인할 것은 사람이**: 카메라 · 센서 · ARCore 동작은 단위 테스트나 에뮬레이터로 대신하지 않고, Galaxy S10
+  실기기에서 측정해 명세의 검증 기록에 남겼습니다.
+- **규칙은 문서와 hook으로**: 에이전트가 따를 작업 규칙(최소 변경 범위, 커밋 단위, 검증 보고 방식)을
+  [`AGENTS.md`](AGENTS.md)에 두었습니다. pre-commit hook이 ktlint와 단위 테스트를, commit-msg hook이 커밋 메시지 규격을
+  검사해 규칙을 어긴 커밋은 들어가지 못합니다.
+
+<br>
+
 ## 기술 스택
 
 | 분류 | 기술 |
@@ -165,7 +208,7 @@ Session을 마치면 앱이 결과 파일을 검사해 **번들** 하나로 묶�
 | 카메라 · AR | ![Camera2](https://img.shields.io/badge/Camera2-34A853?style=for-the-badge&logo=android&logoColor=white) ![ARCore](https://img.shields.io/badge/ARCore_Shared_Camera-4285F4?style=for-the-badge&logo=google&logoColor=white) ![OpenGL ES](https://img.shields.io/badge/OpenGL_ES-5586A4?style=for-the-badge&logo=opengl&logoColor=white) |
 | 데이터 · 네트워크 | ![Room](https://img.shields.io/badge/Room-003B57?style=for-the-badge&logo=sqlite&logoColor=white) ![Coroutines](https://img.shields.io/badge/Coroutines-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![kotlinx.serialization](https://img.shields.io/badge/kotlinx.serialization-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![OkHttp](https://img.shields.io/badge/OkHttp-3E7FC1?style=for-the-badge&logo=square&logoColor=white) |
 | 미디어 | ![Media3 ExoPlayer](https://img.shields.io/badge/Media3_ExoPlayer-34A853?style=for-the-badge&logo=android&logoColor=white) |
-| 개발 방식 | ![Spec Kit](https://img.shields.io/badge/Spec_Kit-181717?style=for-the-badge&logo=github&logoColor=white) |
+| 개발 방식 | ![Spec Kit](https://img.shields.io/badge/Spec_Kit-181717?style=for-the-badge&logo=github&logoColor=white) ![Claude Code](https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=claude&logoColor=white) ![Codex](https://img.shields.io/badge/Codex-000000?style=for-the-badge) |
 | 빌드 · 품질 | ![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white) ![ktlint](https://img.shields.io/badge/ktlint-424242?style=for-the-badge&logo=kotlin&logoColor=white) ![JUnit](https://img.shields.io/badge/JUnit-25A162?style=for-the-badge&logo=junit5&logoColor=white) |
 
 <br>
@@ -361,29 +404,27 @@ specs/                        기능별 명세 · 계획 · 계약 문서
 
 ## 오픈소스 라이선스
 
-앱에 들어가는 라이브러리와 글꼴입니다.
+앱에 들어가는 라이브러리와 글꼴을 라이선스별로 묶었습니다.
 
-| 이름 | 라이선스 |
-| --- | --- |
-| [AndroidX](https://developer.android.com/jetpack/androidx) (Activity, Compose, Core, Lifecycle, Navigation, Room, Media3) | Apache License 2.0 |
-| [Material Components for Android](https://github.com/material-components/material-components-android) | Apache License 2.0 |
-| [Kotlin](https://github.com/JetBrains/kotlin), [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines), [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization) | Apache License 2.0 |
-| [OkHttp](https://github.com/square/okhttp) | Apache License 2.0 |
-| [Pretendard](https://github.com/orioncactus/pretendard) | [SIL Open Font License 1.1](app/licenses/Pretendard-OFL.txt) |
+| 라이선스 | 오픈소스 |
+| :---: | :--- |
+| ![Apache License 2.0](https://img.shields.io/badge/Apache_License-2.0-D22128?style=flat-square&logo=apache&logoColor=white) | ![AndroidX](https://img.shields.io/badge/AndroidX-34A853?style=flat-square&logo=android&logoColor=white) ![Material Components](https://img.shields.io/badge/Material_Components-757575?style=flat-square&logo=materialdesign&logoColor=white) ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white) ![kotlinx.coroutines](https://img.shields.io/badge/kotlinx.coroutines-7F52FF?style=flat-square&logo=kotlin&logoColor=white) ![kotlinx.serialization](https://img.shields.io/badge/kotlinx.serialization-7F52FF?style=flat-square&logo=kotlin&logoColor=white) ![OkHttp](https://img.shields.io/badge/OkHttp-3E7FC1?style=flat-square&logo=square&logoColor=white) |
+| ![SIL Open Font License 1.1](https://img.shields.io/badge/SIL_OFL-1.1-1E5AA8?style=flat-square&logo=googlefonts&logoColor=white) | ![Pretendard](https://img.shields.io/badge/Pretendard-1E5AA8?style=flat-square) <sub>라이선스 전문: [`app/licenses/Pretendard-OFL.txt`](app/licenses/Pretendard-OFL.txt)</sub> |
 
-[ARCore SDK for Android](https://github.com/google-ar/arcore-android-sdk)는 오픈소스가 아니며
-[ARCore 추가 서비스 약관](https://developers.google.com/ar/develop/terms)을 따릅니다.
+<sub>AndroidX에는 Activity · Compose · Core · Lifecycle · Navigation · Room · Media3가 들어갑니다.</sub>
+
+> [!NOTE]
+> ARCore SDK for Android는 오픈소스가 아니며, ARCore 추가 서비스 약관(ARCore Additional Terms of Service)을 따릅니다.
 
 <details>
-<summary>빌드와 테스트에만 쓰는 도구</summary>
+<summary><b>빌드와 테스트에만 쓰는 도구</b></summary>
 
 <br>
 
-| 이름 | 라이선스 |
-| --- | --- |
-| [Gradle](https://github.com/gradle/gradle), [Android Gradle Plugin](https://developer.android.com/build), [KSP](https://github.com/google/ksp) | Apache License 2.0 |
-| [AndroidX Test](https://github.com/android/android-test) (Espresso 포함), [MockWebServer](https://github.com/square/okhttp/tree/master/mockwebserver) | Apache License 2.0 |
-| [JUnit 4](https://github.com/junit-team/junit4) | Eclipse Public License 1.0 |
-| [ktlint](https://github.com/pinterest/ktlint), [ktlint Gradle plugin](https://github.com/JLLeitschuh/ktlint-gradle) | MIT License |
+| 라이선스 | 오픈소스 |
+| :---: | :--- |
+| ![Apache License 2.0](https://img.shields.io/badge/Apache_License-2.0-D22128?style=flat-square&logo=apache&logoColor=white) | ![Gradle](https://img.shields.io/badge/Gradle-02303A?style=flat-square&logo=gradle&logoColor=white) ![Android Gradle Plugin](https://img.shields.io/badge/Android_Gradle_Plugin-34A853?style=flat-square&logo=android&logoColor=white) ![KSP](https://img.shields.io/badge/KSP-7F52FF?style=flat-square&logo=kotlin&logoColor=white) ![AndroidX Test](https://img.shields.io/badge/AndroidX_Test-34A853?style=flat-square&logo=android&logoColor=white) ![MockWebServer](https://img.shields.io/badge/MockWebServer-3E7FC1?style=flat-square&logo=square&logoColor=white) |
+| ![Eclipse Public License 1.0](https://img.shields.io/badge/EPL-1.0-2C2255?style=flat-square&logo=eclipseide&logoColor=white) | ![JUnit 4](https://img.shields.io/badge/JUnit_4-25A162?style=flat-square&logo=junit5&logoColor=white) |
+| ![MIT License](https://img.shields.io/badge/MIT-License-3DA639?style=flat-square&logo=opensourceinitiative&logoColor=white) | ![ktlint](https://img.shields.io/badge/ktlint-424242?style=flat-square&logo=kotlin&logoColor=white) ![ktlint Gradle plugin](https://img.shields.io/badge/ktlint_Gradle_plugin-424242?style=flat-square&logo=gradle&logoColor=white) |
 
 </details>
