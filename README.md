@@ -1,9 +1,24 @@
+<div align="center">
+
 # TIGER MASK
 
-***T**arget-**I**nteraction **G**rounded **E**pisode **R**ecorder*\
+***T**arget-**I**nteraction **G**rounded **E**pisode **R**ecorder*<br>
 ***M**anual **A**cquisition **S**etting **K**eeper*
 
-수집기에 단 휴대폰으로 카메라 영상, IMU, ARCore pose를 수집해 서버로 보내는 Android **데이터 수집 앱**입니다.
+<br>
+
+**수집기에 단 휴대폰으로 카메라 영상 · IMU · ARCore pose를 끊김 없이 모으는 Android 데이터 수집 앱**
+
+<br>
+
+![Android](https://img.shields.io/badge/Android-API_28+-34A853?logo=android&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?logo=kotlin&logoColor=white)
+![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white)
+![ARCore](https://img.shields.io/badge/ARCore-1.56-4285F4?logo=google&logoColor=white)
+
+</div>
+
+<br>
 
 <table align="center">
   <tr>
@@ -11,83 +26,119 @@
     <td align="center"><img src="docs/images/demo-recorded.gif" height="270" alt="휴대폰이 위에서 내려다본 영상. 분홍 표시가 있는 집게 끝이 흰 공에 다가가 집었다가 내려놓는다."></td>
   </tr>
   <tr>
-    <td align="center">수집기로 데이터를 수집하는 모습</td>
-    <td align="center">수집기의 휴대폰이 녹화한 영상</td>
+    <td align="center"><b>수집기로 데이터를 수집하는 모습</b></td>
+    <td align="center"><b>수집기의 휴대폰이 녹화한 영상</b></td>
   </tr>
 </table>
 
-## 목차
+<p align="center">
+  <a href="#프로젝트-소개">소개</a> ·
+  <a href="#주요-기능">주요 기능</a> ·
+  <a href="#기술-스택">기술 스택</a> ·
+  <a href="#아키텍처">아키텍처</a> ·
+  <a href="#기술적-도전과-해결">기술적 도전</a> ·
+  <a href="#수집-데이터">수집 데이터</a> ·
+  <a href="#시작하기">시작하기</a>
+</p>
 
-- [소개](#소개)
-- [주요 기능](#주요-기능)
-- [사용 방법](#사용-방법)
-- [시작하기](#시작하기)
-- [수집 데이터](#수집-데이터)
-- [프로젝트 구조](#프로젝트-구조)
-- [기술 스택](#기술-스택)
-- [관련 문서](#관련-문서)
-- [오픈소스 라이선스](#오픈소스-라이선스)
+<br>
 
-## 소개
+## 한눈에 보기
 
-### 무엇을 하는 앱인가요
+<table>
+  <tr>
+    <td align="center" width="25%"><h3>74회 → 0회</h3>10초 동안 카메라 설정이<br>스스로 바뀐 횟수</td>
+    <td align="center" width="25%"><h3>29.97 fps</h3>1,022프레임 평균 간격 기준<br>셔터를 바꿔도 30 fps 유지</td>
+    <td align="center" width="25%"><h3>217 → 0 ms</h3>무효 작업 구간의<br>마감 시각 오차</td>
+    <td align="center" width="25%"><h3>21,532개</h3>이 앱으로 모은 데이터에서<br>만든 학습 샘플</td>
+  </tr>
+</table>
 
-TIGER MASK는 Android 기반 **Capture Session 수집 앱**입니다.
+<p align="right"><sub>앞의 셋은 Galaxy S10(SM-G973N) 실측, 학습 샘플 수는 데이터 파이프라인 결과</sub></p>
 
-휴대폰(Galaxy S10)은 **수집기**에 고정해 씁니다. 수집기는 사람이 손에 쥐는 집게 장치이고, 휴대폰은 위쪽
-거치대에서 집게 끝을 내려다봅니다.
+<br>
 
-녹화를 시작하면 **Session**이 열리고, 끝낼 때까지 아래 세 가지를 같은 시계에 맞춰 끊김 없이 수집합니다.
+## 프로젝트 소개
 
-- **카메라 영상**: 뒷면 메인 카메라 영상과 프레임마다의 촬영 시각
-- **움직임 센서(IMU)**: 가속도계, 자이로스코프, 회전 벡터
-- **휴대폰의 위치와 방향**: ARCore가 추정한 카메라 pose
+### 전체 프로젝트
 
-Session 안에서 실제로 작업한 구간은 수집자가 직접 표시하고, 이 구간을 **Episode**라고 합니다. 녹화는
-이어 둔 채 작업하는 동안만 Episode로 표시하므로, 자세를 고쳐 잡는 등의 준비 동작이 작업 구간에 섞이지
-않습니다.
+이 저장소는 **스마트폰 기반 저비용 로봇 데이터 수집 플랫폼**의 Android 앱입니다. 플랫폼은 3D 프린터로 만든 수집기와
+스마트폰으로 사람의 시연(Human Demonstration)을 모으고, 이를 로봇 학습 데이터로 가공해 Diffusion Policy를
+학습시킨 뒤, ROS2 + MuJoCo 환경에서 실행까지 검증합니다.
 
-Session을 마치면 앱이 결과 파일을 검사해 **번들**(bundle) 하나로 묶고 서버로 보냅니다. 서버는 그중
-유효한 Episode를 학습 데이터로 씁니다.
+```mermaid
+flowchart LR
+    hw["수집기<br/>3D 프린팅 집게"] --> app["Android 앱<br/>(이 저장소)"]
+    app --> data["데이터 파이프라인<br/>동기화 · Episode 추출"]
+    data --> ai["Diffusion Policy<br/>학습"]
+    ai --> robot["ROS2 + MuJoCo<br/>실행 검증"]
+    style app fill:#7F52FF,color:#ffffff,stroke:#7F52FF
+```
 
-### 이름
+이 앱으로 모은 시연 68개는 데이터 파이프라인을 거쳐 **Episode 94개, 학습 샘플 21,532개**가 되었습니다.
 
-| 이름 | 풀이 | 뜻 |
-| --- | --- | --- |
-| **TIGER** | **T**arget-**I**nteraction **G**rounded **E**pisode **R**ecorder | 대상 물체를 다루는 장면을 Episode 단위로 기록한다 |
-| **MASK** | **M**anual **A**cquisition **S**etting **K**eeper | 촬영 설정을 사람이 직접 정하고, 녹화 내내 그 값을 지킨다 |
+| 프로젝트 기간 | Android 앱 |
+| :---: | :---: |
+| 2026.08.24 ~ 2026.09.30 | **1인 개발** · 9월 1일부터 설계, 구현, 테스트를 모두 맡음 |
 
-MASK는 TIGER 위에 얹은 촬영 설정 기능이고, 앱 이름은 둘을 합친 TIGER MASK입니다.
+### 왜 만들었나
 
-### 왜 촬영 설정을 고정하나요
+스마트폰으로 로봇 학습 데이터를 모으려 하면 세 가지가 걸립니다.
 
-휴대폰 카메라는 장면 밝기에 맞춰 ISO·노출 시간·색을 매 순간 스스로 바꿉니다. 사진에는 좋지만 데이터에는
-해롭습니다. 같은 기기에서 자동 설정으로 10초를 찍었더니 설정이 74번 바뀌었고, 0.5초 만에 ISO가 50에서
-1218로 올랐습니다. 프레임마다 밝기와 색이 다르면 프레임끼리 비교할 수 없습니다.
+- **설정이 매 순간 바뀝니다.** 자동 노출과 화이트 밸런스가 프레임마다 움직여, 같은 장면도 프레임마다 밝기와 색이
+  다르게 찍힙니다.
+- **가까운 곳이 흐립니다.** ARCore는 초점을 1 m 거리에 고정해 두어, 집게 끝처럼 가까운 작업 영역이 흐리게
+  찍힙니다.
+- **쓸 수 있는 구간을 가릴 수 없습니다.** 영상만으로는 어디가 실제 작업이었는지, 그때 ARCore가 휴대폰의 위치를
+  제대로 잡고 있었는지 알 수 없습니다.
 
-초점도 문제입니다. ARCore는 초점을 1 m 거리에 고정해 두므로, 집게 끝처럼 가까운 작업 영역이 흐리게
-찍힙니다.
+### 무엇을 하나
 
-MASK를 쓰면 수집자가 초점·ISO·셔터·화이트 밸런스를 직접 고르고, 앱은 녹화가 끝날 때까지 그 값을
-유지합니다. 덕분에 카메라 보정(checkerboard calibration)과 색 기준 촬영, 실제 데이터 수집을 같은 광학
-조건에서 할 수 있습니다. 수동 제어를 지원하지 않는 기기에서는 기존처럼 자동 설정으로 찍습니다.
+휴대폰은 **수집기**에 고정해 씁니다. 수집기는 사람이 손에 쥐는 집게 장치이고, 휴대폰은 위쪽 거치대에서 집게 끝을
+내려다봅니다.
+
+녹화를 시작하면 **Session**이 열리고, 끝낼 때까지 세 가지를 같은 시계에 맞춰 끊김 없이 수집합니다.
+
+| 카메라 영상 | 움직임 센서(IMU) | 휴대폰의 위치와 방향 |
+| :---: | :---: | :---: |
+| 메인 카메라 영상과 프레임마다의 촬영 시각 | 가속도계 · 자이로스코프 · 회전 벡터 | ARCore가 추정한 카메라 pose |
+
+Session 안에서 실제로 작업한 구간은 수집자가 직접 표시하고, 이 구간을 **Episode**라고 합니다. 녹화는 이어 둔 채
+작업하는 동안만 Episode로 표시하므로, 자세를 고쳐 잡는 등의 준비 동작이 작업 구간에 섞이지 않습니다.
+
+Session을 마치면 앱이 결과 파일을 검사해 **번들** 하나로 묶고 서버로 보냅니다. 서버는 그중 유효한 Episode를 학습
+데이터로 씁니다.
+
+> **이름의 뜻**  TIGER는 대상 물체를 다루는 장면을 Episode 단위로 기록한다는 뜻이고, MASK는 그 위에 얹은 수동 촬영
+> 설정 기능입니다. 사람이 정한 촬영 설정을 녹화 내내 지킵니다.
+
+<br>
 
 ## 주요 기능
 
-- **동시 기록**: 카메라 영상, IMU 세 종류, ARCore pose를 한 Session으로 함께 기록합니다.
-- **구간 표시**: 버튼으로 Episode의 시작과 끝을 표시합니다. Episode 도중 ARCore가 휴대폰의 위치를 0.5초
-  넘게 놓치면 그 Episode를 무효로 처리하고 자동으로 끝냅니다. Session은 계속됩니다.
-- **촬영 설정 고정 (MASK)**: 녹화 해상도(1920×1080 / 1280×720), 초점, ISO, 셔터, 화이트 밸런스를 고르고
-  녹화 내내 유지합니다. 프레임 속도는 30 fps로 고정합니다. 고른 값은 다음 실행에도 기억합니다.
-- **결과 검사**: 녹화를 마칠 때 파일이 빠짐없이 있는지, CSV 머리글이 맞는지, SHA-256 해시가 일치하는지
-  검사한 뒤에만 번들을 확정합니다.
-- **중단 복구**: 녹화 도중 앱이 꺼져도, 다음 실행 때 남은 녹화를 검사해 정상 Session으로 마감합니다.
-- **자동 업로드**: Session을 마치면 곧바로 서버로 올리고, 실패하면 다시 시도할 수 있습니다.
-- **다시 보기와 정리**: 찍은 영상을 앱에서 재생하고, 필요 없는 Session을 기기에서 지웁니다.
+### 작업 구간만 골라 표시하는 녹화
 
-## 사용 방법
+<p align="center">
+  <img src="docs/images/capture-workspace.jpg" width="720" alt="녹화 중인 수집 화면. 카메라 프리뷰가 화면을 채우고, 왼쪽 위에 EPISODE ACTIVE 배지, 오른쪽에 닫기·일시 정지·정지 버튼이 있다.">
+</p>
 
-수집 화면은 가로, 목록과 상세 화면은 세로로 고정됩니다. 아래 화면은 에뮬레이터에서 예시 데이터로 찍었습니다.
+재생 버튼으로 Session을 시작하고, ARCore가 휴대폰의 위치를 잡아 `READY`가 되면 재생과 일시 정지로 Episode를
+시작하고 끝냅니다. 한 Session 안에서 Episode를 몇 번이고 반복할 수 있습니다. **Episode 도중 위치를 0.5초 넘게
+놓치면 그 Episode만 무효로 마감**하고, Session은 그대로 이어집니다.
+
+### 촬영 설정을 녹화 내내 고정하는 MASK
+
+<p align="center">
+  <img src="docs/images/camera-settings.jpg" width="720" alt="카메라 설정 시트. 녹화 해상도, 초점, ISO, 셔터, 화이트 밸런스 항목이 있다.">
+</p>
+
+녹화 해상도, 초점, ISO, 셔터, 화이트 밸런스를 수집자가 직접 고릅니다. 값은 **바꾸는 즉시 프리뷰에 반영**되어 화면을
+보며 초점을 맞출 수 있고, Session이 시작되면 잠겨 끝날 때까지 바뀌지 않습니다. 자동 설정으로 10초를 찍으면 설정이
+**74번** 바뀌지만, MASK로 고정하면 **0번**입니다. 프레임 속도는 30 fps로 고정해 셔터를 바꿔도 프레임 간격이
+33.3 ms로 유지되고(1,022프레임 평균 29.97 fps), 고른 값은 다음 실행에도 기억합니다. 덕분에 카메라
+보정(checkerboard calibration)과 색 기준 촬영, 실제 데이터 수집을 같은 광학 조건에서 할 수 있습니다.
+
+### 검사를 통과한 번들만 서버로
 
 <p align="center">
   <img src="docs/images/home.png" width="240" alt="홈 화면. Task별로 Session 수가 적힌 카드가 있고 오른쪽 아래에 새 세션 버튼이 있다.">
@@ -95,94 +146,99 @@ MASK를 쓰면 수집자가 초점·ISO·셔터·화이트 밸런스를 직접 �
   <img src="docs/images/session-detail.png" width="240" alt="Session 상세 화면. 영상, Task·Object·ID, 업로드 버튼이 있다.">
 </p>
 
-### 1. 새 세션 열기
+- **결과 검사**: 파일이 빠짐없이 있는지, CSV 머리글이 맞는지, SHA-256 해시가 일치하는지 확인한 뒤에만 번들을
+  확정합니다.
+- **자동 업로드**: 마감 직후 서버로 올리고, 실패하면 상세 화면에서 다시 보냅니다. 같은 Session을 다시 보내도 서버가
+  중복을 가려내도록 Session ID를 `Idempotency-Key`로 붙입니다.
+- **중단 복구**: 녹화 도중 앱이 꺼져도, 다음 실행 때 남은 녹화를 검사해 정상 Session으로 마감합니다.
+- **다시 보기와 정리**: Session을 Task별로 모아 보고, 영상을 재생하고, 필요 없는 Session을 기기에서 지웁니다.
 
-홈은 지금까지 찍은 Session을 Task별로 묶어 보여 줍니다. 오른쪽 아래 **새 세션**을 누르면 수집 화면이
-열리고, 먼저 무슨 작업인지(Task, 예: 컵 집기)와 다루는 물체(Object, 예: 머그컵)를 묻습니다. 입력하고
-**준비 완료**를 누릅니다. 입력한 값은 그 Session의 모든 Episode에 붙습니다. Task 화면에서 새 세션을 열면
-그 Task 이름이 미리 채워져 있습니다.
+<sub>위 화면은 에뮬레이터에서 예시 데이터로 찍었습니다.</sub>
 
-### 2. 카메라 설정 (선택)
+<br>
 
-<p align="center">
-  <img src="docs/images/camera-settings.jpg" width="720" alt="카메라 설정 시트. 녹화 해상도, 초점, ISO, 셔터, 화이트 밸런스 항목이 있다.">
-</p>
+## 기술 스택
 
-왼쪽 위 톱니바퀴를 누르면 카메라 설정이 열립니다. 녹화 해상도, 초점, ISO, 셔터, 화이트 밸런스를 고를 수
-있고, 바꾸는 즉시 프리뷰에 반영되므로 화면을 보며 초점을 맞추면 됩니다. Session을 시작하면 톱니바퀴가
-사라지고 설정은 잠깁니다.
+| 분류 | 기술 |
+| :--- | :--- |
+| 언어 · UI | ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white) ![Material 3](https://img.shields.io/badge/Material_3-757575?style=for-the-badge&logo=materialdesign&logoColor=white) ![Navigation Compose](https://img.shields.io/badge/Navigation_Compose-34A853?style=for-the-badge&logo=android&logoColor=white) |
+| 카메라 · AR | ![Camera2](https://img.shields.io/badge/Camera2-34A853?style=for-the-badge&logo=android&logoColor=white) ![ARCore](https://img.shields.io/badge/ARCore_Shared_Camera-4285F4?style=for-the-badge&logo=google&logoColor=white) ![OpenGL ES](https://img.shields.io/badge/OpenGL_ES-5586A4?style=for-the-badge&logo=opengl&logoColor=white) |
+| 데이터 · 네트워크 | ![Room](https://img.shields.io/badge/Room-003B57?style=for-the-badge&logo=sqlite&logoColor=white) ![Coroutines](https://img.shields.io/badge/Coroutines-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![kotlinx.serialization](https://img.shields.io/badge/kotlinx.serialization-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) ![OkHttp](https://img.shields.io/badge/OkHttp-3E7FC1?style=for-the-badge&logo=square&logoColor=white) |
+| 미디어 | ![Media3 ExoPlayer](https://img.shields.io/badge/Media3_ExoPlayer-34A853?style=for-the-badge&logo=android&logoColor=white) |
+| 빌드 · 품질 | ![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white) ![ktlint](https://img.shields.io/badge/ktlint-424242?style=for-the-badge&logo=kotlin&logoColor=white) ![JUnit](https://img.shields.io/badge/JUnit-25A162?style=for-the-badge&logo=junit5&logoColor=white) |
 
-### 3. 녹화하기
+<br>
 
-<p align="center">
-  <img src="docs/images/capture-workspace.jpg" width="720" alt="녹화 중인 수집 화면. 카메라 프리뷰가 화면을 채우고, 왼쪽 위에 EPISODE ACTIVE 배지, 오른쪽에 닫기·일시 정지·정지 버튼이 있다.">
-</p>
+## 아키텍처
 
-오른쪽의 재생 버튼을 누르면 Session이 시작됩니다. ARCore가 휴대폰의 위치를 잡으면 왼쪽 위 상태가
-`READY`로 바뀌고, 그때부터 재생 버튼으로 Episode를 시작하고 일시 정지 버튼으로 끝냅니다. Episode는 한
-Session 안에서 여러 번 반복할 수 있습니다. 모두 마쳤으면 정지 버튼으로 Session을 끝냅니다. 결과를 검사하는
-동안에는 앱을 닫지 마세요.
+### 수집 파이프라인
 
-### 4. 확인하고 올리기
-
-녹화가 마감되면 그 Session의 상세 화면으로 이동하고 업로드가 바로 시작됩니다. 상세 화면에서 영상을
-다시 보고 업로드 상태(로컬에만 저장됨 · 업로드 중 · 업로드 완료 · 업로드 실패)를 확인할 수 있습니다.
-실패하면 사유와 함께 **업로드 재시도**가 나타납니다.
-
-- 업로드는 앱이 화면에 떠 있는 동안에만 진행됩니다. 도중에 앱을 백그라운드로 보내면 실패로 남으니 상세
-  화면에서 다시 시도하세요.
-- Session은 Task 화면에서 카드를 길게 누르거나 상세 화면 오른쪽 위 메뉴에서 지웁니다. **기기에서만** 지워지며
-  서버에 올라간 데이터는 남습니다. 업로드 중에는 지울 수 없습니다.
-
-### 촬영 팁
-
-- 어두우면 ARCore가 휴대폰의 위치를 잡지 못해 `READY`로 넘어가지 않습니다. 조명을 밝게 하세요.
-- 수동 노출은 밝기를 잠급니다. 자동이었다면 ISO를 올려 버텼을 장면에서도 위치를 놓칠 수 있으니, 그럴
-  때는 ISO를 올리거나 셔터를 1/60 · 1/30으로 늦춥니다. 1/30까지는 30 fps를 유지합니다.
-
-## 시작하기
-
-### 요구 환경
-
-**실행**
-
-- ARCore를 지원하는 Android 9(API 28) 이상 기기. 개발에는 Galaxy S10(SM-G973N)을 썼습니다.
-- 최신 Google Play Services for AR
-
-**빌드**
-
-- JDK 17 이상 (Gradle 9.6이 요구합니다)
-- Android SDK Platform 37
-- Android Studio를 권장합니다. 저장소에 Gradle Wrapper가 들어 있어 Gradle을 따로 설치하지 않아도 됩니다.
-
-### 업로드 서버 주소 설정
-
-저장소 루트의 `local.properties`에 서버 주소를 적습니다. 이 파일은 git에 올라가지 않습니다.
-
-```properties
-tigerUploadBaseUrl=http://<서버 주소>
+```mermaid
+flowchart LR
+    subgraph phone["수집기의 휴대폰"]
+        direction LR
+        cam["Camera2 +<br/>ARCore Shared Camera"]
+        imu["IMU 센서"]
+        staging[("staging/<br/>녹화 중인 파일")]
+        completed[("completed/<br/>확정된 번들")]
+        cam -- "영상 · 프레임 시각 · pose" --> staging
+        imu -- "가속도 · 각속도 · 회전" --> staging
+        staging -- "마감: 파일 · 머리글 · SHA-256 검사" --> completed
+    end
+    completed -- "multipart 업로드<br/>Idempotency-Key" --> server["수집 서버"]
 ```
 
-빌드할 때 `-PtigerUploadBaseUrl=<서버 주소>`로 넘겨도 됩니다. 주소 없이 빌드해도 녹화는 되지만 업로드는
-할 수 없습니다.
+카메라 하나를 ARCore와 녹화가 함께 씁니다(ARCore Shared Camera). 같은 카메라 프레임에서 ARCore는 위치를
+추정하고 MediaRecorder는 영상을 저장하므로, 영상과 pose가 같은 시간축에 놓입니다. 카메라 시각이 기기 단조 시계와
+같은 기준(`REALTIME`)이 아닌 기기에서는 Session을 시작하지 않습니다.
 
-### 빌드와 설치
+### 화면 상태 관리
 
-Android Studio에서 `app` 구성을 실행하거나, 명령줄에서 빌드한 뒤 기기에 설치합니다.
+- **수집 화면은 MVI**입니다. 처음에는 상태를 불리언 네 개로 표현해 16가지 조합이 생겼는데, 실제로 있을 수 있는
+  상태는 다섯 가지뿐이었고 나머지는 호출 순서로만 막혀 있었습니다. 다섯 상태를 가진 열거형 하나로 바꿔 있을 수 없는
+  상태를 타입이 막게 했습니다. 위치 추적 폴링 · 권한 콜백 · 생명주기 · ARCore 실패처럼 흩어져 경합하던 변경은
+  `CaptureIntent`라는 하나의 입구로 모았고, 전이는 순수 함수 `reduce`라 Android 없이 단위 테스트합니다.
+- **조회 화면은 상태 보유자만** 둡니다. Room이 내보내는 목록을 화면이 받아 그리고, 전송과 삭제만 얇은 보유자가
+  맡습니다. 상태 기계가 없는 곳에 intent와 reducer를 두지 않습니다.
+- **`ViewModel`과 DI 라이브러리를 쓰지 않습니다.** 수집 화면은 앱이 백그라운드로 가면 진행 중인 Session을 일부러
+  마감하므로, 구성 변경 너머로 상태를 살리는 것이 오히려 해가 됩니다. 대신 다크 모드 전환만으로 데이터베이스와
+  HTTP 클라이언트가 하나씩 더 생기던 문제를 고치면서, 앱 수명을 갖는 객체 셋을 `Application`의 필드로 옮겼습니다.
 
-```powershell
-.\gradlew.bat assembleDebug
-adb install -r app\build\outputs\apk\debug\app-debug.apk
-```
+<br>
 
-macOS·Linux에서는 `./gradlew assembleDebug`를 씁니다. 설치되는 앱의 패키지 이름은
-`com.ssafy.s15p21a206.tigermask`입니다.
+## 기술적 도전과 해결
+
+### 무효 작업 구간의 마감 시각이 217 ms 어긋나던 문제
+
+- **문제**  서버 쪽이 실제 업로드 데이터를 검토해, ARCore가 위치를 오래 놓친 구간도 정상 완료로 저장된다고 알려
+  왔습니다. 그래서 Episode 도중 위치를 0.5초 넘게 놓치면 "첫 유실 시각 + 0.5초"에 무효로 마감하게 했는데,
+  기록된 마감 시각이 그보다 217 ms 늦었습니다.
+- **원인**  유실 시작을 "앱이 알아챈 시각"으로 잡아, ARCore의 pose 처리 지연과 100 ms 판정 주기가 그대로
+  더해졌습니다. 이를 고친 뒤에도 67 ms가 남았는데, pose 스레드가 매 프레임 최신 시각을 덮어써 판정 주기 사이에
+  두 프레임이 더 진행된 값이 읽혔기 때문입니다.
+- **해결**  시계를 둘로 나눴습니다. 0.5초 판정은 기기의 단조 시계로 하고, 기록에는 카메라 pose 시각을 씁니다.
+  첫 유실 pose 시각은 회복할 때까지 고정해 둡니다. 시계를 pose 시각 하나로 합치면 pose 지연 탓에 0.5초 미만의
+  유실도 무효가 되므로, 이 함정은 단위 테스트로 막았습니다.
+- **결과**  오차가 **217 ms → 67 ms → 0.0 ms**로 줄어, 기록된 마감 시각이 첫 유실 pose + 0.5초와 정확히
+  일치합니다.
+
+<br>
+
+## 한계와 다음 단계
+
+- **기기 한 대 기준**: Galaxy S10 하나에 맞춰 만들었습니다. 다른 기기는 카메라 스트림 조합과 수동 제어 범위가 달라
+  따로 확인해야 합니다.
+- **피사계 심도**: 초점은 한 거리에만 맞습니다. 작업 대상과 집게 끝이 한 초점면에 다 들어오지 않으면 조리개를
+  조여 심도를 넓힐 수 있는데(S10은 F1.5 / F2.4), 지금은 조리개를 기기 기본값에 맡깁니다.
+- **어두운 환경**: 수동 노출은 밝기를 잠그므로, 어두운 곳에서는 ARCore가 위치를 잡지 못할 수 있습니다. 이때는 ISO를
+  올리거나 셔터를 1/30까지 늦춥니다. 1/30까지는 30 fps를 유지합니다.
+- **초광각 카메라**: 메인 카메라만 기록합니다. 초광각을 함께 기록하는 것은 범위에서 뺐습니다.
+
+<br>
 
 ## 수집 데이터
 
-### 번들 구성
-
-Session 하나가 아래 파일들로 이루어진 번들 하나가 됩니다.
+Session 하나가 아래 8개 파일로 이루어진 번들 하나가 됩니다.
 
 | 파일 | 내용 |
 | --- | --- |
@@ -191,69 +247,116 @@ Session 하나가 아래 파일들로 이루어진 번들 하나가 됩니다.
 | `accelerometer.csv` | 가속도계 값 |
 | `gyroscope.csv` | 자이로스코프 값 |
 | `rotation_vector.csv` | 회전 벡터 값 |
-| `arcore_poses.csv` | ARCore가 추정한 카메라 위치·방향과, 위치를 잡고 있었는지(Tracking 상태) |
-| `episodes.csv` | Episode마다의 시작·종료 시각과 결과(정상 완료, 또는 위치를 놓쳐 무효) |
-| `metadata.json` | Session ID, 카메라 정보(해상도·내부 파라미터), 촬영 설정(요청값과 실제 적용값), 파일 목록과 SHA-256 |
+| `arcore_poses.csv` | ARCore가 추정한 카메라 위치 · 방향과, 위치를 잡고 있었는지(Tracking 상태) |
+| `episodes.csv` | Episode마다의 시작 · 종료 시각과 결과(정상 완료, 또는 위치를 놓쳐 무효) |
+| `metadata.json` | Session ID, 카메라 정보(해상도 · 내부 파라미터), 촬영 설정(요청값과 실제 적용값), 파일 목록과 SHA-256 |
 
-`metadata.json`의 형식은 [Session `metadata.json` 계약](specs/003-session-episode-tracking-gate/contracts/session-metadata.md)에
-있습니다.
-
-### 저장과 전송
-
-```text
-카메라 + ARCore + IMU
-        │  녹화
-        ▼
-staging/<session_id>/      녹화 중인 파일
-        │  마감: 파일 검사
-        ▼
-completed/<session_id>/    확정된 번들 (이후 수정하지 않음)
-        │  업로드: 마감 직후 자동, 실패하면 상세 화면에서 재시도
-        ▼
-POST {BASE_URL}/sessions
-```
-
-번들은 앱 전용 내부 저장소에 있어 다른 앱이나 파일 탐색기에서는 보이지 않습니다. 기기 밖으로 꺼내는
-방법은 업로드뿐입니다. 업로드는 번들을 읽기만 하므로 실패하거나 중단돼도 원본은 그대로 남습니다.
-
-앱은 번들을 multipart 요청 하나로 보내고, 같은 Session을 다시 보내도 서버가 중복을 가려내도록
-`Idempotency-Key`에 Session ID를 담습니다. 요청과 응답 형식은
+번들은 앱 전용 내부 저장소에 두고, 확정한 뒤로는 수정하지 않습니다. 형식은
+[Session `metadata.json` 계약](specs/003-session-episode-tracking-gate/contracts/session-metadata.md)과
 [Capture Session Upload 계약](specs/001-episode-recorder/contracts/episode-upload.md)에 있습니다.
 
-## 프로젝트 구조
+<br>
 
-모듈은 `app` 하나입니다.
+## 시작하기
+
+<details>
+<summary><b>요구 환경</b></summary>
+
+<br>
+
+- **실행**: ARCore를 지원하는 Android 9(API 28) 이상 기기와 최신 Google Play Services for AR. 개발에는
+  Galaxy S10(SM-G973N)을 썼습니다.
+- **빌드**: JDK 17 이상, Android SDK Platform 37. 저장소에 Gradle Wrapper가 들어 있어 Gradle을 따로 설치하지
+  않아도 됩니다.
+
+</details>
+
+<details>
+<summary><b>업로드 서버 주소 설정</b></summary>
+
+<br>
+
+저장소 루트의 `local.properties`에 서버 주소를 적습니다. 이 파일은 git에 올라가지 않습니다.
+
+```properties
+tigerUploadBaseUrl=http://<서버 주소>
+```
+
+빌드할 때 `-PtigerUploadBaseUrl=<서버 주소>`로 넘겨도 됩니다. 주소 없이 빌드해도 녹화는 되지만 업로드는 할 수
+없습니다.
+
+</details>
+
+<details>
+<summary><b>빌드와 설치</b></summary>
+
+<br>
+
+```powershell
+.\gradlew.bat assembleDebug
+adb install -r app\build\outputs\apk\debug\app-debug.apk
+```
+
+macOS · Linux에서는 `./gradlew assembleDebug`를 씁니다. 설치되는 앱의 패키지 이름은
+`com.ssafy.s15p21a206.tigermask`입니다.
+
+</details>
+
+<details>
+<summary><b>프로젝트 구조</b></summary>
+
+<br>
 
 ```text
 app/src/main/java/com/ssafy/s15p21a206/tiger/
+├── TigerApplication.kt       앱 수명 객체(데이터베이스 · 저장소 · 업로드 서비스)
+├── TigerApp.kt               앱 루트
+├── TigerAppState.kt          수집 상태, 전송 · 삭제, 화면 이동이 얽힌 동작
+├── navigation/               화면 경로와 NavHost
 ├── core/
-│   ├── capture/        카메라·ARCore·IMU 기록 (MASK 수동 설정은 capture/manual)
-│   ├── session/        번들 마감·검사·복구
-│   ├── upload/         서버 전송
-│   ├── database/       Room. Session과 Episode 기록
-│   ├── model/          데이터 모델
-│   └── designsystem/   테마와 공용 컴포넌트
+│   ├── capture/              한 번의 수집을 여닫는 순서, Tracking 판정과 Episode 경계
+│   │   ├── camera/           Camera2 녹화 · 프리뷰 세션, 녹화 해상도
+│   │   ├── manual/           MASK 수동 촬영 설정
+│   │   ├── arcore/           ARCore 프레임 처리, pose 기록, 프리뷰 그리기
+│   │   └── writer/           IMU · Episode · 프레임 시각 CSV 기록
+│   ├── session/              번들 마감 · 검사 · 복구
+│   ├── upload/               서버 전송
+│   ├── database/             Room. Session과 Episode 색인
+│   ├── model/                capture · session · upload 데이터 모델
+│   ├── designsystem/         테마와 공용 컴포넌트
+│   ├── android/              Activity 접근, 화면 방향 고정
+│   └── common/               공용 도우미
 └── feature/
-    ├── capture/        수집 화면
-    └── session/        홈, Task 화면, Session 상세, 영상 재생
-specs/                  기능별 명세·계획·계약 문서
+    ├── capture/              수집 화면
+    │   ├── state/            상태 · Intent · 전이 (MVI)
+    │   ├── driver/           권한 · 폴링 · 생명주기 같은 부수 효과
+    │   ├── preview/          카메라 프리뷰
+    │   ├── settings/         카메라 설정 시트
+    │   ├── overlay/          프리뷰 위 상태 배지와 제어 버튼
+    │   └── dialog/           수집 정보 입력, 종료 확인
+    └── session/              조회 화면
+        ├── list/             홈, Task 화면
+        ├── detail/           Session 상세
+        └── video/            영상 재생
+
+app/licenses/                 앱에 넣은 글꼴의 라이선스
+docs/images/                  README 이미지
+specs/                        기능별 명세 · 계획 · 계약 문서
 ```
 
-## 기술 스택
+</details>
 
-- Kotlin, Jetpack Compose, Material 3, Navigation Compose
-- Android Camera2, ARCore Shared Camera
-- Room, Kotlin Coroutines, kotlinx.serialization
-- OkHttp, Media3 ExoPlayer
-- 글꼴: Pretendard
+<br>
 
 ## 관련 문서
 
-- 기능 명세와 설계: [`specs/001-episode-recorder/`](specs/001-episode-recorder/),
+- **기능 명세와 설계**: [`specs/001-episode-recorder/`](specs/001-episode-recorder/),
   [`specs/002-capture-control-ux/`](specs/002-capture-control-ux/),
   [`specs/003-session-episode-tracking-gate/`](specs/003-session-episode-tracking-gate/)
-- 개발에 참여한다면: [`AGENTS.md`](AGENTS.md)에 빌드·테스트·커밋 규칙이, [`app/AGENTS.md`](app/AGENTS.md)에
-  코드·화면 작성 규칙이 있습니다. 처음 clone한 뒤 `.\gradlew.bat installGitHooks`로 git hook을 켜 주세요.
+- **개발 규칙**: [`AGENTS.md`](AGENTS.md)에 빌드 · 테스트 · 커밋 규칙이, [`app/AGENTS.md`](app/AGENTS.md)에 코드 · 화면
+  작성 규칙과 설계 결정의 이유가 있습니다.
+
+<br>
 
 ## 오픈소스 라이선스
 
@@ -270,7 +373,10 @@ specs/                  기능별 명세·계획·계약 문서
 [ARCore SDK for Android](https://github.com/google-ar/arcore-android-sdk)는 오픈소스가 아니며
 [ARCore 추가 서비스 약관](https://developers.google.com/ar/develop/terms)을 따릅니다.
 
-빌드와 테스트에만 쓰는 도구입니다.
+<details>
+<summary>빌드와 테스트에만 쓰는 도구</summary>
+
+<br>
 
 | 이름 | 라이선스 |
 | --- | --- |
@@ -278,3 +384,5 @@ specs/                  기능별 명세·계획·계약 문서
 | [AndroidX Test](https://github.com/android/android-test) (Espresso 포함), [MockWebServer](https://github.com/square/okhttp/tree/master/mockwebserver) | Apache License 2.0 |
 | [JUnit 4](https://github.com/junit-team/junit4) | Eclipse Public License 1.0 |
 | [ktlint](https://github.com/pinterest/ktlint), [ktlint Gradle plugin](https://github.com/JLLeitschuh/ktlint-gradle) | MIT License |
+
+</details>
