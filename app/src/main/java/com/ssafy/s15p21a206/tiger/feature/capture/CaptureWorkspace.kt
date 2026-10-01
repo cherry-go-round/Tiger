@@ -1,14 +1,10 @@
 package com.ssafy.s15p21a206.tiger.feature.capture
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -21,7 +17,6 @@ import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
 import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
 import com.ssafy.s15p21a206.tiger.feature.capture.preview.CapturePreviewSurface
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraPanel
-import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraSettingsButton
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraSheet
 
 /**
@@ -126,48 +121,6 @@ internal fun CaptureWorkspace(
             onConfirm = driver.confirmStop,
             onDismiss = { onIntent(CaptureIntent.StopDismissed) },
         )
-    }
-}
-
-/**
- * 프리뷰 위 상단 줄. 왼쪽 자리와 닫기 버튼을 한 Row에 담는다.
- *
- * 서로 다른 align으로 두면 배지가 길어질 때 닫기 버튼 아래로 파고든다. 그래서 왼쪽 자리는
- * `weight(fill = false)`로 제 너비만 쓴다. 기준은 프리뷰가 아니라 화면이다. 우측 제어와 좌표계를
- * 맞추고, 레터박스가 생기는 기기에서는 검은 띠 위에 얹혀 영상을 가리지 않는다.
- *
- * 왼쪽 자리는 Session 전에는 촬영 조건을 여는 톱니바퀴, 시작한 뒤에는 tracking 상태 배지가 쓴다.
- * 시작하면 조건이 잠기고, 그 전에는 상태가 늘 IDLE이라 배지가 알려 줄 것이 없다.
- */
-@Suppress("FunctionName")
-@Composable
-private fun CaptureTopBar(
-    state: CaptureUiState,
-    onOpenSettings: () -> Unit,
-    onExit: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .safeDrawingPadding()
-                .padding(top = 20.dp, start = 20.dp, end = 20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top,
-    ) {
-        Row(
-            modifier = Modifier.weight(1f, fill = false),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (state.phase == CaptureWorkspaceControlState.Idle) {
-                CaptureCameraSettingsButton(enabled = state.captureSettingsEditable, onClick = onOpenSettings)
-            } else {
-                CaptureWorkspaceStatus(state = state.phase)
-            }
-        }
-        CaptureWorkspaceExitControls(policy = state.policy, onExit = onExit)
     }
 }
 

@@ -89,7 +89,10 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 | `preview/CapturePreviewSurface` | `TextureView`와 `SurfaceTexture`의 수명 |
 | `CaptureMetadataDialog` | Task·Object 입력 |
 | `settings/CaptureCameraPanel` | 카메라 설정 사이드 시트. 해상도·초점·ISO·셔터·화이트 밸런스 |
-| `CaptureOverlays` | 배지·제어 버튼·마감 판·기준선 같은 프리뷰 위 오버레이 |
+| `CaptureTopBar` | 프리뷰 위 상단 줄. 설정 단추 또는 상태 배지, 닫기 |
+| `CaptureControls` | 우측 재생·일시 정지·정지 제어와 종료 확인 |
+| `CaptureFinalizingOverlay` | 마감 중·마감 실패를 알리는 판 |
+| `CaptureCenterGuide` | 거치 기준선 |
 | `CaptureControlPolicy` | 상태에서 파생되는 허용 동작 |
 
 상태는 `TigerApp`이 소유하고 화면은 값과 `onIntent`만 받는다. 작업 공간을 여는 것이 조회 화면의 동작이기 때문이다.
