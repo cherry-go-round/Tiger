@@ -64,7 +64,7 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 
 ### 패턴 밖에 두는 것
 
-`previewSurface`·`previewTexture`는 `CaptureUiState`에 넣지 않는다. 수명이 `TextureView`에 묶여 있어 상태로 올리면 backing view가 사라진 뒤의 null·release를 직접 관리해야 한다. `rememberCaptureDriver`가 들고, 화면은 Surface가 생기고 사라졌다는 사실만 알린다. 권한 launcher도 드라이버에 있다. 아래 "composition에 묶여 있어 올릴 수 없는 것"과 같은 목록이다.
+프리뷰 Surface와 SurfaceTexture는 `CaptureUiState`에 넣지 않는다. 수명이 `TextureView`에 묶여 있어 상태로 올리면 backing view가 사라진 뒤의 null·release를 직접 관리해야 한다. `IdlePreview`(`rememberIdlePreview`)가 들고, 화면은 Surface가 생기고 사라졌다는 사실만 알린다. 권한 launcher도 composition에 있다. 프리뷰 권한은 `rememberIdlePreview`, 카메라 권한은 드라이버가 든다. 아래 "composition에 묶여 있어 올릴 수 없는 것"과 같은 목록이다.
 
 ### 다시 검토해야 하는 조건
 
@@ -81,7 +81,9 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 | | 맡는 것 |
 |---|---|
 | `CaptureWorkspace` | 그리기만 한다. 카메라도 목적지도 모른다 |
-| `CaptureDriver` | 카메라 세션·ARCore·권한·tracking 폴링·마감 |
+| `CaptureDriver` | Session의 수명. ARCore 확인·카메라 권한·시작·tracking 폴링·중단·마감 |
+| `IdlePreview` | Session 전 유휴 Camera2 프리뷰. Surface, 프리뷰 권한, 되살리기 |
+| `ManualCameraControls` | 수동 촬영 조건. 녹화 카메라 능력 읽기, 프리뷰에 걸기, 기억 |
 | `CaptureState` | `CaptureUiState`·`CaptureIntent`·`reduce` |
 | `CapturePreviewSurface` | `TextureView`와 `SurfaceTexture`의 수명 |
 | `CaptureMetadataDialog` | Task·Object 입력 |
@@ -95,7 +97,7 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 
 `rememberCaptureDriver`는 Composable이다. 권한 `rememberLauncherForActivityResult`는 composition에서만 만들 수 있고, tracking 폴링과 `ON_STOP`·`ON_START` 처리도 composition의 effect다. 무거운 것들은 `remember`로 한 번만 만들고, 돌려주는 `CaptureDriver`는 매 composition 새로 만든다 — 콜백이 `remember`에 갇히면 옛 상태를 보게 된다.
 
-`previewSurface`·`previewTexture`가 드라이버에 있는 것은 Camera2 session을 여는 쪽이 거기이기 때문이다. 화면은 Surface가 생기고 사라졌다는 사실만 알린다.
+프리뷰 Surface와 SurfaceTexture가 `IdlePreview`에 있는 것은 Camera2 session을 여는 쪽이 거기이기 때문이다. 화면은 Surface가 생기고 사라졌다는 사실만 알린다.
 
 ### composition에 묶여 있어 올릴 수 없는 것
 

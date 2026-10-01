@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.graphics.SurfaceTexture
-import android.hardware.camera2.CameraManager
 import android.os.SystemClock
 import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -30,10 +29,7 @@ import com.ssafy.s15p21a206.tiger.core.android.findActivity
 import com.ssafy.s15p21a206.tiger.core.capture.AndroidCaptureRuntime
 import com.ssafy.s15p21a206.tiger.core.capture.CaptureSessionCoordinator
 import com.ssafy.s15p21a206.tiger.core.capture.MonotonicClock
-import com.ssafy.s15p21a206.tiger.core.capture.camera.PreviewCameraSession
 import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
-import com.ssafy.s15p21a206.tiger.core.capture.manual.ManualCameraConfigStore
-import com.ssafy.s15p21a206.tiger.core.capture.manual.ManualCameraProfile
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.capture.TrackingState
@@ -89,8 +85,8 @@ internal class CaptureDriver(
  * 대신 무거운 것들은 [remember]로 한 번만 만들고, 돌려주는 [CaptureDriver]는 매 composition
  * 새로 만든다 — 그래야 콜백이 최신 [state]를 본다.
  *
- * `previewSurface`·`previewTexture`가 여기 있는 것은 Camera2 session을 여는 쪽이 여기이기
- * 때문이다. 화면은 Surface가 생기고 사라졌다는 사실만 알린다.
+ * 유휴 프리뷰와 수동 촬영 조건은 [rememberIdlePreview]와 [rememberManualCamera]가 세운다. 여기는
+ * 그 둘을 받아 Session의 수명(시작·tracking·중단·마감)을 맡는다.
  */
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -105,9 +101,7 @@ internal fun rememberCaptureDriver(
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val scope = rememberCoroutineScope()
     // 화면 문구. 콜백이 composition 밖에서 불리므로 여기서 미리 읽어 둔다.
-    val previewFailureMessage = stringResource(R.string.capture_preview_failed)
     val operationFailureMessage = stringResource(R.string.capture_operation_failed)
-    val whiteBalancePendingMessage = stringResource(R.string.capture_camera_white_balance_pending)
     val episodeInvalidatedMessage = stringResource(R.string.capture_episode_invalid_tracking)
     val recordingCameraUnavailable = stringResource(R.string.recording_camera_unavailable)
     val activeEpisodeEndRequired = stringResource(R.string.active_episode_end_required)
@@ -119,32 +113,9 @@ internal fun rememberCaptureDriver(
 
     val captureRuntime = remember { AndroidCaptureRuntime(context.applicationContext, SessionBundleStore(context.applicationContext)) }
     val snackbarHostState = remember { SnackbarHostState() }
-    var previewSurface by remember { mutableStateOf<Surface?>(null) }
-    // 수집 시작 시 ARCore가 고른 해상도로 버퍼를 다시 맞추려면 SurfaceTexture를 들고 있어야 한다.
-    var previewTexture by remember { mutableStateOf<SurfaceTexture?>(null) }
+    val preview = rememberIdlePreview(state, onIntent)
+    val manualCamera = rememberManualCamera(state, onIntent, preview.camera)
     var arCoreInstallRequested by remember { mutableStateOf(false) }
-    val previewSession =
-        remember {
-            PreviewCameraSession(context.applicationContext) { _ ->
-                onIntent(CaptureIntent.PreviewFailed(previewFailureMessage))
-            }
-        }
-    val manualCameraStore = remember { ManualCameraConfigStore(context.applicationContext) }
-    val manualCameraProfile =
-        remember {
-            ManualCameraProfile(context.applicationContext, context.getSystemService(CameraManager::class.java))
-        }
-
-    // 녹화에 쓰일 카메라의 능력은 한 번만 읽는다. ARCore에게 어느 카메라인지 물으려면 Session을
-    // 잠깐 만들어야 해 수백 ms가 걸리므로 배경에서 한다. 읽지 못하면 패널이 사유를 보여 주고,
-    // 수집은 기존 자동 동작 그대로 돈다.
-    LaunchedEffect(state.open) {
-        if (!state.open || state.manualCamera.capabilities != null) return@LaunchedEffect
-        val capabilities = withContext(Dispatchers.IO) { manualCameraProfile.read() } ?: return@LaunchedEffect
-        val config = capabilities.coerce(manualCameraStore.load() ?: capabilities.defaultConfig())
-        onIntent(CaptureIntent.ManualCameraProfiled(capabilities, config))
-        previewSession.apply(config)
-    }
     val coordinator =
         remember {
             CaptureSessionCoordinator(
@@ -161,14 +132,6 @@ internal fun rememberCaptureDriver(
                 },
             )
         }
-
-    // 유휴 Camera2 프리뷰를 (다시) 연다.
-    // prepare()는 이미 열려 있으면 즉시 반환하므로 먼저 닫아야 실제로 다시 연다. Surface가 없으면 열 곳이 없다.
-    fun restoreIdlePreview() {
-        val surface = previewSurface ?: return
-        previewSession.release()
-        previewSession.prepare(surface)
-    }
 
     // ARCore가 있는지 확인하고, 없으면 설치를 요청한다. 이번 요청으로 Session을 시작해도 되면 true다.
     // 시작하지 않을 때는 사유를 알리고 제어 잠금을 푼다.
@@ -210,8 +173,8 @@ internal fun rememberCaptureDriver(
                             val actual = RecordingResolution(width, height)
                             onIntent(CaptureIntent.SelectResolution(actual))
                             onIntent(CaptureIntent.IdlePreviewResized(actual))
-                            previewTexture?.setDefaultBufferSize(width, height)
-                            previewSurface
+                            preview.resizeBuffer(width, height)
+                            preview.surface
                         },
                         // 프리뷰에서 맞춘 값을 그대로 녹화에 건다. Session이 시작된 뒤에는 바뀌지 않는다.
                         manual = state.manualCamera.appliedConfig,
@@ -232,7 +195,7 @@ internal fun rememberCaptureDriver(
                     )
                 }.onFailure { error ->
                     // ARCore가 카메라를 잡지 못했으므로 유휴 프리뷰를 되살린다.
-                    restoreIdlePreview()
+                    preview.restore()
                     onIntent(CaptureIntent.Notify("$arCoreSessionStartFailed: ${error.message.orEmpty()}"))
                     if (error is UnavailableArcoreNotInstalledException) {
                         context.openArCoreStore()
@@ -256,15 +219,6 @@ internal fun rememberCaptureDriver(
                 startSession()
             }
         }
-    val previewPermission =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) restoreIdlePreview() else onIntent(CaptureIntent.PreviewFailed(previewFailureMessage))
-        }
-    LaunchedEffect(state.open) {
-        if (state.open) {
-            previewPermission.launch(Manifest.permission.CAMERA)
-        }
-    }
     // onTracking은 호출 시점 기준으로 경과 시간을 판정하므로, 값이 변하지 않아도 계속 호출되어야
     // 안정화(1초)와 유실(0.5초) 마감이 발화한다. 값 변화 구독만으로는 유실 마감이 오지 않는다.
     LaunchedEffect(state.phase != CaptureWorkspaceControlState.Idle) {
@@ -309,10 +263,6 @@ internal fun rememberCaptureDriver(
         }
         onIntent(CaptureIntent.Interrupted)
         coordinator.release()
-    }
-    // 백그라운드 전환으로 카메라를 놓고 돌아온 경우 TextureView는 살아 있지만 프레임이 끊긴 상태다.
-    LifecycleEventEffect(Lifecycle.Event.ON_START) {
-        if (state.open && state.phase == CaptureWorkspaceControlState.Idle) restoreIdlePreview()
     }
 
     fun finalizeCapture() {
@@ -370,38 +320,24 @@ internal fun rememberCaptureDriver(
                 // 의도는 그 경로에서만 여는 것이지만 `state`는 마감을 시작한 시점의 값이라 늘 open이다.
                 // 상세로 넘어가는 경로에서도 Surface가 아직 남아 있어 잠깐 열렸다가, 작업 공간을 벗어날 때
                 // 닫힌다.
-                if (state.open) restoreIdlePreview()
+                if (state.open) preview.restore()
             }
         }
-    }
-
-    // 촬영 조건을 바꾼다. 상태에 올리고, 곧바로 프리뷰에 걸고, 다음 실행을 위해 기억한다.
-    fun applyManualCamera(config: ManualCameraConfig) {
-        onIntent(CaptureIntent.EditManualCamera(config))
-        previewSession.apply(config)
-        manualCameraStore.save(config)
     }
 
     // 매 composition 새로 만든다. 콜백이 remember에 갇히면 옛 state를 보게 된다.
     return CaptureDriver(
         snackbarHostState = snackbarHostState,
-        onSurfaceAvailable = { surface, texture ->
-            previewSurface = surface
-            previewTexture = texture
-            previewSession.prepare(surface)
-        },
+        onSurfaceAvailable = { surface, texture -> preview.attach(surface, texture) },
         onSurfaceDestroyed = {
-            previewSession.release()
-            previewSurface?.release()
-            previewSurface = null
-            previewTexture = null
+            preview.detach()
             onIntent(CaptureIntent.PreviewReleased)
         },
         play = play@{
             if (!state.policy.canPlay) return@play
             if (state.phase == CaptureWorkspaceControlState.Idle) {
                 onIntent(CaptureIntent.SessionRequested)
-                previewSession.release()
+                preview.release()
                 cameraPermission.launch(Manifest.permission.CAMERA)
             } else {
                 // Episode 시작은 Coordinator가 Tracking 안정화 여부를 확인한 뒤에만 허용한다.
@@ -439,34 +375,14 @@ internal fun rememberCaptureDriver(
             // 정하므로, 버퍼 크기만 바꾸면 이미 열린 session에는 반영되지 않는다.
             if (state.idlePreviewSize != chosen) {
                 onIntent(CaptureIntent.IdlePreviewResized(chosen))
-                previewTexture?.setDefaultBufferSize(chosen.width, chosen.height)
-                restoreIdlePreview()
+                preview.resizeBuffer(chosen.width, chosen.height)
+                preview.restore()
             }
         },
-        releaseIdlePreview = previewSession::release,
-        // 값이 바뀌면 곧바로 프리뷰에 건다. 초점을 화면으로 보고 고르는 것이 이 기능의 목적이다.
-        // 기억까지 여기서 하는 것은, 다음에 앱을 켰을 때도 같은 조건으로 찍어야 하기 때문이다.
-        editManualCamera = { requested ->
-            val coerced = state.manualCamera.capabilities?.coerce(requested) ?: requested
-            applyManualCamera(coerced)
-        },
-        fixWhiteBalance = fix@{
-            val current = state.manualCamera.config ?: return@fix
-            // 프리뷰가 아직 수렴시키지 못했으면 붙잡을 값이 없다. 중립값으로 채우면 색이 틀어진 채
-            // 고정돼, 고정하지 않은 것보다 나쁘다.
-            val converged =
-                previewSession.convergedWhiteBalance ?: run {
-                    onIntent(CaptureIntent.Notify(whiteBalancePendingMessage))
-                    return@fix
-                }
-            val fixed = current.copy(whiteBalance = converged)
-            applyManualCamera(fixed)
-        },
-        releaseWhiteBalance = release@{
-            val current = state.manualCamera.config ?: return@release
-            val released = current.copy(whiteBalance = null)
-            applyManualCamera(released)
-        },
+        releaseIdlePreview = preview::release,
+        editManualCamera = manualCamera.edit,
+        fixWhiteBalance = manualCamera.fixWhiteBalance,
+        releaseWhiteBalance = manualCamera.releaseWhiteBalance,
     )
 }
 
