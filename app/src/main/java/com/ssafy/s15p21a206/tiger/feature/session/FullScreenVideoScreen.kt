@@ -2,6 +2,7 @@ package com.ssafy.s15p21a206.tiger.feature.session
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.CircleShape
@@ -22,6 +23,12 @@ import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.android.LockLandscapeWhilePlaying
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 
+/**
+ * 전체화면 재생. 상세 화면과 같은 재생기([sharedPlayer])를 써서 재생 위치가 이어진다.
+ *
+ * 위쪽 컨트롤(뒤로 가기·가로 고정)은 재생기 컨트롤과 함께 보였다 숨는다. 재생할 영상이 없으면 재생기
+ * 컨트롤이 뜨지 않으므로, 뒤로 가기가 사라지지 않게 처음부터 보이게 둔다.
+ */
 @Composable
 @Suppress("FunctionName")
 internal fun FullScreenVideoScreen(
@@ -31,7 +38,6 @@ internal fun FullScreenVideoScreen(
 ) {
     val videoFile = bundlePath?.let(::playableMainVideo)
     var landscapeLocked by remember { mutableStateOf(false) }
-    // 재생할 영상이 없으면 컨트롤이 뜨지 않으므로, 뒤로 가기가 사라지지 않게 처음부터 보이게 둔다.
     var controlsVisible by remember { mutableStateOf(true) }
     LockLandscapeWhilePlaying(landscapeLocked)
     Box(Modifier.fillMaxSize().background(Color.Black)) {
@@ -51,26 +57,44 @@ internal fun FullScreenVideoScreen(
             )
         }
         if (controlsVisible) {
-            // 검은 배경은 화면 끝까지 채우되 컨트롤만 시스템 바를 피한다. 가로로 눕히면 컷아웃이
-            // 좌우로 오므로 상단 여백만으로는 모자란다.
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.align(Alignment.TopStart).safeDrawingPadding(),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_navigation_back),
-                    contentDescription = stringResource(R.string.navigation_back),
-                    tint = Color.White,
-                )
-            }
-            if (videoFile != null) {
-                LandscapeLockButton(
-                    landscapeLocked = landscapeLocked,
-                    onToggle = { landscapeLocked = !landscapeLocked },
-                    modifier = Modifier.align(Alignment.TopEnd).safeDrawingPadding(),
-                )
-            }
+            FullScreenTopControls(
+                playable = videoFile != null,
+                landscapeLocked = landscapeLocked,
+                onToggleLandscape = { landscapeLocked = !landscapeLocked },
+                onBack = onBack,
+            )
         }
+    }
+}
+
+/**
+ * 뒤로 가기와 가로 고정. 검은 배경은 화면 끝까지 채우되 컨트롤만 시스템 바를 피한다. 가로로 눕히면
+ * 컷아웃이 좌우로 오므로 상단 여백만으로는 모자라 `safeDrawingPadding`을 쓴다.
+ */
+@Composable
+@Suppress("FunctionName")
+private fun BoxScope.FullScreenTopControls(
+    playable: Boolean,
+    landscapeLocked: Boolean,
+    onToggleLandscape: () -> Unit,
+    onBack: () -> Unit,
+) {
+    IconButton(
+        onClick = onBack,
+        modifier = Modifier.align(Alignment.TopStart).safeDrawingPadding(),
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_navigation_back),
+            contentDescription = stringResource(R.string.navigation_back),
+            tint = Color.White,
+        )
+    }
+    if (playable) {
+        LandscapeLockButton(
+            landscapeLocked = landscapeLocked,
+            onToggle = onToggleLandscape,
+            modifier = Modifier.align(Alignment.TopEnd).safeDrawingPadding(),
+        )
     }
 }
 
@@ -84,6 +108,8 @@ private fun LandscapeLockButton(
     onToggle: () -> Unit,
     modifier: Modifier,
 ) {
+    val description =
+        stringResource(if (landscapeLocked) R.string.session_video_unlock_landscape else R.string.session_video_lock_landscape)
     IconButton(
         onClick = onToggle,
         modifier =
@@ -94,14 +120,7 @@ private fun LandscapeLockButton(
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_screen_rotation),
-            contentDescription =
-                stringResource(
-                    if (landscapeLocked) {
-                        R.string.session_video_unlock_landscape
-                    } else {
-                        R.string.session_video_lock_landscape
-                    },
-                ),
+            contentDescription = description,
             tint = Color.White,
         )
     }

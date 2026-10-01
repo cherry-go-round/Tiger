@@ -22,8 +22,11 @@ import androidx.media3.ui.PlayerView
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import java.io.File
 
-// PlayerView는 Media3의 unstable API다. 앱이 직접 쓰는 유일한 지점이라 여기서만 opt-in한다.
-@androidx.annotation.OptIn(UnstableApi::class)
+/**
+ * 영상 재생기 화면. 전체화면 버튼과 그 콜백만 Media3가 주고, 화면 전환은 앱이 한다.
+ *
+ * 리스너는 [PlayerView]를 만들 때 한 번만 걸므로, 콜백은 최신 값을 따라가게 감싸 넘긴다.
+ */
 @Composable
 @Suppress("FunctionName")
 internal fun VideoPlayer(
@@ -33,30 +36,47 @@ internal fun VideoPlayer(
     modifier: Modifier,
     onControlsVisibilityChanged: (Boolean) -> Unit = {},
 ) {
-    // listener를 factory에서 한 번만 걸기 때문에, 콜백은 최신 값을 따라가게 감싼다.
     val currentFullscreenClick by rememberUpdatedState(onFullscreenClick)
     val currentControlsVisibilityChanged by rememberUpdatedState(onControlsVisibilityChanged)
     AndroidView(
         factory = { viewContext ->
-            PlayerView(viewContext).apply {
-                // 버튼 상태를 먼저 맞추고 listener를 건다. `setFullscreenButtonState`는 상태만
-                // 바꾸지 않고 listener까지 호출하므로, 순서를 바꾸면 전체화면에 들어가자마자
-                // 콜백이 불려 곧바로 상세 화면으로 되돌아간다.
-                setFullscreenButtonState(fullscreen)
-                // 전체화면 버튼과 콜백만 Media3가 주고, 화면 전환은 앱이 한다.
-                setFullscreenButtonClickListener { currentFullscreenClick() }
-                setControllerVisibilityListener(
-                    PlayerView.ControllerVisibilityListener { visibility ->
-                        currentControlsVisibilityChanged(visibility == View.VISIBLE)
-                    },
-                )
-            }
+            createPlayerView(
+                context = viewContext,
+                fullscreen = fullscreen,
+                onFullscreenClick = { currentFullscreenClick() },
+                onControlsVisibilityChanged = { currentControlsVisibilityChanged(it) },
+            )
         },
         update = { view -> view.player = player },
         onRelease = { view -> view.player = null },
         modifier = modifier,
     )
 }
+
+/**
+ * 재생기 뷰를 만들고 전체화면 버튼과 컨트롤 표시 리스너를 건다.
+ *
+ * 버튼 상태를 먼저 맞추고 리스너를 건다. `setFullscreenButtonState`는 상태만 바꾸지 않고 리스너까지
+ * 부르므로, 순서를 바꾸면 전체화면에 들어가자마자 콜백이 불려 곧바로 상세 화면으로 되돌아간다.
+ *
+ * [PlayerView]는 Media3의 unstable API다. 앱이 직접 쓰는 유일한 지점이라 여기서만 opt-in한다.
+ */
+@androidx.annotation.OptIn(UnstableApi::class)
+private fun createPlayerView(
+    context: Context,
+    fullscreen: Boolean,
+    onFullscreenClick: () -> Unit,
+    onControlsVisibilityChanged: (Boolean) -> Unit,
+): PlayerView =
+    PlayerView(context).apply {
+        setFullscreenButtonState(fullscreen)
+        setFullscreenButtonClickListener { onFullscreenClick() }
+        setControllerVisibilityListener(
+            PlayerView.ControllerVisibilityListener { visibility ->
+                onControlsVisibilityChanged(visibility == View.VISIBLE)
+            },
+        )
+    }
 
 /**
  * 영상의 가로세로 비율을 따라간다. 회전 metadata가 적용된 크기를 쓰므로, `video_rotation_degrees`가
