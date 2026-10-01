@@ -1,5 +1,6 @@
 package com.ssafy.s15p21a206.tiger.feature.session
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.ssafy.s15p21a206.tiger.R
@@ -41,6 +42,8 @@ internal enum class SessionDeleteAction {
  * 되돌릴 수 없으므로 한 번 묻는다. 서버에 DELETE API가 없어 이미 업로드된 데이터는 어느 쪽이든
  * 서버에 남는다. 두 경우를 같은 문구로 덮으면 아직 올리지 않은 세션을 삭제할 때 사용자가 무엇을
  * 잃는지 모른 채 확인을 누른다.
+ *
+ * 세션 종료 확인과 같은 판을 쓴다. 같은 무게의 결정이 화면마다 다르게 생길 이유가 없다.
  */
 @Composable
 @Suppress("FunctionName")
@@ -49,18 +52,20 @@ internal fun SessionDeleteConfirmation(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    // 세션 종료 확인과 같은 판을 쓴다. 같은 무게의 결정이 화면마다 다르게 생길 이유가 없다.
     DestructiveConfirmationDialog(
         title = stringResource(R.string.session_delete_title),
-        message =
-            stringResource(
-                when (action) {
-                    SessionDeleteAction.DeleteLocalCopy -> R.string.session_delete_message_local_copy
-                    SessionDeleteAction.DeleteOnlyCopy -> R.string.session_delete_message_only_copy
-                },
-            ),
+        message = stringResource(action.messageRes),
         confirmLabel = stringResource(R.string.action_delete),
         onConfirm = onConfirm,
         onDismiss = onDismiss,
     )
 }
+
+/** 확인 판의 본문. 무엇을 잃는지가 경우마다 다르다. */
+@get:StringRes
+private val SessionDeleteAction.messageRes: Int
+    get() =
+        when (this) {
+            SessionDeleteAction.DeleteLocalCopy -> R.string.session_delete_message_local_copy
+            SessionDeleteAction.DeleteOnlyCopy -> R.string.session_delete_message_only_copy
+        }

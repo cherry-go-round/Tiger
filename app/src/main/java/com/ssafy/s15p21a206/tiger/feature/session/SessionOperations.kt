@@ -96,7 +96,6 @@ internal class SessionOperations(
                         return@launch
                     }
             when (result) {
-                // 디렉터리가 남았더라도 목록과 색인에서는 사라졌다. 남은 것은 다음 실행이 회수한다.
                 SessionDeleteResult.DELETED, SessionDeleteResult.BUNDLE_RETAINED -> {
                     deleteFailure = null
                     onDeleted()

@@ -3,6 +3,7 @@ package com.ssafy.s15p21a206.tiger.feature.session
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 
+/** 상세 화면이 [SessionSummary]에서 끌어내는 값. 수집 길이와 지금 걸 수 있는 전송·삭제 동작이다. */
 internal data class SessionDetailPresentation(
     val durationSeconds: Long,
     val uploadAction: UploadAction?,
