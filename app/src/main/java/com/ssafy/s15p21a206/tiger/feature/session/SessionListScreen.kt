@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -37,6 +38,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
@@ -67,43 +69,17 @@ fun SessionListScreen(
     // 헤더 아래 64dp에서 시작한다. 홈만 50dp 위에 붙어 화면 위쪽에 눌린 것으로 보였다.
     val sectionTopPadding = NavigationHeaderHeight + LIST_CONTENT_TOP_PADDING
     Box(modifier = modifier.fillMaxSize()) {
-        if (taskGroups.isEmpty()) {
-            // 비어 있으면 목록이 아니다. 이름표는 제자리에 두고 안내만 남은 공간 가운데로 보낸다.
-            // 목록 항목처럼 왼쪽 위에 붙여 두면 채워질 자리를 기다리는 빈 행으로 읽힌다.
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(start = 16.dp, end = 16.dp, top = sectionTopPadding, bottom = FAB_CLEARANCE),
-            ) {
-                ListSectionHeader(
-                    modifier = Modifier.padding(bottom = SECTION_HEADER_BOTTOM_PADDING),
-                    title = stringResource(R.string.session_list_title),
-                    // 비어 있을 때는 아래 안내가 같은 말을 하므로 세지 않는다.
-                    supporting = null,
-                )
-                EmptyListMessage(stringResource(R.string.session_list_empty), Modifier.weight(1f))
-            }
-        } else {
-            // 이름표를 목록 바깥에 두면 홀로 뜬 머리띠가 되고, FAB가 아래로 내려간 뒤로는 같은 줄에
-            // 짝이 될 것도 없다. 목록의 첫 항목으로 넣어 카드와 같은 기둥 안에서 함께 흐르게 한다.
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                // 아래 여백은 FAB가 마지막 카드를 가리지 않을 만큼 둔다.
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = sectionTopPadding, bottom = FAB_CLEARANCE),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                item(key = HOME_SECTION_KEY) {
-                    ListSectionHeader(
-                        modifier = Modifier.padding(bottom = SECTION_HEADER_BOTTOM_PADDING),
-                        title = stringResource(R.string.session_list_title),
-                        supporting = stringResource(R.string.task_list_count, taskGroups.size),
-                    )
-                }
-                items(taskGroups.entries.toList(), key = { it.key }) { (taskName, taskSessions) ->
-                    val label = taskName.ifBlank { unknownTask }
-                    TaskSummaryItem(label, taskSessions.size) { onOpenTask(taskName) }
-                }
+        SectionedList(
+            title = stringResource(R.string.session_list_title),
+            count = stringResource(R.string.task_list_count, taskGroups.size),
+            emptyMessage = stringResource(R.string.session_list_empty),
+            sectionKey = HOME_SECTION_KEY,
+            topPadding = sectionTopPadding,
+            isEmpty = taskGroups.isEmpty(),
+        ) {
+            items(taskGroups.entries.toList(), key = { it.key }) { (taskName, taskSessions) ->
+                val label = taskName.ifBlank { unknownTask }
+                TaskSummaryItem(label, taskSessions.size) { onOpenTask(taskName) }
             }
         }
         NewSessionFab(
@@ -162,27 +138,6 @@ private fun NewSessionFab(
     )
 }
 
-/**
- * 목록이 비었을 때 남은 공간 가운데에 놓는 안내다.
- *
- * 목록 항목처럼 왼쪽 위에 붙여 두면 곧 채워질 자리를 기다리는 빈 행으로 읽힌다. 화면에 혼자 있는
- * 문장이므로 카드 안 메타 정보와 같은 크기일 이유도 없다.
- */
-@Composable
-@Suppress("FunctionName")
-private fun EmptyListMessage(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Text(
-            text = text,
-            style = TigerText.bodyMuted,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
 @Composable
 @Suppress("FunctionName")
 fun TaskSessionListScreen(
@@ -202,40 +157,18 @@ fun TaskSessionListScreen(
             NavigationHeader(title = "", onBack = onBack)
             // 마지막 세션을 지우면 이 화면이 빈 채로 남는다. 삭제하기 전에는 세션이 있는 Task만
             // 홈에 나타나 이 상태에 닿을 수 없었다. 홈과 같은 짜임으로 안내를 가운데에 둔다.
-            if (sessions.isEmpty()) {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(start = 16.dp, end = 16.dp, top = LIST_CONTENT_TOP_PADDING, bottom = FAB_CLEARANCE),
-                ) {
-                    ListSectionHeader(
-                        modifier = Modifier.padding(bottom = SECTION_HEADER_BOTTOM_PADDING),
-                        title = title,
-                        supporting = null,
-                    )
-                    EmptyListMessage(stringResource(R.string.task_session_list_empty), Modifier.weight(1f))
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    // 위 여백은 헤더 아래에서부터 재므로 홈이 헤더 높이에 더해 쓰는 것과 같은 값이다.
-                    // 두 화면의 이름표가 같은 높이에서 시작한다.
-                    //
-                    // 아래 여백은 홈과 같은 이유로 FAB가 마지막 카드를 가리지 않을 만큼 둔다.
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = LIST_CONTENT_TOP_PADDING, bottom = FAB_CLEARANCE),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    item(key = TASK_SESSIONS_SECTION_KEY) {
-                        ListSectionHeader(
-                            modifier = Modifier.padding(bottom = SECTION_HEADER_BOTTOM_PADDING),
-                            title = title,
-                            supporting = stringResource(R.string.session_list_count, sessions.size),
-                        )
-                    }
-                    items(sessions, key = SessionSummary::sessionId) { summary ->
-                        SessionSummaryItem(summary, onOpenSession, onDeleteSession)
-                    }
+            SectionedList(
+                title = title,
+                count = stringResource(R.string.session_list_count, sessions.size),
+                emptyMessage = stringResource(R.string.task_session_list_empty),
+                sectionKey = TASK_SESSIONS_SECTION_KEY,
+                // 위 여백은 헤더 아래에서부터 재므로 홈이 헤더 높이에 더해 쓰는 것과 같은 값이다.
+                // 두 화면의 이름표가 같은 높이에서 시작한다.
+                topPadding = LIST_CONTENT_TOP_PADDING,
+                isEmpty = sessions.isEmpty(),
+            ) {
+                items(sessions, key = SessionSummary::sessionId) { summary ->
+                    SessionSummaryItem(summary, onOpenSession, onDeleteSession)
                 }
             }
         }
@@ -244,6 +177,83 @@ fun TaskSessionListScreen(
         NewSessionFab(
             onClick = onStartCapture,
             modifier = Modifier.align(Alignment.BottomEnd),
+        )
+    }
+}
+
+/**
+ * 이름표를 첫 항목으로 두고 그 아래로 카드를 쌓는 목록. 홈과 Task의 Session 목록이 같은 짜임을 쓴다.
+ *
+ * 이름표를 목록 바깥에 두면 홀로 뜬 머리띠가 되고, FAB가 아래로 내려간 뒤로는 같은 줄에 짝이 될
+ * 것도 없다. 목록의 첫 항목으로 넣어 카드와 같은 기둥 안에서 함께 흐르게 한다. 아래 여백은 FAB가
+ * 마지막 카드를 가리지 않을 만큼 둔다.
+ *
+ * 비어 있으면 목록이 아니다. 이름표는 제자리에 두고 안내만 남은 공간 가운데로 보낸다. 목록 항목처럼
+ * 왼쪽 위에 붙여 두면 채워질 자리를 기다리는 빈 행으로 읽힌다. 그때는 아래 안내가 같은 말을 하므로
+ * 이름표 아래에 개수([count])를 달지 않는다.
+ *
+ * @param topPadding 이름표 위 여백. 헤더가 없는 홈은 헤더 높이만큼 더 비워 두 화면의 이름표 높이를 맞춘다.
+ */
+@Composable
+@Suppress("FunctionName")
+private fun SectionedList(
+    title: String,
+    count: String,
+    emptyMessage: String,
+    sectionKey: String,
+    topPadding: Dp,
+    isEmpty: Boolean,
+    content: LazyListScope.() -> Unit,
+) {
+    if (isEmpty) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(start = 16.dp, end = 16.dp, top = topPadding, bottom = FAB_CLEARANCE),
+        ) {
+            ListSectionHeader(
+                modifier = Modifier.padding(bottom = SECTION_HEADER_BOTTOM_PADDING),
+                title = title,
+                supporting = null,
+            )
+            EmptyListMessage(emptyMessage, Modifier.weight(1f))
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = topPadding, bottom = FAB_CLEARANCE),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            item(key = sectionKey) {
+                ListSectionHeader(
+                    modifier = Modifier.padding(bottom = SECTION_HEADER_BOTTOM_PADDING),
+                    title = title,
+                    supporting = count,
+                )
+            }
+            content()
+        }
+    }
+}
+
+/**
+ * 목록이 비었을 때 남은 공간 가운데에 놓는 안내다.
+ *
+ * 목록 항목처럼 왼쪽 위에 붙여 두면 곧 채워질 자리를 기다리는 빈 행으로 읽힌다. 화면에 혼자 있는
+ * 문장이므로 카드 안 메타 정보와 같은 크기일 이유도 없다.
+ */
+@Composable
+@Suppress("FunctionName")
+private fun EmptyListMessage(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Text(
+            text = text,
+            style = TigerText.bodyMuted,
+            textAlign = TextAlign.Center,
         )
     }
 }
