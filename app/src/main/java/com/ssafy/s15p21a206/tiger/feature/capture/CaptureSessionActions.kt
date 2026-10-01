@@ -24,6 +24,7 @@ import com.ssafy.s15p21a206.tiger.core.capture.PreviewSurfaceProvider
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.capture.TrackingState
 import com.ssafy.s15p21a206.tiger.core.model.session.CaptureSession
+import com.ssafy.s15p21a206.tiger.core.model.session.EpisodeMarker
 import com.ssafy.s15p21a206.tiger.core.model.session.EpisodeState
 import com.ssafy.s15p21a206.tiger.core.model.session.FinalizeResult
 import com.ssafy.s15p21a206.tiger.core.model.session.RecordingState
@@ -58,18 +59,7 @@ internal class CaptureSessionActions(
     private val coordinator =
         CaptureSessionCoordinator(
             clock = MonotonicClock(SystemClock::elapsedRealtimeNanos),
-            onEpisodeClosed = { marker ->
-                // 사용자 종료와 Tracking 유실 자동 마감이 같은 경로로 기록된다.
-                if (marker.outcome == EpisodeState.INVALID_TRACKING) {
-                    notify(R.string.capture_episode_invalid_tracking)
-                }
-                scope.launch {
-                    runCatching {
-                        repository.save(marker)
-                        runtime.appendEpisode(marker)
-                    }.onFailure { notify(R.string.capture_operation_failed) }
-                }
-            },
+            onEpisodeClosed = ::recordEpisode,
         )
 
     private var arCoreInstallRequested = false
@@ -85,11 +75,15 @@ internal class CaptureSessionActions(
             preview.release()
             requestCameraPermission()
         } else {
-            // Episode 시작은 Coordinator가 Tracking 안정화 여부를 확인한 뒤에만 허용한다.
-            runCatching { coordinator.startEpisode(state.task, state.objectName) }
-                .onSuccess { onIntent(CaptureIntent.EpisodeStarted) }
-                .onFailure { notify(R.string.capture_tracking_not_ready) }
+            startEpisode(state)
         }
+    }
+
+    /** Episode를 시작한다. Coordinator가 Tracking이 안정화됐는지 확인하고, 아니면 거절한다. */
+    private fun startEpisode(state: CaptureUiState) {
+        runCatching { coordinator.startEpisode(state.task, state.objectName) }
+            .onSuccess { onIntent(CaptureIntent.EpisodeStarted) }
+            .onFailure { notify(R.string.capture_tracking_not_ready) }
     }
 
     fun onCameraPermissionResult(
@@ -193,11 +187,14 @@ internal class CaptureSessionActions(
         repository.save(state.sessionRow(bundle, RecordingState.INITIALIZING, startNs = startedAtNs))
     }
 
-    /** Tracking 표본 하나를 Coordinator에 넣고 화면 상태를 맞춘다. 작업 공간이 주기적으로 부른다. */
+    /**
+     * Tracking 표본 하나를 Coordinator에 넣고 화면 상태를 맞춘다. 작업 공간이 주기적으로 부른다.
+     *
+     * Tracking이 끊겨 Episode가 자동으로 마감되는 일은 사용자 조작 없이 일어나므로, 단계도 여기서 맞춘다.
+     */
     fun sampleTracking() {
         val sample = runtime.tracking.value
         coordinator.onTracking(sample.isTracking, sample.observedAtNs.takeIf { it > 0L })
-        // Tracking 유실 자동 마감은 사용자 조작 없이 일어나므로 화면 상태를 여기서 맞춘다.
         onIntent(
             CaptureIntent.TrackingSampled(
                 ready = coordinator.trackingState == TrackingState.READY,
@@ -206,12 +203,28 @@ internal class CaptureSessionActions(
         )
     }
 
+    /** Episode를 끝낸다. 기록은 Coordinator가 닫힌 Episode를 넘기는 [recordEpisode]가 한다. */
     fun pause(state: CaptureUiState) {
         if (!state.policy.canPause) return
-        // 기록은 coordinator의 onEpisodeClosed가 담당한다.
         runCatching { coordinator.endEpisode() }
             .onSuccess { onIntent(CaptureIntent.EpisodeEnded) }
             .onFailure { notify(R.string.capture_operation_failed) }
+    }
+
+    /**
+     * 닫힌 Episode를 기록한다. 사용자가 끝낸 것과 Tracking 유실로 자동 마감된 것이 모두 여기로 온다.
+     * 자동 마감은 화면 조작 없이 일어나므로 알린다.
+     */
+    private fun recordEpisode(marker: EpisodeMarker) {
+        if (marker.outcome == EpisodeState.INVALID_TRACKING) {
+            notify(R.string.capture_episode_invalid_tracking)
+        }
+        scope.launch {
+            runCatching {
+                repository.save(marker)
+                runtime.appendEpisode(marker)
+            }.onFailure { notify(R.string.capture_operation_failed) }
+        }
     }
 
     /** 상태에 따라 무시하거나, 확인을 묻거나, 그냥 닫는다. */
@@ -219,7 +232,6 @@ internal class CaptureSessionActions(
         when (state.policy.exitAction) {
             CaptureExitAction.Ignore -> Unit
             CaptureExitAction.Confirm -> onIntent(CaptureIntent.StopRequested)
-            // 녹화 전에는 Session을 만들지 않고 작업 공간만 닫는다. 아래에 목록이 그대로 남아 있다.
             CaptureExitAction.Leave -> onIntent(CaptureIntent.Close)
         }
     }
