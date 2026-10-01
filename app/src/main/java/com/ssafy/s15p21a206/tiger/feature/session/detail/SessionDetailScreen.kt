@@ -75,9 +75,51 @@ internal fun SessionDetailScreen(
     sharedPlayer: SharedVideoPlayer,
     onOpenFullscreenVideo: () -> Unit,
 ) {
+    if (summary == null) {
+        MissingSessionDetail(onBack)
+        return
+    }
+    SessionDetail(
+        summary = summary,
+        onBack = onBack,
+        onUpload = onUpload,
+        onDelete = onDelete,
+        deleteFailureReason = deleteFailureReason,
+        uploadFailureReason = uploadFailureReason,
+        sharedPlayer = sharedPlayer,
+        onOpenFullscreenVideo = onOpenFullscreenVideo,
+    )
+}
+
+/** 목록에서 사라진 세션을 연 경우. 보일 것도 할 일도 없어 헤더에는 뒤로 가기만 둔다. */
+@Composable
+@Suppress("FunctionName")
+private fun MissingSessionDetail(onBack: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        NavigationHeader(title = "", onBack = onBack)
+        Text(
+            text = stringResource(R.string.session_detail_unavailable),
+            style = TigerText.bodyMuted,
+            modifier = Modifier.padding(horizontal = TigerSpacing.screenEdge),
+        )
+    }
+}
+
+@Composable
+@Suppress("FunctionName")
+private fun SessionDetail(
+    summary: SessionSummary,
+    onBack: () -> Unit,
+    onUpload: () -> Unit,
+    onDelete: () -> Unit,
+    deleteFailureReason: String?,
+    uploadFailureReason: String?,
+    sharedPlayer: SharedVideoPlayer,
+    onOpenFullscreenVideo: () -> Unit,
+) {
     var showSessionInfo by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<SessionDeleteAction?>(null) }
-    val presentation = summary?.let(SessionDetailPresentation::from)
+    val presentation = SessionDetailPresentation.from(summary)
     Column(
         modifier =
             Modifier
@@ -85,26 +127,16 @@ internal fun SessionDetailScreen(
                 .verticalScroll(rememberScrollState()),
     ) {
         NavigationHeader(title = "", onBack = onBack) {
-            if (presentation != null) {
-                SessionDetailMenu(
-                    deleteAction = presentation.deleteAction,
-                    onOpenSessionInfo = { showSessionInfo = true },
-                    onRequestDelete = { pendingDelete = it },
-                )
-            }
-        }
-        if (presentation == null) {
-            Text(
-                text = stringResource(R.string.session_detail_unavailable),
-                style = TigerText.bodyMuted,
-                modifier = Modifier.padding(horizontal = TigerSpacing.screenEdge),
+            SessionDetailMenu(
+                deleteAction = presentation.deleteAction,
+                onOpenSessionInfo = { showSessionInfo = true },
+                onRequestDelete = { pendingDelete = it },
             )
-        } else {
-            SessionVideoPreview(summary.bundlePath, sharedPlayer, onOpenFullscreenVideo)
-            SessionDetailBody(summary, presentation, deleteFailureReason, uploadFailureReason, onUpload)
         }
+        SessionVideoPreview(summary.bundlePath, sharedPlayer, onOpenFullscreenVideo)
+        SessionDetailBody(summary, presentation, deleteFailureReason, uploadFailureReason, onUpload)
     }
-    if (showSessionInfo && presentation != null) {
+    if (showSessionInfo) {
         SessionInfoSheet(
             summary = summary,
             durationSeconds = presentation.durationSeconds,
