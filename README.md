@@ -51,9 +51,9 @@
 
 <table align="center">
   <tr>
-    <td align="center" width="33%"><h3>68개</h3>이 앱으로 수집한 시연</td>
-    <td align="center" width="33%"><h3>94개</h3>학습에 쓸 수 있는 Episode</td>
-    <td align="center" width="33%"><h3>21,532개</h3>로봇 학습 데이터셋의 학습 샘플</td>
+    <td align="center" width="250"><h3>68개</h3>이 앱으로 수집한 시연</td>
+    <td align="center" width="250"><h3>94개</h3>학습에 쓸 수 있는 Episode</td>
+    <td align="center" width="250"><h3>21,532개</h3>로봇 학습 데이터셋의 학습 샘플</td>
   </tr>
 </table>
 
@@ -169,9 +169,9 @@ flowchart LR
 
 <table align="center">
   <tr>
-    <td align="center" width="33%"><h3>작업 177개</h3>기능 3개를 Spec Kit으로<br>명세 → 계획 → 작업으로 분해</td>
-    <td align="center" width="33%"><h3>약 80%</h3>전체 커밋 중<br>AI 에이전트와 함께 작성</td>
-    <td align="center" width="33%"><h3>테스트 190개</h3>단위 테스트 148개<br>계측 테스트 42개</td>
+    <td align="center" width="250"><h3>작업 177개</h3>기능 3개를 Spec Kit으로<br>명세 → 계획 → 작업으로 분해</td>
+    <td align="center" width="250"><h3>약 80%</h3>전체 커밋 중<br>AI 에이전트와 함께 작성</td>
+    <td align="center" width="250"><h3>테스트 190개</h3>단위 테스트 148개<br>계측 테스트 42개</td>
   </tr>
 </table>
 
