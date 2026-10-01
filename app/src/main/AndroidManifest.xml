@@ -19,14 +19,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Tiger">
         <meta-data android:name="com.google.ar.core" android:value="required" />
+        <!--
+            앱은 세로로 묶는다(specs/002-capture-control-ux/contracts/capture-control-ui.md). 기기를 눕혀도
+            화면이 돌지 않고, 가로가 되는 길은 수집 작업 공간과 전체화면의 회전 버튼뿐이다. 둘 다 코드에서
+            방향을 바꾼다(core/android/OrientationLock.kt). Android 16부터 큰 화면(sw600dp 이상)에서는 이
+            고정이 무시되지만 수집 기기는 폰이라 해당하지 않는다.
+        -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:exported="true"
-            android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Tiger"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
