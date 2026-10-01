@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
