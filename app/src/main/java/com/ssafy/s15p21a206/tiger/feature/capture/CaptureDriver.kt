@@ -133,6 +133,24 @@ internal fun rememberCaptureDriver(
             )
         }
 
+    // Session 전: 녹화할 해상도를 고른다.
+
+    // 다른 촬영 조건처럼 고르는 즉시 기억하고 프리뷰에 건다. Session이 시작되면 상태 전이가 막는다.
+    fun selectResolution(chosen: RecordingResolution) {
+        if (state.phase != CaptureWorkspaceControlState.Idle || state.busy) return
+        onIntent(CaptureIntent.SelectResolution(chosen))
+        resolutionStore.save(chosen)
+        // 유휴 프리뷰도 고른 해상도로 다시 연다. Camera2는 session을 만들 때 stream 크기를
+        // 정하므로, 버퍼 크기만 바꾸면 이미 열린 session에는 반영되지 않는다.
+        if (state.idlePreviewSize != chosen) {
+            onIntent(CaptureIntent.IdlePreviewResized(chosen))
+            preview.resizeBuffer(chosen.width, chosen.height)
+            preview.restore()
+        }
+    }
+
+    // 시작: 카메라 권한 → ARCore 확인 → Session 시작.
+
     // ARCore가 있는지 확인하고, 없으면 설치를 요청한다. 이번 요청으로 Session을 시작해도 되면 true다.
     // 시작하지 않을 때는 사유를 알리고 제어 잠금을 푼다.
     fun arCoreReady(): Boolean {
@@ -219,6 +237,9 @@ internal fun rememberCaptureDriver(
                 startSession()
             }
         }
+
+    // 진행: tracking 폴링과 Episode 시작·끝. 재생은 Idle이면 Session을, Ready면 Episode를 시작한다.
+
     // onTracking은 호출 시점 기준으로 경과 시간을 판정하므로, 값이 변하지 않아도 계속 호출되어야
     // 안정화(1초)와 유실(0.5초) 마감이 발화한다. 값 변화 구독만으로는 유실 마감이 오지 않는다.
     LaunchedEffect(state.phase != CaptureWorkspaceControlState.Idle) {
@@ -236,6 +257,29 @@ internal fun rememberCaptureDriver(
             delay(TRACKING_TICK)
         }
     }
+
+    fun play() {
+        if (!state.policy.canPlay) return
+        if (state.phase == CaptureWorkspaceControlState.Idle) {
+            onIntent(CaptureIntent.SessionRequested)
+            preview.release()
+            cameraPermission.launch(Manifest.permission.CAMERA)
+        } else {
+            // Episode 시작은 Coordinator가 Tracking 안정화 여부를 확인한 뒤에만 허용한다.
+            runCatching { coordinator.startEpisode(state.task, state.objectName) }
+                .onSuccess { onIntent(CaptureIntent.EpisodeStarted) }
+                .onFailure { onIntent(CaptureIntent.Notify(trackingNotReadyMessage)) }
+        }
+    }
+
+    fun pause() {
+        if (!state.policy.canPause) return
+        // 기록은 coordinator의 onEpisodeClosed가 담당한다.
+        runCatching { coordinator.endEpisode() }
+            .onSuccess { onIntent(CaptureIntent.EpisodeEnded) }
+            .onFailure { onIntent(CaptureIntent.Notify(operationFailureMessage)) }
+    }
+
     LaunchedEffect(state.notice, state.open) {
         if (state.open && state.notice.isNotBlank()) {
             val notice = state.notice
@@ -243,27 +287,8 @@ internal fun rememberCaptureDriver(
             scope.launch { snackbarHostState.showSnackbar(notice) }
         }
     }
-    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
-        if (state.phase == CaptureWorkspaceControlState.Finalizing) return@LifecycleEventEffect
-        val interruptedBundle = state.activeBundle ?: return@LifecycleEventEffect
-        val startedAtNs = state.recordingStartNs
-        captureRuntime.interrupt()
-        scope.launch {
-            repository.save(
-                sessionRow(
-                    interruptedBundle,
-                    state.task,
-                    state.objectName,
-                    RecordingState.INTERRUPTED,
-                    startNs = startedAtNs,
-                    endNs = SystemClock.elapsedRealtimeNanos(),
-                    recordedAtEpochMs = System.currentTimeMillis(),
-                ),
-            )
-        }
-        onIntent(CaptureIntent.Interrupted)
-        coordinator.release()
-    }
+
+    // 끝: 정지를 확인받아 마감하거나, 앱이 밀려나면 중단한다.
 
     fun finalizeCapture() {
         if (!state.policy.canStop) return
@@ -325,6 +350,42 @@ internal fun rememberCaptureDriver(
         }
     }
 
+    fun requestExit() {
+        when (state.policy.exitAction) {
+            CaptureExitAction.Ignore -> Unit
+            CaptureExitAction.Confirm -> onIntent(CaptureIntent.StopRequested)
+            // 녹화 전에는 Session을 만들지 않고 작업 공간만 닫는다. 아래에 목록이 그대로 남아 있다.
+            CaptureExitAction.Leave -> onIntent(CaptureIntent.Close)
+        }
+    }
+
+    fun confirmStop() {
+        onIntent(CaptureIntent.StopDismissed)
+        finalizeCapture()
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        if (state.phase == CaptureWorkspaceControlState.Finalizing) return@LifecycleEventEffect
+        val interruptedBundle = state.activeBundle ?: return@LifecycleEventEffect
+        val startedAtNs = state.recordingStartNs
+        captureRuntime.interrupt()
+        scope.launch {
+            repository.save(
+                sessionRow(
+                    interruptedBundle,
+                    state.task,
+                    state.objectName,
+                    RecordingState.INTERRUPTED,
+                    startNs = startedAtNs,
+                    endNs = SystemClock.elapsedRealtimeNanos(),
+                    recordedAtEpochMs = System.currentTimeMillis(),
+                ),
+            )
+        }
+        onIntent(CaptureIntent.Interrupted)
+        coordinator.release()
+    }
+
     // 매 composition 새로 만든다. 콜백이 remember에 갇히면 옛 state를 보게 된다.
     return CaptureDriver(
         snackbarHostState = snackbarHostState,
@@ -333,52 +394,12 @@ internal fun rememberCaptureDriver(
             preview.detach()
             onIntent(CaptureIntent.PreviewReleased)
         },
-        play = play@{
-            if (!state.policy.canPlay) return@play
-            if (state.phase == CaptureWorkspaceControlState.Idle) {
-                onIntent(CaptureIntent.SessionRequested)
-                preview.release()
-                cameraPermission.launch(Manifest.permission.CAMERA)
-            } else {
-                // Episode 시작은 Coordinator가 Tracking 안정화 여부를 확인한 뒤에만 허용한다.
-                runCatching { coordinator.startEpisode(state.task, state.objectName) }
-                    .onSuccess { onIntent(CaptureIntent.EpisodeStarted) }
-                    .onFailure { onIntent(CaptureIntent.Notify(trackingNotReadyMessage)) }
-            }
-        },
-        pause = pause@{
-            if (!state.policy.canPause) return@pause
-            // 기록은 coordinator의 onEpisodeClosed가 담당한다.
-            runCatching { coordinator.endEpisode() }
-                .onSuccess { onIntent(CaptureIntent.EpisodeEnded) }
-                .onFailure { onIntent(CaptureIntent.Notify(operationFailureMessage)) }
-        },
-        requestExit = {
-            when (state.policy.exitAction) {
-                CaptureExitAction.Ignore -> Unit
-                CaptureExitAction.Confirm -> onIntent(CaptureIntent.StopRequested)
-                // 녹화 전에는 Session을 만들지 않고 작업 공간만 닫는다. 아래에 목록이 그대로 남아 있다.
-                CaptureExitAction.Leave -> onIntent(CaptureIntent.Close)
-            }
-        },
-        confirmStop = {
-            onIntent(CaptureIntent.StopDismissed)
-            finalizeCapture()
-        },
+        play = ::play,
+        pause = ::pause,
+        requestExit = ::requestExit,
+        confirmStop = ::confirmStop,
         confirmMetadata = { onIntent(CaptureIntent.ConfirmMetadata) },
-        // 다른 촬영 조건처럼 고르는 즉시 기억하고 프리뷰에 건다. Session이 시작되면 상태 전이가 막는다.
-        selectResolution = select@{ chosen ->
-            if (state.phase != CaptureWorkspaceControlState.Idle || state.busy) return@select
-            onIntent(CaptureIntent.SelectResolution(chosen))
-            resolutionStore.save(chosen)
-            // 유휴 프리뷰도 고른 해상도로 다시 연다. Camera2는 session을 만들 때 stream 크기를
-            // 정하므로, 버퍼 크기만 바꾸면 이미 열린 session에는 반영되지 않는다.
-            if (state.idlePreviewSize != chosen) {
-                onIntent(CaptureIntent.IdlePreviewResized(chosen))
-                preview.resizeBuffer(chosen.width, chosen.height)
-                preview.restore()
-            }
-        },
+        selectResolution = ::selectResolution,
         releaseIdlePreview = preview::release,
         editManualCamera = manualCamera.edit,
         fixWhiteBalance = manualCamera.fixWhiteBalance,
