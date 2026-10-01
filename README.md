@@ -43,18 +43,17 @@
 
 <br>
 
-## 한눈에 보기
+## 성과
 
 <table>
   <tr>
-    <td align="center" width="25%"><h3>74회 → 0회</h3>10초 동안 카메라 설정이<br>스스로 바뀐 횟수</td>
-    <td align="center" width="25%"><h3>29.97 fps</h3>1,022프레임 평균 간격 기준<br>셔터를 바꿔도 30 fps 유지</td>
-    <td align="center" width="25%"><h3>217 → 0 ms</h3>무효 작업 구간의<br>마감 시각 오차</td>
-    <td align="center" width="25%"><h3>21,532개</h3>이 앱으로 모은 데이터에서<br>만든 학습 샘플</td>
+    <td align="center" width="33%"><h3>68개</h3>이 앱으로 수집한 시연</td>
+    <td align="center" width="33%"><h3>94개</h3>학습에 쓸 수 있는 Episode</td>
+    <td align="center" width="33%"><h3>21,532개</h3>로봇 학습 데이터셋의 학습 샘플</td>
   </tr>
 </table>
 
-<p align="right"><sub>앞의 셋은 Galaxy S10(SM-G973N) 실측, 학습 샘플 수는 데이터 파이프라인 결과</sub></p>
+<p align="right"><sub>시연 수는 이 앱의 수집 결과, Episode와 학습 샘플 수는 팀 데이터 파이프라인의 가공 결과</sub></p>
 
 <br>
 
@@ -74,8 +73,6 @@ flowchart LR
     ai --> robot["ROS2 + MuJoCo<br/>실행 검증"]
     style app fill:#7F52FF,color:#ffffff,stroke:#7F52FF
 ```
-
-이 앱으로 모은 시연 68개는 데이터 파이프라인을 거쳐 **Episode 94개, 학습 샘플 21,532개**가 되었습니다.
 
 | 프로젝트 기간 | Android 앱 |
 | :---: | :---: |
@@ -134,9 +131,8 @@ Session을 마치면 앱이 결과 파일을 검사해 **번들** 하나로 묶�
 
 녹화 해상도, 초점, ISO, 셔터, 화이트 밸런스를 수집자가 직접 고릅니다. 값은 **바꾸는 즉시 프리뷰에 반영**되어 화면을
 보며 초점을 맞출 수 있고, Session이 시작되면 잠겨 끝날 때까지 바뀌지 않습니다. 자동 설정으로 10초를 찍으면 설정이
-**74번** 바뀌지만, MASK로 고정하면 **0번**입니다. 프레임 속도는 30 fps로 고정해 셔터를 바꿔도 프레임 간격이
-33.3 ms로 유지되고(1,022프레임 평균 29.97 fps), 고른 값은 다음 실행에도 기억합니다. 덕분에 카메라
-보정(checkerboard calibration)과 색 기준 촬영, 실제 데이터 수집을 같은 광학 조건에서 할 수 있습니다.
+**74번** 바뀌지만, MASK로 고정하면 **0번**입니다. 고른 값은 다음 실행에도 기억하므로, 카메라
+보정(checkerboard calibration)과 색 기준 촬영, 실제 데이터 수집을 날을 달리해도 같은 광학 조건에서 할 수 있습니다.
 
 ### 검사를 통과한 번들만 서버로
 
