@@ -13,9 +13,8 @@ import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 /**
  * 카메라 프레임이 올라오는 판.
  *
- * `TextureView`와 그 `SurfaceTexture`의 수명만 맡는다. Camera2 session을 열고 닫는 것은 부모다 —
- * [onSurfaceAvailable]과 [onSurfaceDestroyed]로 알리기만 한다. 이전에는 리스너 안에서 세션을 직접
- * 열었고, 그 자리가 이 화면에서 "렌더링과 사용자 이벤트 처리로 한정"이 가장 크게 깨지는 곳이었다.
+ * `TextureView`와 그 `SurfaceTexture`의 수명만 맡는다. Camera2 session을 열고 닫는 것은 부모다.
+ * [onSurfaceAvailable]과 [onSurfaceDestroyed]로 알리기만 한다.
  *
  * [applyTransform]은 유휴 프리뷰에서만 켠다. 수집이 시작되면 ARCore가 같은 Surface에 표시 기하를
  * 반영해 직접 그리므로, `TextureView` 변환이 남아 있으면 그 위에 한 번 더 돌아간다.
@@ -33,43 +32,50 @@ internal fun CapturePreviewSurface(
     AndroidView(
         factory = { viewContext ->
             TextureView(viewContext).apply {
-                surfaceTextureListener =
-                    object : TextureView.SurfaceTextureListener {
-                        override fun onSurfaceTextureAvailable(
-                            surfaceTexture: SurfaceTexture,
-                            width: Int,
-                            height: Int,
-                        ) {
-                            surfaceTexture.setDefaultBufferSize(bufferSize.width, bufferSize.height)
-                            applyIdlePreviewTransform(this@apply, width, height, bufferSize.width, bufferSize.height)
-                            onSurfaceAvailable(Surface(surfaceTexture), surfaceTexture)
-                        }
-
-                        override fun onSurfaceTextureSizeChanged(
-                            surfaceTexture: SurfaceTexture,
-                            width: Int,
-                            height: Int,
-                        ) = applyIdlePreviewTransform(this@apply, width, height, bufferSize.width, bufferSize.height)
-
-                        override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-                            onSurfaceDestroyed()
-                            return true
-                        }
-
-                        // 실패한 프리뷰는 늦게 온 프레임으로 되살아나지 않는다. reduce가 막는다.
-                        override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) = onFrame()
-                    }
+                surfaceTextureListener = PreviewSurfaceListener(this, bufferSize, onSurfaceAvailable, onSurfaceDestroyed, onFrame)
             }
         },
         update = { view ->
             if (applyTransform) {
-                applyIdlePreviewTransform(view, view.width, view.height, bufferSize.width, bufferSize.height)
+                applyIdlePreviewTransform(view, view.width, view.height, bufferSize)
             } else {
                 view.setTransform(Matrix())
             }
         },
         modifier = modifier,
     )
+}
+
+/** [view]의 Surface가 생기고 바뀌고 사라지는 것을 부모에게 알린다. 생기거나 크기가 바뀌면 유휴 프리뷰 회전을 다시 건다. */
+private class PreviewSurfaceListener(
+    private val view: TextureView,
+    private val bufferSize: RecordingResolution,
+    private val onSurfaceAvailable: (Surface, SurfaceTexture) -> Unit,
+    private val onSurfaceDestroyed: () -> Unit,
+    private val onFrame: () -> Unit,
+) : TextureView.SurfaceTextureListener {
+    override fun onSurfaceTextureAvailable(
+        surfaceTexture: SurfaceTexture,
+        width: Int,
+        height: Int,
+    ) {
+        surfaceTexture.setDefaultBufferSize(bufferSize.width, bufferSize.height)
+        applyIdlePreviewTransform(view, width, height, bufferSize)
+        onSurfaceAvailable(Surface(surfaceTexture), surfaceTexture)
+    }
+
+    override fun onSurfaceTextureSizeChanged(
+        surfaceTexture: SurfaceTexture,
+        width: Int,
+        height: Int,
+    ) = applyIdlePreviewTransform(view, width, height, bufferSize)
+
+    override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
+        onSurfaceDestroyed()
+        return true
+    }
+
+    override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) = onFrame()
 }
 
 /**
@@ -82,12 +88,11 @@ private fun applyIdlePreviewTransform(
     view: TextureView,
     viewWidth: Int,
     viewHeight: Int,
-    bufferWidth: Int,
-    bufferHeight: Int,
+    bufferSize: RecordingResolution,
 ) {
     val displayRotation = view.display?.rotation ?: return
     val rotation = counterRotation(displayRotation.surfaceRotationDegrees())
-    view.setTransform(previewMatrix(viewWidth, viewHeight, bufferWidth, bufferHeight, rotation))
+    view.setTransform(previewMatrix(viewWidth, viewHeight, bufferSize.width, bufferSize.height, rotation))
 }
 
 /** `Surface.ROTATION_*`(0~3)를 각도로 바꾼다. */
