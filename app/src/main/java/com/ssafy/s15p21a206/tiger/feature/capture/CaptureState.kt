@@ -78,6 +78,10 @@ internal data class CaptureUiState(
     val policy: CaptureControlPolicy
         get() = CaptureControlPolicy(state = phase, ready = ready, busy = busy)
 
+    /** 촬영 조건(해상도·수동 설정)을 바꿀 수 있는지. Session이 시작되면 잠기고, Session 요청이 걸린 사이에도 받지 않는다. */
+    val captureSettingsEditable: Boolean
+        get() = phase == CaptureWorkspaceControlState.Idle && !busy
+
     /** 마감 중이거나 마감이 실패한 동안은 판이 덮으므로 작업 공간의 것들을 걷는다. */
     val chromeVisible: Boolean
         get() = phase != CaptureWorkspaceControlState.Finalizing && finalizeFailure == null

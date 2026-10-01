@@ -51,68 +51,29 @@ internal fun CaptureWorkspace(
         )
 
     if (!state.open) return
-    // 작업 공간을 벗어나면 유휴 프리뷰 Camera2 session을 놓는다. 조회 화면이 카메라를
-    // 붙잡고 있을 이유가 없고, 다음 수집은 새 Surface로 다시 연다.
     DisposableEffect(Unit) {
         onDispose(driver.releaseIdlePreview)
     }
-    // 수집 화면은 가로로 고정한다. Camera 센서가 90도 눕혀 장착돼 있어 세로 화면에서는
-    // 프리뷰가 옆으로 누운 채 비율까지 어긋나 보인다. 저장되는 영상도 가로다.
+    // 카메라 센서가 90도 눕혀 장착돼 있어 세로 화면에서는 프리뷰가 옆으로 누운 채 비율까지 어긋난다.
     LockLandscapeWhileVisible()
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         CapturePreviewSurface(
             bufferSize = state.idlePreviewSize,
-            // 수집이 시작되면 ARCore가 직접 그리므로 변환을 걷는다.
             applyTransform = state.phase == CaptureWorkspaceControlState.Idle,
             onSurfaceAvailable = driver.onSurfaceAvailable,
             onSurfaceDestroyed = driver.onSurfaceDestroyed,
             onFrame = { onIntent(CaptureIntent.PreviewFrameArrived) },
-            // 프리뷰는 가로 16:9다. 화면이 세로면 위아래에 검은 영역이 남고, 가로면 꽉 찬다.
-            // 늘이거나 잘라내지 않아야 저장되는 영상과 화각이 같다.
             modifier = Modifier.align(Alignment.Center).aspectRatio(PREVIEW_ASPECT_RATIO),
         )
-        // 왼쪽 자리(Session 전에는 톱니바퀴, 시작한 뒤에는 상태 배지)와 닫기 버튼을 한 Row에 담아
-        // 어떤 화면 비율에서도 겹치지 않게 한다. 서로 다른 align으로 두면 배지 폭이 길어질 때 닫기
-        // 버튼 아래로 파고든다.
-        // 기준은 프리뷰가 아니라 화면이다. 우측 제어와 좌표계를 맞추고, 레터박스가 생기는
-        // 기기에서는 검은 띠 위에 얹혀 영상을 가리지 않는다.
-        // 마감 중에는 프리뷰만 남기고 판 위의 것들을 걷는다. 상태 배지는 덮은 판이 같은 말을
-        // 더 길게 하고 있고, 닫기와 제어는 그 구간에 아무것도 받지 않는다. 덮인 채로 남겨 두면
-        // 누를 수 있는 것처럼 보이기만 한다.
         if (state.chromeVisible) {
-            // 거치 기준선은 판 위의 것들보다 먼저 그려 배지나 스낵바를 가르지 않게 한다.
+            // 거치 기준선을 판 위의 것들보다 먼저 그려 배지나 스낵바를 가르지 않게 한다.
             CaptureCenterGuide()
-            Row(
-                modifier =
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .fillMaxWidth()
-                        .safeDrawingPadding()
-                        .padding(top = 20.dp, start = 20.dp, end = 20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Row(
-                    // fill = false라야 배지가 제 너비만 쓰고, 길어져도 닫기 버튼 자리를 침범하지 않는다.
-                    modifier = Modifier.weight(1f, fill = false),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    // 한 자리를 두 구간이 나눠 쓴다. Session 전에는 상태가 늘 IDLE이라 배지가 알려 줄 것이
-                    // 없고, 할 일은 촬영 조건(해상도 포함)을 정하는 것이다. 시작한 뒤에는 조건이 잠겨
-                    // 설정을 열 일이 없고, 알아야 할 것은 tracking 상태다.
-                    if (state.phase == CaptureWorkspaceControlState.Idle) {
-                        CaptureCameraSettingsButton(
-                            // Session 요청이 걸린 사이에는 열지 않는다.
-                            enabled = !state.busy,
-                            onClick = { onIntent(CaptureIntent.ToggleManualCameraPanel(true)) },
-                        )
-                    } else {
-                        CaptureWorkspaceStatus(state = state.phase)
-                    }
-                }
-                CaptureWorkspaceExitControls(policy = state.policy, onExit = driver.requestExit)
-            }
+            CaptureTopBar(
+                state = state,
+                onOpenSettings = { onIntent(CaptureIntent.ToggleManualCameraPanel(true)) },
+                onExit = driver.requestExit,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
         }
         if (state.manualCamera.panelOpen && state.chromeVisible) {
             val closePanel = { onIntent(CaptureIntent.ToggleManualCameraPanel(false)) }
@@ -120,8 +81,7 @@ internal fun CaptureWorkspace(
                 CaptureCameraPanel(
                     state = state.manualCamera,
                     resolution = state.resolution,
-                    // 시트는 Idle에서만 열리지만, 연 채로 Session 요청이 걸린 사이에도 값을 받지 않는다.
-                    enabled = state.phase == CaptureWorkspaceControlState.Idle && !state.busy,
+                    enabled = state.captureSettingsEditable,
                     onChange = driver.editManualCamera,
                     onResolutionChange = driver.selectResolution,
                     onFixWhiteBalance = driver.fixWhiteBalance,
@@ -151,8 +111,6 @@ internal fun CaptureWorkspace(
             onCancel = { onIntent(CaptureIntent.Close) },
         )
     }
-    // 마감 중이거나 마감이 실패한 동안은 작업 공간을 덮는다. 제어가 이미 전부 막혀 있는
-    // 구간이라 덮는 편이 상태를 정직하게 말한다.
     if (!state.chromeVisible) {
         CaptureFinalizingOverlay(
             failure = state.finalizeFailure,
@@ -167,5 +125,51 @@ internal fun CaptureWorkspace(
     }
 }
 
-/** 프리뷰와 영상의 가로세로 비. 두 녹화 해상도 모두 16:9라 선택과 무관하게 같다. */
+/**
+ * 프리뷰 위 상단 줄. 왼쪽 자리와 닫기 버튼을 한 Row에 담는다.
+ *
+ * 서로 다른 align으로 두면 배지가 길어질 때 닫기 버튼 아래로 파고든다. 그래서 왼쪽 자리는
+ * `weight(fill = false)`로 제 너비만 쓴다. 기준은 프리뷰가 아니라 화면이다. 우측 제어와 좌표계를
+ * 맞추고, 레터박스가 생기는 기기에서는 검은 띠 위에 얹혀 영상을 가리지 않는다.
+ *
+ * 왼쪽 자리는 Session 전에는 촬영 조건을 여는 톱니바퀴, 시작한 뒤에는 tracking 상태 배지가 쓴다.
+ * 시작하면 조건이 잠기고, 그 전에는 상태가 늘 IDLE이라 배지가 알려 줄 것이 없다.
+ */
+@Suppress("FunctionName")
+@Composable
+private fun CaptureTopBar(
+    state: CaptureUiState,
+    onOpenSettings: () -> Unit,
+    onExit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .safeDrawingPadding()
+                .padding(top = 20.dp, start = 20.dp, end = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top,
+    ) {
+        Row(
+            modifier = Modifier.weight(1f, fill = false),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (state.phase == CaptureWorkspaceControlState.Idle) {
+                CaptureCameraSettingsButton(enabled = state.captureSettingsEditable, onClick = onOpenSettings)
+            } else {
+                CaptureWorkspaceStatus(state = state.phase)
+            }
+        }
+        CaptureWorkspaceExitControls(policy = state.policy, onExit = onExit)
+    }
+}
+
+/**
+ * 프리뷰와 영상의 가로세로 비. 두 녹화 해상도 모두 16:9라 선택과 무관하게 같다.
+ *
+ * 늘이거나 잘라내지 않고 이 비로 맞춰야 저장되는 영상과 화각이 같다. 화면이 세로면 위아래에 검은 영역이 남는다.
+ */
 private const val PREVIEW_ASPECT_RATIO = 16f / 9f
