@@ -75,13 +75,13 @@ internal fun SessionDetailScreen(
                 )
             }
         }
-        if (summary == null) {
+        if (summary == null || presentation == null) {
             Text(
                 text = stringResource(R.string.session_detail_unavailable),
                 style = TigerText.bodyMuted,
                 modifier = Modifier.padding(horizontal = DETAIL_CONTENT_PADDING),
             )
-        } else if (presentation != null) {
+        } else {
             // 영상은 좌우 여백 없이 화면 폭을 다 쓴다. 16:9 안에 컨트롤이 오버레이로 놓이므로
             // 여백을 주면 재생 영역만 줄고 얻는 것이 없다.
             SessionVideoPreview(summary.bundlePath, sharedPlayer, onOpenFullscreenVideo)
@@ -153,20 +153,13 @@ internal fun SessionDetailScreen(
                 if (deleteFailureReason != null) {
                     Text(text = deleteFailureReason, style = TigerText.supporting)
                 }
-                if (presentation.uploadAction != null) {
-                    Button(onClick = onUpload) {
-                        Text(
-                            stringResource(
-                                if (presentation.uploadAction ==
-                                    SessionDetailPresentation.UploadAction.Retry
-                                ) {
-                                    R.string.upload_retry
-                                } else {
-                                    R.string.upload_session
-                                },
-                            ),
-                        )
-                    }
+                presentation.uploadAction?.let { action ->
+                    val label =
+                        when (action) {
+                            SessionDetailPresentation.UploadAction.Upload -> R.string.upload_session
+                            SessionDetailPresentation.UploadAction.Retry -> R.string.upload_retry
+                        }
+                    Button(onClick = onUpload) { Text(stringResource(label)) }
                 }
             }
         }
