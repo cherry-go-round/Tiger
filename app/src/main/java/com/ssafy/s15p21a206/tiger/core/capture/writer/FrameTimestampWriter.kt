@@ -3,20 +3,6 @@ package com.ssafy.s15p21a206.tiger.core.capture.writer
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import java.io.File
 
-open class CsvWriter(
-    private val file: File,
-    private val header: String,
-) {
-    fun start() {
-        file.parentFile?.mkdirs()
-        if (!file.exists()) file.writeText("$header\n")
-    }
-
-    fun append(row: String) {
-        file.appendText("$row\n")
-    }
-}
-
 class FrameTimestampWriter(
     file: File,
 ) : CsvWriter(file, SessionBundle.FRAME_TIMESTAMPS_HEADER) {

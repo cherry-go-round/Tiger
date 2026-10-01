@@ -1,20 +1,10 @@
 package com.ssafy.s15p21a206.tiger.core.upload
 
-import com.ssafy.s15p21a206.tiger.core.model.session.CaptureSession
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadResult
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import kotlinx.coroutines.CancellationException
 import java.io.File
-
-interface UploadSessionStore {
-    suspend fun completedSource(sessionId: String): CaptureSession?
-
-    suspend fun updateUploadState(
-        sessionId: String,
-        state: UploadState,
-    )
-}
 
 class SessionUploadService(
     private val store: UploadSessionStore,
