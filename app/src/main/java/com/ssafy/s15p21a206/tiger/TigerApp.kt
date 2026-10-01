@@ -28,10 +28,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSurface
-import com.ssafy.s15p21a206.tiger.feature.capture.CaptureIntent
-import com.ssafy.s15p21a206.tiger.feature.capture.CaptureUiState
 import com.ssafy.s15p21a206.tiger.feature.capture.CaptureWorkspace
-import com.ssafy.s15p21a206.tiger.feature.capture.reduce
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureIntent
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureUiState
+import com.ssafy.s15p21a206.tiger.feature.capture.state.reduce
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteFailure
 import com.ssafy.s15p21a206.tiger.feature.session.SessionOperations
 import com.ssafy.s15p21a206.tiger.feature.session.detail.SessionDetailScreen

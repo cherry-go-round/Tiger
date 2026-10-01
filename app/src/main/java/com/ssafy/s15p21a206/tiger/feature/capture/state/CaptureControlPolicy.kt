@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.state
 
 /**
  * 수집 작업 공간이 표시하는 상태.

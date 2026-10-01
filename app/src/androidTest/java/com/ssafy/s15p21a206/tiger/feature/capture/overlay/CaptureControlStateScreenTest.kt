@@ -1,5 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
-
+package com.ssafy.s15p21a206.tiger.feature.capture.overlay
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.mutableStateOf
@@ -14,6 +13,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerTheme
+import com.ssafy.s15p21a206.tiger.feature.capture.dialog.CaptureStopConfirmation
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureControlPolicy
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureWorkspaceControlState
 import com.ssafy.s15p21a206.tiger.string
 import org.junit.Assert.assertEquals
 import org.junit.Rule

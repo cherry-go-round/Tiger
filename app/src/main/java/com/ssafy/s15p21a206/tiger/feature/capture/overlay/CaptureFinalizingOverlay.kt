@@ -1,5 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
-
+package com.ssafy.s15p21a206.tiger.feature.capture.overlay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureFullScreenScrim
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureControlPolicy
 
 /**
  * 마감과 그 실패를 알리는 판이다.

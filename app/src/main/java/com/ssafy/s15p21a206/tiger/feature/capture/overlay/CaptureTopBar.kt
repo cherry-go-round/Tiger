@@ -1,5 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
-
+package com.ssafy.s15p21a206.tiger.feature.capture.overlay
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -25,6 +24,10 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlayScrim
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraSettingsButton
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureControlPolicy
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureExitAction
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureUiState
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureWorkspaceControlState
 
 /**
  * 프리뷰 위 상단 줄. 왼쪽 자리와 닫기 버튼을 한 Row에 담는다.

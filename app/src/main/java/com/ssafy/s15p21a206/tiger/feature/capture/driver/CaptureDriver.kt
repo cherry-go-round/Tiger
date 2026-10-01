@@ -1,5 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
-
+package com.ssafy.s15p21a206.tiger.feature.capture.driver
 import android.Manifest
 import android.graphics.SurfaceTexture
 import android.view.Surface
@@ -18,6 +17,9 @@ import com.ssafy.s15p21a206.tiger.feature.capture.preview.IdlePreview
 import com.ssafy.s15p21a206.tiger.feature.capture.preview.rememberIdlePreview
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureSettingsControls
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.rememberCaptureSettings
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureIntent
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureUiState
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureWorkspaceControlState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds

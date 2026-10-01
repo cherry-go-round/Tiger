@@ -16,7 +16,7 @@
 - **글자**: `core/designsystem/theme/TigerText.kt`의 역할에서 고른다. 크기 다섯 층(28·22·16·14·12)과 잉크 세 단계가 거기서 정해진다. 새 조합이 필요하면 호출부가 아니라 이 파일에 역할을 더한다.
 - **판**: `core/designsystem/theme/TigerSurface.kt`. 카드가 얹히는 바닥과 글자가 놓이는 판 둘뿐이다.
 - **타입 스케일과 글꼴**: `core/designsystem/theme/Type.kt`. Material 3 컴포넌트가 제 안에서 집어 쓰는 눈금이라 여기를 비우면 그 컴포넌트만 앱 밖의 값을 쓴다.
-- **여백**: `core/designsystem/theme/TigerSpacing.kt`. 조회 화면의 좌우 가장자리와 카드 안쪽 여백은 여기서 고른다. 한 화면에서만 쓰는 간격은 그 화면에 둔다. 수집 화면 오버레이의 크기·여백은 `feature/capture/CaptureOverlayDimens.kt`에 있다.
+- **여백**: `core/designsystem/theme/TigerSpacing.kt`. 조회 화면의 좌우 가장자리와 카드 안쪽 여백은 여기서 고른다. 한 화면에서만 쓰는 간격은 그 화면에 둔다. 수집 화면 오버레이의 크기·여백은 `feature/capture/overlay/CaptureOverlayDimens.kt`에 있다.
 - **공용 컴포넌트**: `core/designsystem/component`의 `TigerCard`, `LabelledGroup`, `LabelledValue`, `TigerMenuItem`. 카드와 묶음과 메뉴 항목은 여기를 거친다.
 - **Preview**: 컴포넌트는 `ComponentPreview`, 화면은 `ScreenPreview`에 올리고 크기는 `@PortraitScreenPreview`·`@LandscapeScreenPreview`로 고른다. 어두운 테마 변형은 두지 않는다. 여러 Preview가 함께 부르는 도우미는 이름을 `Preview`로 끝내지 않는다(예: `TaskSessionListSample`). `@Preview` 함수와 이름이 겹치면 Android Studio가 자기 자신을 부르는 Preview로 읽고 경고한다. 다이얼로그·시트는 창을 따로 띄워 그려지지 않으므로 안의 판을 떼어 그린다. Preview를 따로 두지 않는 것은 카메라 `TextureView`(`CapturePreviewSurface`), Media3 `PlayerView`(`VideoPlayer`), View 기반 `SideSheetDialog`(`CaptureCameraSheet`)다.
 
@@ -78,24 +78,25 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 
 ## 수집 화면의 구성
 
-`feature/capture/`는 책임별로 갈라져 있다. 새 화면을 만들 때 참고할 수 있는 배치다.
+`feature/capture/`는 책임별로 갈라져 있다. 새 화면을 만들 때 참고할 수 있는 배치다. 루트에는 진입점 `CaptureWorkspace`만 두고, 나머지는 하위 패키지로 묶는다. `state`는 Android를 모르는 상태와 전이, `driver`는 부수 효과, `preview`는 카메라 프리뷰, `settings`는 촬영 조건 시트, `overlay`는 프리뷰 위에 얹히는 것, `dialog`는 작업 공간을 덮는 판이다.
 
 | | 맡는 것 |
 |---|---|
 | `CaptureWorkspace` | 수명만 맡는다. 드라이버를 만들고 가로 고정·프리뷰 놓기를 건다. 그리는 것은 `CaptureWorkspaceContent`가 상태와 조작만 받아 한다 |
-| `CaptureDriver` | composition에 묶인 연결. 카메라 권한 launcher, tracking 폴링·알림·`ON_STOP` effect, 셋을 이은 조작 묶음 |
-| `CaptureSessionActions` | Session의 시작·진행·마감. ARCore 확인, 시작, Episode, tracking 반영, 중단, 마감 |
+| `driver/CaptureDriver` | composition에 묶인 연결. 카메라 권한 launcher, tracking 폴링·알림·`ON_STOP` effect, 셋을 이은 조작 묶음 |
+| `driver/CaptureSessionActions` | Session의 시작·진행·마감. ARCore 확인, 시작, Episode, tracking 반영, 중단, 마감 |
 | `preview/IdlePreview` | Session 전 유휴 Camera2 프리뷰. Surface, 프리뷰 권한, 되살리기 |
 | `settings/CaptureSettingsControls` | 촬영 조건. 녹화 해상도와 수동 설정을 바꾸고 프리뷰에 걸어 기억한다. 녹화 카메라 능력 읽기 |
-| `CaptureUiState`·`CaptureIntent`·`CaptureReducer` | 상태, 상태를 바꾸는 입구, 전이(`reduce`) |
+| `state/CaptureUiState`·`CaptureIntent`·`CaptureReducer` | 상태, 상태를 바꾸는 입구, 전이(`reduce`) |
 | `preview/CapturePreviewSurface` | `TextureView`와 `SurfaceTexture`의 수명 |
-| `CaptureMetadataDialog` | Task·Object 입력 |
+| `dialog/CaptureMetadataDialog` | Task·Object 입력 |
+| `dialog/CaptureStopConfirmation` | Session을 멈출지 묻는 판 |
 | `settings/CaptureCameraPanel` | 카메라 설정 사이드 시트. 해상도·초점·ISO·셔터·화이트 밸런스 |
-| `CaptureTopBar` | 프리뷰 위 상단 줄. 설정 단추 또는 상태 배지, 닫기 |
-| `CaptureControls` | 우측 재생·일시 정지·정지 제어와 종료 확인 |
-| `CaptureFinalizingOverlay` | 마감 중·마감 실패를 알리는 판 |
-| `CaptureCenterGuide` | 거치 기준선 |
-| `CaptureControlPolicy` | 상태에서 파생되는 허용 동작 |
+| `overlay/CaptureTopBar` | 프리뷰 위 상단 줄. 설정 단추 또는 상태 배지, 닫기 |
+| `overlay/CaptureControls` | 우측 재생·일시 정지·정지 제어 |
+| `overlay/CaptureFinalizingOverlay` | 마감 중·마감 실패를 알리는 판 |
+| `overlay/CaptureCenterGuide` | 거치 기준선 |
+| `state/CaptureControlPolicy` | 상태에서 파생되는 허용 동작 |
 
 상태는 `TigerApp`이 소유하고 화면은 값과 `onIntent`만 받는다. 작업 공간을 여는 것이 조회 화면의 동작이기 때문이다.
 

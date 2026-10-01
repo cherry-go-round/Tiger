@@ -1,5 +1,4 @@
 package com.ssafy.s15p21a206.tiger.feature.capture
-
 import android.view.WindowManager
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
@@ -13,6 +12,11 @@ import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerTheme
+import com.ssafy.s15p21a206.tiger.feature.capture.overlay.CAPTURE_CENTER_GUIDE_TAG
+import com.ssafy.s15p21a206.tiger.feature.capture.overlay.CaptureCenterGuide
+import com.ssafy.s15p21a206.tiger.feature.capture.overlay.CaptureWorkspaceControls
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureControlPolicy
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureWorkspaceControlState
 import com.ssafy.s15p21a206.tiger.string
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

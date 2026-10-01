@@ -1,5 +1,4 @@
 package com.ssafy.s15p21a206.tiger.feature.capture
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -21,10 +20,21 @@ import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.LandscapeScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
 import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
+import com.ssafy.s15p21a206.tiger.feature.capture.dialog.CaptureMetadataDialog
+import com.ssafy.s15p21a206.tiger.feature.capture.dialog.CaptureStopConfirmation
+import com.ssafy.s15p21a206.tiger.feature.capture.driver.CaptureDriver
+import com.ssafy.s15p21a206.tiger.feature.capture.driver.rememberCaptureDriver
+import com.ssafy.s15p21a206.tiger.feature.capture.overlay.CaptureCenterGuide
+import com.ssafy.s15p21a206.tiger.feature.capture.overlay.CaptureFinalizingOverlay
+import com.ssafy.s15p21a206.tiger.feature.capture.overlay.CaptureTopBar
+import com.ssafy.s15p21a206.tiger.feature.capture.overlay.CaptureWorkspaceControls
 import com.ssafy.s15p21a206.tiger.feature.capture.preview.CapturePreviewSurface
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraPanel
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraSheet
 import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureSettingsControls
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureIntent
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureUiState
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureWorkspaceControlState
 
 /**
  * 수집 작업 공간. 조회 흐름 위에 모달로 얹힌다.

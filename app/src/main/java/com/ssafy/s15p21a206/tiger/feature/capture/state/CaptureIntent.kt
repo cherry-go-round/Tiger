@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.state
 
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraCapabilities
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig

@@ -12,9 +12,9 @@ import com.ssafy.s15p21a206.tiger.core.capture.manual.ManualCameraConfigStore
 import com.ssafy.s15p21a206.tiger.core.capture.manual.ManualCameraProfile
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
-import com.ssafy.s15p21a206.tiger.feature.capture.CaptureIntent
-import com.ssafy.s15p21a206.tiger.feature.capture.CaptureUiState
 import com.ssafy.s15p21a206.tiger.feature.capture.preview.IdlePreview
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureIntent
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

@@ -1,5 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
-
+package com.ssafy.s15p21a206.tiger.feature.capture.overlay
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -19,11 +18,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
-import com.ssafy.s15p21a206.tiger.core.designsystem.component.DestructiveConfirmationDialog
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureControlDisabled
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureDestructive
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureOverlayScrim
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.CaptureStart
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureControlPolicy
+import com.ssafy.s15p21a206.tiger.feature.capture.state.CaptureWorkspaceControlState
 
 /**
  * 재생·일시 정지·정지 제어. 단계에 따라 둘 또는 하나를 보인다.
@@ -109,18 +109,4 @@ private fun CaptureControlIcon(
             )
         }
     }
-}
-
-@Composable
-internal fun CaptureStopConfirmation(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    DestructiveConfirmationDialog(
-        title = stringResource(R.string.capture_stop_title),
-        message = stringResource(R.string.capture_stop_message),
-        confirmLabel = stringResource(R.string.capture_stop_confirm),
-        onConfirm = onConfirm,
-        onDismiss = onDismiss,
-    )
 }

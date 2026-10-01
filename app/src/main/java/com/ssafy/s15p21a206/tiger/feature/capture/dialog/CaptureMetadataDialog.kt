@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.dialog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

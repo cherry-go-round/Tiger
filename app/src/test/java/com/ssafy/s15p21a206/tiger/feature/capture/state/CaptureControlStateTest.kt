@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.state
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.overlay
 
 import androidx.annotation.StringRes
 import androidx.compose.material3.ExperimentalMaterial3Api
