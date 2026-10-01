@@ -37,9 +37,13 @@ object SessionBundleValidator {
         includesUltraWide: Boolean = false,
         requireMetadata: Boolean = true,
     ): BundleValidationResult {
+        val recording = recordingProblem(directory)
         val problem =
-            recordingProblem(directory)
-                ?: if (requireMetadata) metadataProblem(directory) else ultraWideProblem(directory, includesUltraWide)
+            when {
+                recording != null -> recording
+                requireMetadata -> metadataProblem(directory)
+                else -> ultraWideProblem(directory, includesUltraWide)
+            }
         return problem?.let(BundleValidationResult::Invalid) ?: BundleValidationResult.Valid
     }
 
@@ -51,32 +55,40 @@ object SessionBundleValidator {
         return invalidCsv?.let { "invalid ${it.key}" }
     }
 
-    private fun ultraWideProblem(
-        directory: File,
-        includesUltraWide: Boolean,
-    ): String? = "invalid ultra-wide stream".takeIf { includesUltraWide && !hasValidUltraWideFiles(directory) }
-
     /** `metadata.json`이 번들과 맞는지. 선언(세션 ID, 카메라 스트림)과 파일 manifest를 본다. */
     private fun metadataProblem(directory: File): String? {
         val metadata = parseMetadata(File(directory, SessionBundle.METADATA_FILE)) ?: return "metadata commit marker is missing"
         val declaresUltraWide = metadata.declaresStream("ultrawide") ?: return "metadata ultra-wide declaration is missing"
         return when {
-            metadata.declaresStream("main") != true -> "main stream declaration is invalid"
+            !metadata.declaresMainStream -> "main stream declaration is invalid"
             metadata.sessionId.isBlank() -> "metadata session id is missing"
-            declaresUltraWide != hasUltraWideDocuments(directory) -> "ultra-wide document set does not match metadata"
+            !hasUltraWideDocumentsAsDeclared(directory, declaresUltraWide) -> "ultra-wide document set does not match metadata"
             declaresUltraWide && !hasValidUltraWideFiles(directory) -> "invalid ultra-wide stream"
-            metadata.manifest == null || !hasExactManifest(directory, metadata.manifest) -> "metadata manifest does not match bundle"
+            !hasExactManifest(directory, metadata.manifest) -> "metadata manifest does not match bundle"
             else -> null
         }
+    }
+
+    /** 초광각 파일이 있는지가 선언과 같은지. 선언했으면 둘 중 하나라도 있어야 하고, 하지 않았으면 둘 다 없어야 한다. */
+    private fun hasUltraWideDocumentsAsDeclared(
+        directory: File,
+        declared: Boolean,
+    ): Boolean {
+        val present =
+            File(directory, SessionBundle.ULTRAWIDE_VIDEO_FILE).exists() ||
+                File(directory, SessionBundle.ULTRAWIDE_FRAME_TIMESTAMPS_FILE).exists()
+        return present == declared
     }
 
     private fun hasValidUltraWideFiles(directory: File): Boolean =
         File(directory, SessionBundle.ULTRAWIDE_VIDEO_FILE).hasContent() &&
             File(directory, SessionBundle.ULTRAWIDE_FRAME_TIMESTAMPS_FILE).hasHeader(SessionBundle.FRAME_TIMESTAMPS_HEADER)
 
-    private fun hasUltraWideDocuments(directory: File): Boolean =
-        File(directory, SessionBundle.ULTRAWIDE_VIDEO_FILE).exists() ||
-            File(directory, SessionBundle.ULTRAWIDE_FRAME_TIMESTAMPS_FILE).exists()
+    /** metadata 없이 볼 때의 초광각 문제. 함께 찍었다면 영상과 프레임 시각이 온전해야 한다. */
+    private fun ultraWideProblem(
+        directory: File,
+        includesUltraWide: Boolean,
+    ): String? = "invalid ultra-wide stream".takeIf { includesUltraWide && !hasValidUltraWideFiles(directory) }
 
     private fun parseMetadata(metadataFile: File): BundleMetadata? =
         runCatching {
@@ -105,11 +117,13 @@ object SessionBundleValidator {
      *
      * 디렉터리에는 파일만 있어야 하고, `metadata.json`을 뺀 파일 이름의 집합이 manifest 경로의 집합과
      * 같아야 한다. 그 위에서 항목마다 크기와 SHA-256이 실제 파일과 같아야 한다.
+     * 형식이 틀린 항목이 있어 [manifest]가 null이면 맞지 않는 것으로 본다.
      */
     private fun hasExactManifest(
         directory: File,
-        manifest: List<ManifestEntry>,
+        manifest: List<ManifestEntry>?,
     ): Boolean {
+        if (manifest == null) return false
         val documents = directory.listFiles()?.toList().orEmpty()
         if (documents.any { !it.isFile }) return false
         val rawDocuments = documents.filter { it.name != SessionBundle.METADATA_FILE }.associateBy(File::getName)
@@ -143,6 +157,9 @@ object SessionBundleValidator {
         /** 파일 manifest. 항목 중 하나라도 형식이 틀리면 null이다. */
         val manifest: List<ManifestEntry>?,
     ) {
+        /** 주 스트림을 담았다고 선언했는지. 선언이 없거나 불리언이 아니면 담지 않은 것으로 본다. */
+        val declaresMainStream: Boolean get() = declaresStream("main") == true
+
         /** `camera_streams`에서 [name] 스트림을 담았다고 선언했는지. 선언이 없거나 불리언이 아니면 null이다. */
         fun declaresStream(name: String): Boolean? = cameraStreams[name]?.jsonPrimitive?.booleanOrNull
     }
