@@ -40,6 +40,17 @@ import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 
+/**
+ * 한 Session의 상세. 영상 아래에 이름(수집 일시)과 이름표를 단 묶음 카드를 쌓는다.
+ *
+ * - Task와 Object를 본문에 둔다. 수집을 마감하면 목록을 지나지 않고 이 화면으로 바로 오므로, 방금
+ *   찍은 것이 맞는지 확인할 자리가 여기뿐이다. 목록 카드와 달리 Task도 적는다. 이 화면은 Task 이름을
+ *   단 화면 안에 있지 않아 스스로 말하지 않으면 알 길이 없다.
+ * - 상세는 훑는 목록이 아니라 줄을 아낄 이유가 없다. 이름표와 값을 쌓는다. 상세 정보 시트도 같은 형태다.
+ * - 묶음마다 이름표를 단다. 이 수집이 무엇인지 말하는 값(Task·Object·ID)과 지금 어떤지 말하는
+ *   줄(전송 상태)은 성격이 다르다. 이름표는 읽을 대상이 아니라 표지라 묶음 안 글보다 작고 옅다.
+ * - 이름과 각 묶음은 같은 간격([DETAIL_GROUP_GAP])으로 띄운다. 가르는 일은 카드가 한다.
+ */
 @Suppress("FunctionName")
 @Composable
 internal fun SessionDetailScreen(
@@ -95,33 +106,10 @@ internal fun SessionDetailScreen(
                     ),
                 verticalArrangement = Arrangement.spacedBy(DETAIL_GROUP_GAP),
             ) {
-                // 이 화면의 이름은 언제 찍은 것인지이고, 그 아래로 무엇을 찍었는지와 식별자가 온다.
-                //
-                // 두 이름이 본문에 있어야 하는 이유는 수집을 마감한 직후 경로다. 그때는 Task 묶음도
-                // 세션 카드도 지나오지 않고 이 화면으로 바로 오므로, 둘 다 화면에 한 번도 나온 적이
-                // 없다. 방금 찍은 것이 맞는지 확인하는 자리에서 메뉴를 한 번 더 열게 할 수 없다.
-                //
-                // 목록 카드와 달리 Task도 함께 둔다. 카드는 Task 이름을 단 화면 안에 있지만 이
-                // 화면은 스스로 말하지 않으면 알 길이 없고, Object만으로는 이름의 절반이다.
-                //
-                // 상세는 목록 항목이 아니다. Material 3이 보조 줄을 1~3줄로 제한하는 것은 훑는
-                // 목록의 규칙이고, 여기서는 줄을 아낄 이유가 없다. 이름표와 값을 쌓는다. 상세 정보
-                // 시트가 이미 같은 형태다.
-                //
-                // 이름과 정보는 이름표를 단 묶음 카드가 가른다. 간격만으로 가르던 동안에는 이름과 정보
-                // 사이를 묶음 사이보다 좁게 두었으나, 카드가 생긴 뒤로는 이름과 각 묶음을 같은 간격으로
-                // 띄운다.
                 Text(
-                    text =
-                        formatCaptureTime(summary.recordedAtEpochMs),
+                    text = formatCaptureTime(summary.recordedAtEpochMs),
                     style = TigerText.itemTitle,
                 )
-                // 묶음마다 이름표를 붙인다. 이 화면에는 성격이 다른 것이 둘 있다. 이 수집이 무엇인지
-                // 말하는 값들과, 그 기록이 지금 어떤 상태인지 말하는 줄이다. 이름표가 없으면 네 줄이
-                // 한 더미로 쌓여, 전송 상태가 Task·Object·ID와 같은 종류의 값으로 읽힌다.
-                //
-                // 이름표는 묶음 안의 글보다 작고 옅다. 읽을 대상이 아니라 무엇을 읽고 있는지 알려
-                // 주는 표지이기 때문이다.
                 LabelledGroup(stringResource(R.string.session_group_info)) {
                     // 세 줄이 모두 이름표와 값이라 같은 짜임을 쓴다. 이름표 기둥이 고정폭이라 값이
                     // 한 기둥에 정렬되고, 훑는 눈이 값만 따라 내려갈 수 있다.
