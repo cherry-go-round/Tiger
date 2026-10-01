@@ -14,36 +14,57 @@ internal enum class CaptureWorkspaceControlState {
     Finalizing,
 }
 
+/** 작업 공간을 나가려 할 때 할 일. 닫기 버튼, 정지 버튼, 시스템 뒤로 가기가 같은 판단을 쓴다. */
 internal enum class CaptureExitAction {
+    /** Session 전이라 그냥 닫는다. */
     Leave,
+
+    /** Session이 돌고 있어 종료를 확인받는다. */
     Confirm,
+
+    /** 마감 중이거나 다른 작업이 걸려 있어 받지 않는다. */
     Ignore,
 }
 
+/** 수집 단계에서 파생되는 허용 동작. */
 internal data class CaptureControlPolicy(
     val state: CaptureWorkspaceControlState,
     val ready: Boolean = true,
     val busy: Boolean = false,
 ) {
-    // Idle에서는 Session을, Ready에서는 Episode를 시작한다. Initializing은 Tracking이 안정화될 때까지 막는다.
+    /** Idle에서는 Session을, Ready에서는 Episode를 시작한다. Initializing은 Tracking이 안정화될 때까지 막는다. */
     val canPlay: Boolean
-        get() = !busy && ((state == CaptureWorkspaceControlState.Idle && ready) || state == CaptureWorkspaceControlState.Ready)
-    val canPause: Boolean
-        get() = !busy && state == CaptureWorkspaceControlState.EpisodeActive
-    val canStop: Boolean
         get() =
             !busy &&
-                state in
-                listOf(
-                    CaptureWorkspaceControlState.Initializing,
-                    CaptureWorkspaceControlState.Ready,
-                    CaptureWorkspaceControlState.EpisodeActive,
-                )
+                when (state) {
+                    CaptureWorkspaceControlState.Idle -> ready
+                    CaptureWorkspaceControlState.Ready -> true
+                    else -> false
+                }
+
+    val canPause: Boolean
+        get() = !busy && state == CaptureWorkspaceControlState.EpisodeActive
+
+    val canStop: Boolean
+        get() = !busy && sessionRunning
+
     val exitAction: CaptureExitAction
         get() =
             when {
                 busy || state == CaptureWorkspaceControlState.Finalizing -> CaptureExitAction.Ignore
                 state == CaptureWorkspaceControlState.Idle -> CaptureExitAction.Leave
                 else -> CaptureExitAction.Confirm
+            }
+
+    private val sessionRunning: Boolean
+        get() =
+            when (state) {
+                CaptureWorkspaceControlState.Initializing,
+                CaptureWorkspaceControlState.Ready,
+                CaptureWorkspaceControlState.EpisodeActive,
+                -> true
+                CaptureWorkspaceControlState.Idle,
+                CaptureWorkspaceControlState.Finalizing,
+                -> false
             }
 }
