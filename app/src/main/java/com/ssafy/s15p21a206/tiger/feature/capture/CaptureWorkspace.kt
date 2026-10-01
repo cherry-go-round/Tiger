@@ -19,6 +19,10 @@ import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.core.android.LockLandscapeWhileVisible
 import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
 import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
+import com.ssafy.s15p21a206.tiger.feature.capture.preview.CapturePreviewSurface
+import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraPanel
+import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraSettingsButton
+import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureCameraSheet
 
 /**
  * 수집 작업 공간. 조회 흐름 위에 모달로 얹힌다.

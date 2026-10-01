@@ -32,6 +32,7 @@ import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
 import com.ssafy.s15p21a206.tiger.core.model.upload.UploadState
 import com.ssafy.s15p21a206.tiger.core.session.SessionBundleStore
 import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
+import com.ssafy.s15p21a206.tiger.feature.capture.preview.IdlePreview
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

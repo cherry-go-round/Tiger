@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.settings
 
 import android.hardware.camera2.CameraManager
 import androidx.compose.runtime.Composable
@@ -12,6 +12,9 @@ import com.ssafy.s15p21a206.tiger.core.capture.manual.ManualCameraConfigStore
 import com.ssafy.s15p21a206.tiger.core.capture.manual.ManualCameraProfile
 import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
+import com.ssafy.s15p21a206.tiger.feature.capture.CaptureIntent
+import com.ssafy.s15p21a206.tiger.feature.capture.CaptureUiState
+import com.ssafy.s15p21a206.tiger.feature.capture.preview.IdlePreview
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

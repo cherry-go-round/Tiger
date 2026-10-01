@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.settings
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,6 +13,7 @@ import androidx.test.espresso.Espresso
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerTheme
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
+import com.ssafy.s15p21a206.tiger.feature.capture.ManualCameraUiState
 import com.ssafy.s15p21a206.tiger.string
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

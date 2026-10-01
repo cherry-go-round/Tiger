@@ -83,12 +83,12 @@ Room Flow에서 목록이 나오고 화면은 값과 콜백만 받는다. 상태
 | `CaptureWorkspace` | 그리기만 한다. 카메라도 목적지도 모른다 |
 | `CaptureDriver` | composition에 묶인 연결. 카메라 권한 launcher, tracking 폴링·알림·`ON_STOP` effect, 셋을 이은 조작 묶음 |
 | `CaptureSessionActions` | Session의 시작·진행·마감. ARCore 확인, 시작, Episode, tracking 반영, 중단, 마감 |
-| `IdlePreview` | Session 전 유휴 Camera2 프리뷰. Surface, 프리뷰 권한, 되살리기 |
-| `CaptureSettingsControls` | 촬영 조건. 녹화 해상도와 수동 설정을 바꾸고 프리뷰에 걸어 기억한다. 녹화 카메라 능력 읽기 |
+| `preview/IdlePreview` | Session 전 유휴 Camera2 프리뷰. Surface, 프리뷰 권한, 되살리기 |
+| `settings/CaptureSettingsControls` | 촬영 조건. 녹화 해상도와 수동 설정을 바꾸고 프리뷰에 걸어 기억한다. 녹화 카메라 능력 읽기 |
 | `CaptureState` | `CaptureUiState`·`CaptureIntent`·`reduce` |
-| `CapturePreviewSurface` | `TextureView`와 `SurfaceTexture`의 수명 |
+| `preview/CapturePreviewSurface` | `TextureView`와 `SurfaceTexture`의 수명 |
 | `CaptureMetadataDialog` | Task·Object 입력 |
-| `CaptureCameraPanel` | 카메라 설정 사이드 시트. 해상도·초점·ISO·셔터·화이트 밸런스 |
+| `settings/CaptureCameraPanel` | 카메라 설정 사이드 시트. 해상도·초점·ISO·셔터·화이트 밸런스 |
 | `CaptureOverlays` | 배지·제어 버튼·마감 판·기준선 같은 프리뷰 위 오버레이 |
 | `CaptureControlPolicy` | 상태에서 파생되는 허용 동작 |
 

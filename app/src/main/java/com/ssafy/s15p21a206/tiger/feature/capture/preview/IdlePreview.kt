@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.preview
 
 import android.Manifest
 import android.content.Context
@@ -19,6 +19,9 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import com.ssafy.s15p21a206.tiger.R
 import com.ssafy.s15p21a206.tiger.core.capture.camera.PreviewCameraSession
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
+import com.ssafy.s15p21a206.tiger.feature.capture.CaptureIntent
+import com.ssafy.s15p21a206.tiger.feature.capture.CaptureUiState
+import com.ssafy.s15p21a206.tiger.feature.capture.CaptureWorkspaceControlState
 
 /**
  * Session을 시작하기 전의 유휴 프리뷰. 작업 공간이 열려 있는 동안 Camera2로 그린다.

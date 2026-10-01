@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +49,8 @@ import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraConfig
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingFormat
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.capture.ShutterPreset
+import com.ssafy.s15p21a206.tiger.feature.capture.CaptureTooltip
+import com.ssafy.s15p21a206.tiger.feature.capture.ManualCameraUiState
 
 /**
  * 수집 전에 촬영 조건을 맞추는 패널.

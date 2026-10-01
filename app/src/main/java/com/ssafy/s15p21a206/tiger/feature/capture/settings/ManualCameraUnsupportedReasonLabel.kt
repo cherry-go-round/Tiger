@@ -1,4 +1,4 @@
-package com.ssafy.s15p21a206.tiger.feature.capture
+package com.ssafy.s15p21a206.tiger.feature.capture.settings
 
 import androidx.annotation.StringRes
 import com.ssafy.s15p21a206.tiger.R

@@ -6,6 +6,7 @@ import com.ssafy.s15p21a206.tiger.core.model.capture.ManualCameraUnsupportedReas
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingFormat
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionBundle
+import com.ssafy.s15p21a206.tiger.feature.capture.preview.IdlePreview
 
 /**
  * 수동 촬영 설정 패널의 상태.

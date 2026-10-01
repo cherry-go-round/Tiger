@@ -14,6 +14,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.ssafy.s15p21a206.tiger.core.capture.camera.RecordingResolutionStore
 import com.ssafy.s15p21a206.tiger.core.session.SessionRepository
+import com.ssafy.s15p21a206.tiger.feature.capture.preview.IdlePreview
+import com.ssafy.s15p21a206.tiger.feature.capture.preview.rememberIdlePreview
+import com.ssafy.s15p21a206.tiger.feature.capture.settings.CaptureSettingsControls
+import com.ssafy.s15p21a206.tiger.feature.capture.settings.rememberCaptureSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
