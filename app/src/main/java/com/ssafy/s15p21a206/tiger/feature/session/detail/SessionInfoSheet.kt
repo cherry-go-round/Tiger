@@ -14,12 +14,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.common.formatDateTime
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.ComponentPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerSurface
 import com.ssafy.s15p21a206.tiger.core.designsystem.theme.TigerText
 import com.ssafy.s15p21a206.tiger.core.model.session.SessionSummary
 import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
-import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
 import com.ssafy.s15p21a206.tiger.feature.session.video.VideoResolutionState
 import com.ssafy.s15p21a206.tiger.feature.session.video.rememberVideoResolution
 
@@ -59,7 +59,7 @@ private fun SessionInfoContent(
             style = TigerText.itemName,
         )
         SessionInfoRow(stringResource(R.string.session_info_id), summary.sessionId)
-        SessionInfoRow(stringResource(R.string.session_info_captured_at), formatCaptureTime(summary.recordedAtEpochMs))
+        SessionInfoRow(stringResource(R.string.session_info_captured_at), formatDateTime(summary.recordedAtEpochMs))
         SessionInfoRow(
             label = stringResource(R.string.session_info_episodes),
             value = stringResource(R.string.session_info_episode_count, summary.completedEpisodeCount),

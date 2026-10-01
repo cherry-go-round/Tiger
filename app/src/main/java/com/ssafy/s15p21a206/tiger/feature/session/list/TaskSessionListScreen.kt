@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.common.formatDateTime
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.PortraitScreenPreview
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.ScreenPreview
@@ -41,7 +42,6 @@ import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteConfirmation
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteMenuItem
 import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
-import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
 import com.ssafy.s15p21a206.tiger.feature.session.labelRes
 
 /**
@@ -145,7 +145,7 @@ private fun SessionSummaryCard(
     onLongPress: () -> Unit,
     onPress: (IntOffset) -> Unit,
 ) {
-    val captureTime = formatCaptureTime(summary.recordedAtEpochMs)
+    val captureTime = formatDateTime(summary.recordedAtEpochMs)
     val sessionLabel = stringResource(R.string.session_list_item_content_description, captureTime)
     TigerCard(
         modifier =

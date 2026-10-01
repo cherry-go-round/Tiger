@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.ssafy.s15p21a206.tiger.R
+import com.ssafy.s15p21a206.tiger.core.common.formatDateTime
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.LabelledGroup
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.LabelledValue
 import com.ssafy.s15p21a206.tiger.core.designsystem.component.NavigationHeader
@@ -43,7 +44,6 @@ import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteAction
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteConfirmation
 import com.ssafy.s15p21a206.tiger.feature.session.SessionDeleteMenuItem
 import com.ssafy.s15p21a206.tiger.feature.session.SessionPreviewSamples
-import com.ssafy.s15p21a206.tiger.feature.session.formatCaptureTime
 import com.ssafy.s15p21a206.tiger.feature.session.labelRes
 import com.ssafy.s15p21a206.tiger.feature.session.video.SharedVideoPlayer
 import com.ssafy.s15p21a206.tiger.feature.session.video.VideoPlayer
@@ -259,7 +259,7 @@ private fun SessionDetailBody(
         verticalArrangement = Arrangement.spacedBy(DETAIL_GROUP_GAP),
     ) {
         Text(
-            text = formatCaptureTime(summary.recordedAtEpochMs),
+            text = formatDateTime(summary.recordedAtEpochMs),
             style = TigerText.itemTitle,
         )
         SessionInfoGroup(summary)
