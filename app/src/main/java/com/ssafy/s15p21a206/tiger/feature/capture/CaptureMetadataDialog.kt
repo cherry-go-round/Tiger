@@ -45,7 +45,6 @@ import com.ssafy.s15p21a206.tiger.R
  * 앱바에 둔다. 가운데 띄우는 다이얼로그는 가로 화면에서 키보드가 올라오면 아래쪽 버튼이 가려져
  * 닿을 방법이 없다. 앱바는 키보드와 겹치지 않으므로 방향과 무관하게 항상 누를 수 있다.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("FunctionName")
 @Composable
 internal fun CaptureMetadataDialog(
@@ -57,72 +56,101 @@ internal fun CaptureMetadataDialog(
     onCancel: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    val objectFieldFocus = remember { FocusRequester() }
     val ready = task.isNotBlank() && objectName.isNotBlank()
+    val confirmFromKeyboard = {
+        focusManager.clearFocus()
+        onConfirm()
+    }
     Dialog(
         onDismissRequest = onCancel,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
         Surface(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.capture_metadata_title)) },
-                    navigationIcon = {
-                        IconButton(onClick = onCancel) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_navigation_back),
-                                contentDescription = stringResource(R.string.action_cancel),
-                            )
-                        }
-                    },
-                    actions = {
-                        TextButton(
-                            enabled = ready,
-                            onClick = onConfirm,
-                        ) { Text(stringResource(R.string.capture_metadata_confirm)) }
-                    },
+                MetadataTopBar(ready = ready, onConfirm = onConfirm, onCancel = onCancel)
+                MetadataFields(
+                    task = task,
+                    objectName = objectName,
+                    onTaskChange = onTaskChange,
+                    onObjectNameChange = onObjectNameChange,
+                    onDone = confirmFromKeyboard.takeIf { ready },
                 )
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .imePadding()
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    // Task가 채워진 채로 열렸으면 손댈 곳은 다음 칸이다. 이미 적혀 있는
-                    // 칸에 커서를 두면 지우고 다시 쓰라는 신호로 읽힌다.
-                    LaunchedEffect(Unit) {
-                        if (task.isNotBlank()) objectFieldFocus.requestFocus()
-                    }
-                    OutlinedTextField(
-                        value = task,
-                        onValueChange = onTaskChange,
-                        label = { Text(stringResource(R.string.capture_metadata_task)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        keyboardActions = KeyboardActions(onNext = { objectFieldFocus.requestFocus() }),
-                    )
-                    OutlinedTextField(
-                        value = objectName,
-                        onValueChange = onObjectNameChange,
-                        label = { Text(stringResource(R.string.capture_metadata_object)) },
-                        modifier = Modifier.focusRequester(objectFieldFocus),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions =
-                            KeyboardActions(
-                                onDone = {
-                                    if (ready) {
-                                        focusManager.clearFocus()
-                                        onConfirm()
-                                    }
-                                },
-                            ),
-                    )
-                }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Suppress("FunctionName")
+@Composable
+private fun MetadataTopBar(
+    ready: Boolean,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    TopAppBar(
+        title = { Text(stringResource(R.string.capture_metadata_title)) },
+        navigationIcon = {
+            IconButton(onClick = onCancel) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_navigation_back),
+                    contentDescription = stringResource(R.string.action_cancel),
+                )
+            }
+        },
+        actions = {
+            TextButton(enabled = ready, onClick = onConfirm) { Text(stringResource(R.string.capture_metadata_confirm)) }
+        },
+    )
+}
+
+/**
+ * Task와 Object 입력 칸.
+ *
+ * Task가 채워진 채로 열렸으면 손댈 곳은 다음 칸이라 Object에 커서를 둔다. 이미 적혀 있는 칸에 커서를
+ * 두면 지우고 다시 쓰라는 신호로 읽힌다.
+ *
+ * @param onDone 키보드의 완료가 할 일. 두 칸이 다 채워지지 않았으면 null이고 완료는 아무것도 하지 않는다.
+ */
+@Suppress("FunctionName")
+@Composable
+private fun MetadataFields(
+    task: String,
+    objectName: String,
+    onTaskChange: (String) -> Unit,
+    onObjectNameChange: (String) -> Unit,
+    onDone: (() -> Unit)?,
+) {
+    val objectFieldFocus = remember { FocusRequester() }
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        LaunchedEffect(Unit) {
+            if (task.isNotBlank()) objectFieldFocus.requestFocus()
+        }
+        OutlinedTextField(
+            value = task,
+            onValueChange = onTaskChange,
+            label = { Text(stringResource(R.string.capture_metadata_task)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(onNext = { objectFieldFocus.requestFocus() }),
+        )
+        OutlinedTextField(
+            value = objectName,
+            onValueChange = onObjectNameChange,
+            label = { Text(stringResource(R.string.capture_metadata_object)) },
+            modifier = Modifier.focusRequester(objectFieldFocus),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions =
+                KeyboardActions(onDone = { onDone?.invoke() }),
+        )
     }
 }
