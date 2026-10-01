@@ -29,6 +29,7 @@
 ```text
 Idle          ──재생──>  Initializing     Session 생성, Camera/IMU/ARCore 수집 시작
 Idle          ──재생──>  Idle             카메라 timestamp 소스가 REALTIME이 아니면 시작 거부. 번들을 지우고 사유를 알린다
+Idle          ──재생──>  Idle             카메라를 열거나 스트림을 시작하지 못하면 시작 실패. 유휴 프리뷰를 되살리고 사유를 알린다. 앱은 종료되지 않는다
 Ready         ──재생──>  EpisodeActive    Episode를 ACTIVE로 시작
 EpisodeActive ──일시정지──> Ready          Episode를 COMPLETED로 마감
 Initializing  ──정지(확인)──>  Finalizing   Session 마감
