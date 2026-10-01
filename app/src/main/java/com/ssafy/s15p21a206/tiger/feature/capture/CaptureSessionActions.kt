@@ -3,6 +3,7 @@ package com.ssafy.s15p21a206.tiger.feature.capture
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
+import android.view.Surface
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import com.ssafy.s15p21a206.tiger.core.android.findActivity
 import com.ssafy.s15p21a206.tiger.core.capture.AndroidCaptureRuntime
 import com.ssafy.s15p21a206.tiger.core.capture.CaptureSessionCoordinator
 import com.ssafy.s15p21a206.tiger.core.capture.MonotonicClock
+import com.ssafy.s15p21a206.tiger.core.capture.PreviewSurfaceProvider
 import com.ssafy.s15p21a206.tiger.core.model.capture.RecordingResolution
 import com.ssafy.s15p21a206.tiger.core.model.capture.TrackingState
 import com.ssafy.s15p21a206.tiger.core.model.session.CaptureSession
@@ -58,13 +60,13 @@ internal class CaptureSessionActions(
             onEpisodeClosed = { marker ->
                 // 사용자 종료와 Tracking 유실 자동 마감이 같은 경로로 기록된다.
                 if (marker.outcome == EpisodeState.INVALID_TRACKING) {
-                    onIntent(CaptureIntent.Notify(message(R.string.capture_episode_invalid_tracking)))
+                    notify(R.string.capture_episode_invalid_tracking)
                 }
                 scope.launch {
                     runCatching {
                         repository.save(marker)
                         runtime.appendEpisode(marker)
-                    }.onFailure { onIntent(CaptureIntent.Notify(message(R.string.capture_operation_failed))) }
+                    }.onFailure { notify(R.string.capture_operation_failed) }
                 }
             },
         )
@@ -85,7 +87,7 @@ internal class CaptureSessionActions(
             // Episode 시작은 Coordinator가 Tracking 안정화 여부를 확인한 뒤에만 허용한다.
             runCatching { coordinator.startEpisode(state.task, state.objectName) }
                 .onSuccess { onIntent(CaptureIntent.EpisodeStarted) }
-                .onFailure { onIntent(CaptureIntent.Notify(message(R.string.capture_tracking_not_ready))) }
+                .onFailure { notify(R.string.capture_tracking_not_ready) }
         }
     }
 
@@ -94,15 +96,13 @@ internal class CaptureSessionActions(
         state: CaptureUiState,
     ) {
         if (!granted) {
-            onIntent(CaptureIntent.Notify(message(R.string.recording_camera_unavailable)))
-            onIntent(CaptureIntent.BusyReleased)
+            declineStart(R.string.recording_camera_unavailable)
         } else if (arCoreReady()) {
             startSession(state)
         }
     }
 
-    // ARCore가 있는지 확인하고, 없으면 설치를 요청한다. 이번 요청으로 Session을 시작해도 되면 true다.
-    // 시작하지 않을 때는 사유를 알리고 제어 잠금을 푼다.
+    /** ARCore가 있는지 확인하고, 없으면 설치를 요청한다. 이번에 Session을 시작해도 되면 true다. */
     private fun arCoreReady(): Boolean {
         val activity = context.findActivity()
         val installStatus =
@@ -110,73 +110,86 @@ internal class CaptureSessionActions(
                 requireNotNull(activity) { "Activity is required to install ARCore." }
                 ArCoreApk.getInstance().requestInstall(activity, !arCoreInstallRequested)
             }.getOrElse {
-                onIntent(CaptureIntent.Notify(message(R.string.arcore_unavailable)))
-                onIntent(CaptureIntent.BusyReleased)
+                declineStart(R.string.arcore_unavailable)
                 return false
             }
         if (installStatus == ArCoreApk.InstallStatus.INSTALL_REQUESTED) {
             arCoreInstallRequested = true
-            onIntent(CaptureIntent.Notify(message(R.string.arcore_install_requested)))
-            onIntent(CaptureIntent.BusyReleased)
+            declineStart(R.string.arcore_install_requested)
             return false
         }
         return true
     }
 
-    // ARCore로 녹화를 시작하고 시작 행을 남긴다. 성공하든 실패하든 끝나면 제어 잠금을 푼다.
+    /** 이번에는 Session을 시작하지 않는다. 사유를 알리고 제어 잠금을 푼다. */
+    private fun declineStart(
+        @StringRes reason: Int,
+    ) {
+        notify(reason)
+        onIntent(CaptureIntent.BusyReleased)
+    }
+
     private fun startSession(state: CaptureUiState) {
         scope.launch {
             try {
-                val displayNumber = repository.nextDisplayNumber()
-                runCatching {
-                    // ARCore가 고른 해상도로 버퍼를 맞춰 프리뷰 화각을 저장 영상과 일치시킨다.
-                    // 이 람다는 Main dispatcher에서 실행되므로 Compose 상태를 직접 갱신해도 된다.
-                    // 프리뷰용 Camera2 세션은 play에서 이미 닫혔으므로 버퍼 크기를 바꿔도 안전하다.
-                    runtime.start(
-                        displayNumber = displayNumber,
-                        resolution = state.resolution,
-                        previewSurfaces = { width, height ->
-                            // ARCore가 실제로 고른 크기다. 후보 config가 없어 기본값으로 물러났으면
-                            // 고른 값과 다를 수 있으므로, 표시와 프리뷰를 여기에 맞춘다.
-                            val actual = RecordingResolution(width, height)
-                            onIntent(CaptureIntent.SelectResolution(actual))
-                            onIntent(CaptureIntent.IdlePreviewResized(actual))
-                            preview.resizeBuffer(width, height)
-                            preview.surface
-                        },
-                        // 프리뷰에서 맞춘 값을 그대로 녹화에 건다. Session이 시작된 뒤에는 바뀌지 않는다.
-                        manual = state.manualCamera.appliedConfig,
-                    )
-                }.onSuccess { bundle ->
-                    val startedAtNs = SystemClock.elapsedRealtimeNanos()
-                    // Session 시작은 Episode를 만들지 않는다. Tracking 안정화 뒤 사용자가 따로 시작한다.
-                    coordinator.start(
-                        bundle.sessionId,
-                        bundle.displayNumber,
-                        bundle.directory.absolutePath,
-                        state.task,
-                        state.objectName,
-                    )
-                    onIntent(CaptureIntent.SessionStarted(bundle, startedAtNs, state.resolution))
-                    repository.save(
-                        state.sessionRow(bundle, RecordingState.INITIALIZING, startNs = startedAtNs),
-                    )
-                }.onFailure { error ->
-                    // ARCore가 카메라를 잡지 못했으므로 유휴 프리뷰를 되살린다.
-                    preview.restore()
-                    onIntent(CaptureIntent.Notify("${message(R.string.arcore_session_start_failed)}: ${error.message.orEmpty()}"))
-                    if (error is UnavailableArcoreNotInstalledException) {
-                        context.openArCoreStore()
-                    }
-                }
+                val bundle = openRecording(state) ?: return@launch
+                recordSessionStart(state, bundle)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                onIntent(CaptureIntent.Notify(message(R.string.capture_operation_failed)))
+                notify(R.string.capture_operation_failed)
             } finally {
                 onIntent(CaptureIntent.BusyReleased)
             }
         }
+    }
+
+    /** ARCore로 녹화를 연다. 열지 못하면 되돌리고 사유를 알린 뒤 null을 돌려준다. */
+    private suspend fun openRecording(state: CaptureUiState): SessionBundle? {
+        val displayNumber = repository.nextDisplayNumber()
+        return runCatching {
+            runtime.start(
+                displayNumber = displayNumber,
+                resolution = state.resolution,
+                previewSurfaces = PreviewSurfaceProvider(::followArCoreResolution),
+                manual = state.manualCamera.appliedConfig,
+            )
+        }.onFailure(::recoverFromStartFailure).getOrNull()
+    }
+
+    /**
+     * ARCore가 실제로 고른 녹화 크기로 표시와 유휴 프리뷰 버퍼를 맞추고, 녹화 중 프리뷰를 그릴 Surface를 내준다.
+     *
+     * 후보 config가 없어 기본값으로 물러났으면 고른 크기와 다를 수 있다. Main dispatcher에서 불리고 유휴
+     * 프리뷰 Camera2 session은 이미 닫혔으므로, 상태와 버퍼 크기를 바로 바꿔도 된다.
+     */
+    private fun followArCoreResolution(
+        width: Int,
+        height: Int,
+    ): Surface? {
+        val actual = RecordingResolution(width, height)
+        onIntent(CaptureIntent.SelectResolution(actual))
+        onIntent(CaptureIntent.IdlePreviewResized(actual))
+        preview.resizeBuffer(width, height)
+        return preview.surface
+    }
+
+    private fun recoverFromStartFailure(error: Throwable) {
+        preview.restore()
+        onIntent(CaptureIntent.Notify("${message(R.string.arcore_session_start_failed)}: ${error.message.orEmpty()}"))
+        if (error is UnavailableArcoreNotInstalledException) {
+            context.openArCoreStore()
+        }
+    }
+
+    private suspend fun recordSessionStart(
+        state: CaptureUiState,
+        bundle: SessionBundle,
+    ) {
+        val startedAtNs = SystemClock.elapsedRealtimeNanos()
+        coordinator.start(bundle.sessionId, bundle.displayNumber, bundle.directory.absolutePath, state.task, state.objectName)
+        onIntent(CaptureIntent.SessionStarted(bundle, startedAtNs, state.resolution))
+        repository.save(state.sessionRow(bundle, RecordingState.INITIALIZING, startNs = startedAtNs))
     }
 
     /** Tracking 표본 하나를 Coordinator에 넣고 화면 상태를 맞춘다. 작업 공간이 주기적으로 부른다. */
@@ -197,7 +210,7 @@ internal class CaptureSessionActions(
         // 기록은 coordinator의 onEpisodeClosed가 담당한다.
         runCatching { coordinator.endEpisode() }
             .onSuccess { onIntent(CaptureIntent.EpisodeEnded) }
-            .onFailure { onIntent(CaptureIntent.Notify(message(R.string.capture_operation_failed))) }
+            .onFailure { notify(R.string.capture_operation_failed) }
     }
 
     /** 상태에 따라 무시하거나, 확인을 묻거나, 그냥 닫는다. */
@@ -219,7 +232,7 @@ internal class CaptureSessionActions(
         if (!state.policy.canStop) return
         // 진행 중인 Episode가 있으면 Session을 마감하지 않고 먼저 종료하도록 안내한다.
         if (coordinator.activeEpisode != null) {
-            onIntent(CaptureIntent.Notify(message(R.string.active_episode_end_required)))
+            notify(R.string.active_episode_end_required)
             return
         }
         val bundle = state.activeBundle
@@ -292,6 +305,12 @@ internal class CaptureSessionActions(
         }
         onIntent(CaptureIntent.Interrupted)
         coordinator.release()
+    }
+
+    private fun notify(
+        @StringRes id: Int,
+    ) {
+        onIntent(CaptureIntent.Notify(message(id)))
     }
 
     private fun message(
