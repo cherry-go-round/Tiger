@@ -85,15 +85,15 @@ internal fun SessionDetailScreen(
                 .verticalScroll(rememberScrollState()),
     ) {
         NavigationHeader(title = "", onBack = onBack) {
-            if (summary != null) {
+            if (presentation != null) {
                 SessionDetailMenu(
-                    deleteAction = presentation?.deleteAction,
+                    deleteAction = presentation.deleteAction,
                     onOpenSessionInfo = { showSessionInfo = true },
                     onRequestDelete = { pendingDelete = it },
                 )
             }
         }
-        if (summary == null || presentation == null) {
+        if (presentation == null) {
             Text(
                 text = stringResource(R.string.session_detail_unavailable),
                 style = TigerText.bodyMuted,
@@ -104,7 +104,7 @@ internal fun SessionDetailScreen(
             SessionDetailBody(summary, presentation, deleteFailureReason, uploadFailureReason, onUpload)
         }
     }
-    if (showSessionInfo && presentation != null && summary != null) {
+    if (showSessionInfo && presentation != null) {
         SessionInfoSheet(
             summary = summary,
             durationSeconds = presentation.durationSeconds,
