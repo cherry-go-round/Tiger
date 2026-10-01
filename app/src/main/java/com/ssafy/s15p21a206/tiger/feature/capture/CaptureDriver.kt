@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraManager
-import android.net.Uri
 import android.os.SystemClock
 import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -50,6 +50,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * 수집 작업 공간이 사용자 조작에 대해 실제로 하는 일들.
@@ -278,7 +279,7 @@ internal fun rememberCaptureDriver(
                     episodeActive = coordinator.activeEpisode != null,
                 ),
             )
-            delay(TRACKING_TICK_MS)
+            delay(TRACKING_TICK)
         }
     }
     LaunchedEffect(state.notice, state.open) {
@@ -470,8 +471,8 @@ internal fun rememberCaptureDriver(
 }
 
 private fun Context.openArCoreStore() {
-    val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.ar.core"))
-    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.google.ar.core"))
+    val marketIntent = Intent(Intent.ACTION_VIEW, "market://details?id=com.google.ar.core".toUri())
+    val webIntent = Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.google.ar.core".toUri())
     startActivity(if (marketIntent.resolveActivity(packageManager) != null) marketIntent else webIntent)
 }
 
@@ -509,4 +510,4 @@ private fun sessionRow(
 )
 
 // Tracking 판정 주기. 안정화(1초)와 유실(0.5초) 임계값보다 충분히 촘촘해야 마감 시점이 제때 발화한다.
-private const val TRACKING_TICK_MS = 100L
+private val TRACKING_TICK = 100.milliseconds
