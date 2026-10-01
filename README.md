@@ -106,8 +106,12 @@ Session 안에서 실제로 작업한 구간은 수집자가 직접 표시하고
 Session을 마치면 앱이 결과 파일을 검사해 **번들** 하나로 묶고 서버로 보냅니다. 서버는 그중 유효한 Episode를 학습
 데이터로 씁니다.
 
-> **이름의 뜻**  TIGER는 대상 물체를 다루는 장면을 Episode 단위로 기록한다는 뜻이고, MASK는 그 위에 얹은 수동 촬영
-> 설정 기능입니다. 사람이 정한 촬영 설정을 녹화 내내 지킵니다.
+> **이름의 뜻**
+>
+> - **TIGER** (**T**arget-**I**nteraction **G**rounded **E**pisode **R**ecorder): 대상 물체를 다루는 장면을 Episode
+>   단위로 기록하는 수집 앱
+> - **MASK** (**M**anual **A**cquisition **S**etting **K**eeper): 그 위에 얹은 기능으로, 사람이 정한 촬영 설정을
+>   녹화 내내 지킴
 
 <br>
 
